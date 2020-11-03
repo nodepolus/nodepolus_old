@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": false,
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": ["ESNext"],
+        "checkJs": false,
+        "incremental": true,
+        "alwaysStrict": true,
+        "sourceMap": true,
+
+    },
+    "include": [
+    "./lib/**/*",
+    ],
+    "exclude": ["node_modules", "**/*.spec.ts"]
+}
