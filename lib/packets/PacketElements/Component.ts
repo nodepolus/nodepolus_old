@@ -99,12 +99,36 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room) =>
 	});
 	statusHandler.set(SystemType.Communications, {
 		read:(buf, rm) => {
-			return {
-				IsSabotaged: buf.readBoolean()
-			};
+			if (rm.settings.Map == AmongUsMap.MIRA_HQ){
+				let length = Number(buf.readVarInt());
+				const active = [];
+				for(let i=0;i<length;i++)active.push([buf.readU8(), buf.readU8()]);
+				length = Number(buf.readVarInt());
+				const completed = [];
+				for(let i=0;i<length;i++)completed.push(buf.readU8());
+				return {
+					ActiveConsoles: active,
+					CompletedConsoles: completed
+				}
+				return;
+			}else {
+				return {
+					IsSabotaged: buf.readBoolean()
+				};
+			}
 		},
 		write: (obj, buf, rm) => {
-			buf.writeBoolean(obj.IsSabotaged)
+			if (rm.settings.Map == AmongUsMap.MIRA_HQ){
+				for(let i=0;i<obj.ActiveConsoles.length;i++){
+					buf.writeU8(obj.ActiveConsoles[i][0]);
+					buf.writeU8(obj.ActiveConsoles[i][1]);
+				}
+				for(let i=0;i<obj.CompletedConsoles.length;i++){
+					buf.writeU8(obj.CompletedConsoles[i]);
+				}
+			} else {
+				buf.writeBoolean(obj.IsSabotaged)
+			}
 		}
 	});
 	statusHandler.set(SystemType.Security, {
@@ -179,7 +203,7 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room) =>
 		},
 		write: (obj, buf, rm) => {
 			buf.writeVarInt(obj.Doors.length);
-			for (let i = 0; i < obj.Consoles.length; i++) {
+			for (let i = 0; i < obj.Doors.length; i++) {
 				buf.writeBoolean(obj.Doors[i])
 			}
 		}
