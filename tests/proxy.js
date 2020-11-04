@@ -1,8 +1,9 @@
-import { createServer } from 'udp-proxy';
+import udp from 'udp-proxy';
+const { createServer } = udp;
 import Packet, { PacketType } from "../dist/packets/Packet.js";
 import Room from "../dist/util/Room.js";
 import PolusBuffer from "../dist/util/PolusBuffer.js";
-import assert from 'assert/strict';
+import assert from 'assert';
 
 const options = {
 	address: '0.0.0.0',
@@ -39,7 +40,7 @@ UDPProxy.on('proxyMsg', function (message, sender, peer) {
 	console.log(" ");
 	var cerealPkt = new Packet(room, false);
 	var cereal = cerealPkt.serialize(parsed);
-	assert.equal(cereal.buf.toString('hex'), message.toString('hex'))
+	assert.strictEqual(cereal.buf.toString('hex'), message.toString('hex'))
 	handlePacket(parsed, senderRaw)
 })
 

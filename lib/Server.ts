@@ -16,6 +16,7 @@ class Server extends EventEmitter {
     clientConnectionMap: Map<RemoteInfo, Connection>;
     constructor(port:number = 22023) {
         super();
+        this.clientConnectionMap = new Map();
         this.port = port;
         this.sock = createSocket("udp4");
         this.sock.on("listening", () => this.emit("listening", this.port));

@@ -2,7 +2,7 @@
 import { EventEmitter } from "events";
 import Packet, { ParsedPacket, PacketType, ParsedPacketData } from "../packets/Packet.js";
 import { RemoteInfo, Socket } from "dgram";
-import Player from "./Player"
+import Player from "./Player.js"
 import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
 import PolusBuffer from "./PolusBuffer.js";
 import { HelloPacket } from "../packets/HelloPacket.js";
