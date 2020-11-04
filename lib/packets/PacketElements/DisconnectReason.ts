@@ -27,47 +27,55 @@ export default class DisconnectReason {
 	reasonInt: number;
 	reason: string;
 
-	constructor(private packet: PolusBuffer, private room: Room){
-		if(packet.dataRemaining().length > 1) {
-			this.reasonInt = packet.readU32();
-		} else {
-			if(packet.dataRemaining().length != 0) {
-				this.reasonInt = packet.readU8();
+	constructor(private packet?: PolusBuffer|number, private room?: Room){
+		if(packet && packet instanceof PolusBuffer) {
+			if(packet.dataRemaining().length > 1) {
+				this.reasonInt = packet.readU32();
+			} else {
+				if(packet.dataRemaining().length != 0) {
+					this.reasonInt = packet.readU8();
+				}
 			}
-		}
-		if (this.reasonInt == DisconnectReasons.Custom) {
-			this.reason = this.packet.readString();
+			if (this.reasonInt == DisconnectReasons.Custom) {
+				this.reason = packet.readString();
+			}
+		} else {
+			this.reasonInt = <number>packet
 		}
 	}
 	toString() {
-		switch (this.reasonInt) {
-			case DisconnectReasons.ServerFull:
-				return "The Among Us servers are overloaded.\r\n\r\nSorry! Please try again later!";
-			case DisconnectReasons.FocusLost:
-				return "You were disconnected because Among Us was suspended by another app.";
-			case DisconnectReasons.Banned:
-				return "You were banned from " + this.room.code.toString() + ".\r\n\r\nYou cannot rejoin that room.";
-			case DisconnectReasons.Hacking:
-				return "You were banned for hacking.\r\n\r\nPlease stop.";
-			case DisconnectReasons.Kicked:
-				return "You were kicked from " + this.room.code.toString() + ".\r\n\r\nYou can rejoin if the room hasn't started.";
-			case DisconnectReasons.GameFull:
-				return "The game you tried to join is full.\r\n\r\nCheck with the host to see if you can join next round.";
-			case DisconnectReasons.GameStarted:
-				return "The game you tried to join already started.\r\n\r\nCheck with the host to see if you can join next round.";
-			case DisconnectReasons.GameNotFound:
-			case DisconnectReasons.IncorrectGame:
-				return "Could not find the game you're looking for.";
-			case DisconnectReasons.ServerRequest:
-				return "The server stopped this game. Possibly due to inactivity.";
-			case DisconnectReasons.Error:
-				return "You disconnected from the server.\r\nIf this happens often, check your network strength.\r\nThis may also be a server issue.";
-			case DisconnectReasons.InvalidName:
-				return "Server refused username: " + "!!TODO!!";
-			case DisconnectReasons.IncorrectVersion:
-				return "You are running an older version of the game.\r\n\r\nPlease update to play with others.";
-			default:
-				return this.reason;
+		if(this.room) {
+			switch (this.reasonInt) {
+				case DisconnectReasons.ServerFull:
+					return "The Among Us servers are overloaded.\r\n\r\nSorry! Please try again later!";
+				case DisconnectReasons.FocusLost:
+					return "You were disconnected because Among Us was suspended by another app.";
+				case DisconnectReasons.Banned:
+					return "You were banned from " + this.room.code.toString() + ".\r\n\r\nYou cannot rejoin that room.";
+				case DisconnectReasons.Hacking:
+					return "You were banned for hacking.\r\n\r\nPlease stop.";
+				case DisconnectReasons.Kicked:
+					return "You were kicked from " + this.room.code.toString() + ".\r\n\r\nYou can rejoin if the room hasn't started.";
+				case DisconnectReasons.GameFull:
+					return "The game you tried to join is full.\r\n\r\nCheck with the host to see if you can join next round.";
+				case DisconnectReasons.GameStarted:
+					return "The game you tried to join already started.\r\n\r\nCheck with the host to see if you can join next round.";
+				case DisconnectReasons.GameNotFound:
+				case DisconnectReasons.IncorrectGame:
+					return "Could not find the game you're looking for.";
+				case DisconnectReasons.ServerRequest:
+					return "The server stopped this game. Possibly due to inactivity.";
+				case DisconnectReasons.Error:
+					return "You disconnected from the server.\r\nIf this happens often, check your network strength.\r\nThis may also be a server issue.";
+				case DisconnectReasons.InvalidName:
+					return "Server refused username: " + "!!TODO!!";
+				case DisconnectReasons.IncorrectVersion:
+					return "You are running an older version of the game.\r\n\r\nPlease update to play with others.";
+				default:
+					return this.reason;
+			}
+		} else {
+			return this.reason;
 		}
 	}
 	serialize() {

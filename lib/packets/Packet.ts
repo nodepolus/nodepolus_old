@@ -1,7 +1,7 @@
-import Unreliable from "./UnreliablePacket.js";
+import Unreliable, { UnreliablePacket } from "./UnreliablePacket.js";
 import Reliable from "./ReliablePacket.js";
-import HelloPacket from "./HelloPacket.js";
-import DisconnectPacket from "./DisconnectPacket.js";
+import HelloPacket, { HelloPacketData } from "./HelloPacket.js";
+import Disconnect, {DisconnectPacket} from "./DisconnectPacket.js";
 import AcknowledgementPacket from "./AcknowledgementPacket.js";
 import Ping from "./PingPacket.js";
 import Room from "../util/Room.js";
@@ -16,11 +16,13 @@ export enum PacketType {
     PingPacket = 0x0c
 };
 
+export type ParsedPacketData = UnreliablePacket | DisconnectPacket | HelloPacketData | UnreliablePacket
+
 export interface ParsedPacket {
     Type: PacketType,
     Nonce?: number,
     Reliable: boolean,
-    Data?: any
+    Data?: ParsedPacketData
 };
 
 export default class Packet {
@@ -28,7 +30,7 @@ export default class Packet {
     UnreliablePacketHandler = new Unreliable(this.room, this.toServer);
     ReliablePacketHandler = new Reliable(this.room, this.toServer);
     HelloPacketHandler = new HelloPacket();
-    DisconnectPacketHandler = new DisconnectPacket(this.room);
+    DisconnectPacketHandler = new Disconnect(this.room);
     AcknowledgementPacketHandler = new AcknowledgementPacket();
     PingPacketHandler = new Ping();
     /**
@@ -68,10 +70,12 @@ export default class Packet {
         buf.writeU8(packet.Type);
         switch(packet.Type) {
             case PacketType.ReliablePacket:
+                //@ts-ignore
                 buf.writeBytes(this.ReliablePacketHandler.serialize(packet));
                 break;
 
             case PacketType.UnreliablePacket:
+                //@ts-ignore
                 buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data));
                 break;
 
@@ -81,6 +85,7 @@ export default class Packet {
                 break;
 
             case PacketType.DisconnectPacket:
+                //@ts-ignore
                 buf.writeBytes(this.DisconnectPacketHandler.serialize(packet.Data));
                 break;
 
@@ -95,5 +100,30 @@ export default class Packet {
                 break;
         }
         return buf;
+    }
+
+    static isReliable(type:PacketType) {
+        switch (type) {
+            case PacketType.ReliablePacket:
+                return true
+
+            case PacketType.UnreliablePacket:
+                return false
+
+            case PacketType.HelloPacket:
+                return true
+
+            case PacketType.DisconnectPacket:
+                return false
+
+            case PacketType.AcknowledgementPacket:
+                return false
+
+            case PacketType.PingPacket:
+                return true
+
+            default:
+                throw new TypeError("Unknown Hazel Packet Type: " + PacketType[type]);
+        }
     }
 };

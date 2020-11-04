@@ -20,6 +20,7 @@ class Reliable {
 	serialize(packet: ParsedPacket): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.writeU16(packet.Nonce, true);
+		//@ts-ignore
 		buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data))
 		return buf;
 	}

@@ -1,13 +1,15 @@
 import PolusBuffer from "../util/PolusBuffer.js";
 import { ParsedPacket } from "./Packet.js";
 
+export interface HelloPacketData {
+	HazelVersion: number,
+	ClientVersion: number,
+	Name: string
+}
+
 export interface HelloPacket {
 	Nonce: number,
-	Data: {
-		HazelVersion: number,
-		ClientVersion: number,
-		Name: string
-	}
+	Data: HelloPacketData
 };
 
 export default class Hello {

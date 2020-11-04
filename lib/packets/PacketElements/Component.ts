@@ -41,24 +41,20 @@ interface CustomTransformData{
 }
 
 interface GameDataPlayerData{
-	PlayerCount?: number,
-	Players: {
-		PlayerID: number,
-		PlayerName: string,
-		Color: bigint,
-		HatID: bigint,
-		PetID: bigint,
-		SkinID: bigint,
-		Flags: {
-			Disconnected: boolean,
-			Impostor: boolean,
-			Dead: boolean
-		},
-		TaskAmount?: number,
-		Tasks: {
-			TaskID: bigint,
-			TaskCompleted: boolean
-		}[]
+	PlayerID: number,
+	PlayerName: string,
+	Color: bigint,
+	HatID: bigint,
+	PetID: bigint,
+	SkinID: bigint,
+	Flags: {
+		Disconnected: boolean,
+		Impostor: boolean,
+		Dead: boolean
+	},
+	Tasks: {
+		TaskID: bigint,
+		TaskCompleted: boolean
 	}[]
 }
 
@@ -198,11 +194,11 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room) =>
 			buf.writeFloat32(obj.Timer)
 		}
 	});
-	statusHandler.set(SystemType.Laboratory, statusHandler.get(SystemType.))
 }
 
 const skeldSystems = [SystemType.Reactor, SystemType.Electrical, SystemType.O2, SystemType.Medbay, SystemType.Security, SystemType.Communications, SystemType.Doors, SystemType.Sabotage];
-const miraSystems = [SystemType.Reactor, SystemType.Electrical, ]
+const miraSystems = [SystemType.Reactor, SystemType.Electrical, SystemType.O2, SystemType.Medbay, SystemType.Communications, SystemType.Sabotage];
+const polusSystems = [SystemType.Reactor, SystemType.Electrical, SystemType.Medbay, SystemType.Security, SystemType.Communications, SystemType.Doors, SystemType.Sabotage];
 
 export default class Component {
 	netID: bigint;
@@ -225,12 +221,7 @@ export default class Component {
 			case ObjectType.PlanetMap:
 			case ObjectType.HeadQuarters:
 				console.log("luv ya cut g",source.dataRemaining());
-				this.Type = Components.ShipStatus;
-
-
-				/// DOD THIS THIS IFUCK FIX THIS 
-				room.settings.Map = AmongUsMap.THE_SKELD;
-				
+				this.Type = Components.ShipStatus;				
 				switch(room.settings.Map) {
 					case AmongUsMap.THE_SKELD:
 						for(let i=0;i<skeldSystems.length;i++){
@@ -274,41 +265,37 @@ export default class Component {
 			case ObjectType.GameData:
 				if (componentIndex == 0){
 					this.Type = Components.GameData;
-					let o: GameDataPlayerData = {
-						Players: []
-					};
 					//let NetID = source.readVarInt();
 					//let Length = source.readU16();
 					// let Tag = source.readU8();
 					let PlayerCount = source.readU8();
-					let Players = Array(PlayerCount);
+					let PlayerData: GameDataPlayerData;
 					for (let i = 0; i < PlayerCount; i++) {
-						Players[i] = {}
-						let PlayerData = Players[i]
-						PlayerData.PlayerID = source.readU8();
-						PlayerData.PlayerName = source.readString();
-						PlayerData.Color = source.readVarInt();
-						PlayerData.HatID = source.readVarInt();
-						PlayerData.PetID = source.readVarInt();
-						PlayerData.SkinID = source.readVarInt();
+						PlayerData = {
+							PlayerID: source.readU8(),
+							PlayerName: source.readString(),
+							Color: source.readVarInt(),
+							HatID: source.readVarInt(),
+							PetID: source.readVarInt(),
+							SkinID: source.readVarInt(),
+							Flags: {Dead:false,Impostor:false,Disconnected:false},
+							Tasks: []
+						};
 						let FlagsBitfield = source.readU8();
 						PlayerData.Flags = {
 							Disconnected: (FlagsBitfield & 0b00000001) != 0,
 							Impostor: (FlagsBitfield & 0b00000010) != 0,
 							Dead: (FlagsBitfield & 0b00000100) != 0
 						}
-						PlayerData.TaskAmount = source.readU8();
-						PlayerData.Tasks = Array(PlayerData.TaskAmount)
+						PlayerData.Tasks = Array(source.readU8())
 						for (let i2 = 0; i2 < PlayerData.Tasks.length; i2++) {
 							PlayerData.Tasks[i2] = {
 								TaskID: source.readVarInt(),
 								TaskCompleted: source.readBoolean()
 							}
 						}
+						this.Data.push(PlayerData);
 					}
-					o.PlayerCount=PlayerCount;
-					o.Players=Players;
-					this.Data.push(o);
 					break;
 				}
 				if (componentIndex == 1) {
@@ -342,15 +329,67 @@ export default class Component {
 	serialize():PolusBuffer{
 		let pb = new PolusBuffer();
 		let datalen = this.Data.length;
+		pb.writeVarInt(this.netID);
+		pb.writeU16(this.length);
+		pb.writeU8(this.type);
 		switch (this.Type){
 			case Components.ShipStatus:
-				switch (this.room.settings.Map){
-					case AmongUsMap.THE_SKELD:
-						for(let i=0;i<datalen;i++){
-							let data: ShipStatusData = <ShipStatusData>this.Data[i];
-							statusHandler.get(data.system).write(data.data, pb, this.room);
-						}
-						break;
+				for(let i=0;i<datalen;i++){
+					let data: ShipStatusData = <ShipStatusData>this.Data[i];
+					statusHandler.get(data.system).write(data.data, pb, this.room);
+				}
+				break;
+			case Components.MeetingHud:
+				for(let i=0;i<datalen;i++){
+					pb.writeU8(StateByte.serialize(<StateByteInterface>this.Data[i]));
+				}
+				break;
+			case Components.PlayerControl:
+				for(let i=0;i<datalen;i++){
+					const data: PlayerControlData = <PlayerControlData>this.Data[i];
+					pb.writeBoolean(data.new);
+					pb.writeU8(data.id);
+				}
+				break;
+			case Components.CustomTransform:
+				const data: CustomTransformData = <CustomTransformData>this.Data[0];
+				pb.writeU16(data.lastSequenceId);
+				pb.writeBytes(data.targetPosition.serialize());
+				pb.writeBytes(data.targetVelocity.serialize());
+				break;
+			case Components.LobbyBehavior:
+			case Components.PhysicsControl:
+				break;
+			case Components.GameData:
+				pb.writeU8(datalen)
+				for (let i=0;i<datalen;i++){
+					let player: GameDataPlayerData = <GameDataPlayerData>this.Data[i];
+					pb.writeU8(player.PlayerID);
+					pb.writeString(player.PlayerName);
+					pb.writeVarInt(player.Color);
+					pb.writeVarInt(player.HatID);
+					pb.writeVarInt(player.PetID);
+					pb.writeVarInt(player.SkinID);
+					pb.writeU8(
+						(player.Flags.Disconnected ? 1 : 0) |
+						(player.Flags.Impostor ? 2 : 0) |
+						(player.Flags.Dead ? 4 : 0)
+					);
+					pb.writeU8(player.Tasks.length);
+					for(let j=0;j<player.Tasks.length;j++){
+						pb.writeVarInt(player.Tasks[j].TaskID);
+						pb.writeBoolean(player.Tasks[j].TaskCompleted);
+					}
+				}
+				break;
+			case Components.VoteBanSystem:
+				let vote: PlayerVoteBanSystem = <PlayerVoteBanSystem>this.Data[0];
+				pb.writeU8(vote.Players.size);
+				for(let x of vote.Players.entries()){
+					pb.write32(x[0]);
+					pb.writeVarInt(x[1][0]);
+					pb.writeVarInt(x[1][1]);
+					pb.writeVarInt(x[1][2]);
 				}
 				break;
 		}

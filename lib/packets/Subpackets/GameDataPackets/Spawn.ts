@@ -50,6 +50,6 @@ export default class Spawn{
 			const component = packet.Components[i];
 			PB.writeBytes(component.serialize())
 		}
-		return PB
+		return PB;
 	};
 };
