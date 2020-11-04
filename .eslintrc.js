@@ -1,25 +1,13 @@
 export default {
-	"env": {
-		"node": true,
-		"es2021": true
-	},
-	"extends": ["esnext", "esnext/style-guide", "node", "node/style-guide", "eslint:recommended"],
-	"parserOptions": {
-		"ecmaVersion": 12
-	},
-	"rules": {
-		"quotes": [
-			"error",
-			"double"
-		],
-		"semi": [
-			"error",
-			"always"
-		],
-		"prefer-const": ["error", {
-			"destructuring": "any",
-			"ignoreReadBeforeAssign": false
-		}],
-		"no-var": "error"
-	}
-};
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"plugins": [
+		"@typescript-eslint"
+	],
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"moduleResolution": "node"
+}

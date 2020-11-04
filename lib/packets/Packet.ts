@@ -1,11 +1,11 @@
-import Unreliable from "./UnreliablePacket";
-import Reliable from "./ReliablePacket";
-import HelloPacket from "./HelloPacket";
-import DisconnectPacket from "./DisconnectPacket";
-import AcknowledgementPacket from "./AcknowledgementPacket";
-import Ping from "./PingPacket";
-import Room from "../util/Room";
-import PolusBuffer from "../util/PolusBuffer";
+import Unreliable from "./UnreliablePacket.js";
+import Reliable from "./ReliablePacket.js";
+import HelloPacket from "./HelloPacket.js";
+import DisconnectPacket from "./DisconnectPacket.js";
+import AcknowledgementPacket from "./AcknowledgementPacket.js";
+import Ping from "./PingPacket.js";
+import Room from "../util/Room.js";
+import PolusBuffer from "../util/PolusBuffer.js";
 
 export enum PacketType {
     UnreliablePacket = 0x00,
@@ -26,7 +26,7 @@ export interface ParsedPacket {
 export default class Packet {
     constructor(private room: Room, private toServer: boolean){}
     UnreliablePacketHandler = new Unreliable(this.room, this.toServer);
-    ReliablePacketHandler = new Reliable(this.toServer);
+    ReliablePacketHandler = new Reliable(this.room, this.toServer);
     HelloPacketHandler = new HelloPacket();
     DisconnectPacketHandler = new DisconnectPacket(this.room);
     AcknowledgementPacketHandler = new AcknowledgementPacket();
@@ -76,7 +76,8 @@ export default class Packet {
                 break;
 
             case PacketType.HelloPacket:
-                buf.writeBytes(this.HelloPacketHandler.serialize(packet.Data));
+                //@ts-ignore
+                buf.writeBytes(this.HelloPacketHandler.serialize(packet));
                 break;
 
             case PacketType.DisconnectPacket:
@@ -84,11 +85,13 @@ export default class Packet {
                 break;
 
             case PacketType.AcknowledgementPacket:
-                buf.writeBytes(this.AcknowledgementPacketHandler.serialize(packet.Data));
+                //@ts-ignore
+                buf.writeBytes(this.AcknowledgementPacketHandler.serialize(packet));
                 break;
 
             case PacketType.PingPacket:
-                buf.writeBytes(this.PingPacketHandler.serialize(packet.Data));
+                //@ts-ignore
+                buf.writeBytes(this.PingPacketHandler.serialize(packet));
                 break;
         }
         return buf;

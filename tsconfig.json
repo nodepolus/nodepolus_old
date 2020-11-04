@@ -9,7 +9,8 @@
         "incremental": true,
         "alwaysStrict": true,
         "sourceMap": true,
-
+        "noImplicitAny": true,
+        "moduleResolution": "node"
     },
     "include": [
     "./lib/**/*",

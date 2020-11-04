@@ -1,4 +1,5 @@
-import PolusBuffer from "../util/PolusBuffer";
+import PolusBuffer from "../util/PolusBuffer.js";
+import { ParsedPacket } from "./Packet.js";
 
 export interface HelloPacket {
 	Nonce: number,
@@ -23,7 +24,7 @@ export default class Hello {
 	
 	serialize(packet: HelloPacket): PolusBuffer {
 		var buf = new PolusBuffer();
-		buf.writeU16(packet.Nonce);
+		buf.writeU16(packet.Nonce, true);
 		buf.writeU8(packet.Data.HazelVersion);
 		buf.write32(packet.Data.ClientVersion);
 		buf.writeString(packet.Data.Name);

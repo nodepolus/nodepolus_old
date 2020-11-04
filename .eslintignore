@@ -1,0 +1,4 @@
+node_modules
+dist
+tests
+tests/proxy.js

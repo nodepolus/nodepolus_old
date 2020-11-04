@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
-import SystemType from "../../../PacketElements/SystemType"
+import PolusBuffer from "../../../../util/PolusBuffer.js";
+import SystemType from "../../../PacketElements/SystemType.js"
 
 export enum RepairAction {
 	Repaired = 0x01,
@@ -64,7 +64,13 @@ export default class RepairSystem {
 		let systemType = packet.readU8();
 		let netID = packet.readVarInt();
 		let amount = packet.readU8();
-		let data: RepairSystemPacket;
+		let data: RepairSystemPacket = {
+			System: systemType,
+			RepairerNetID: netID,
+			RepairAmount: {
+				switchFlipped: 0//dummy data
+			}
+		};
 		data.System = systemType;
 		data.RepairerNetID = netID;
 		switch(data.System) {

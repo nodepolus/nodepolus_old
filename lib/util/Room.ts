@@ -1,7 +1,7 @@
-import Connection from "./Connection";
-import Game from "./Game";
-import Publicity from "../data/enums/publicity";
-import { RoomSettings } from "../packets/PacketElements/RoomSettings";
+import Connection from "./Connection.js";
+import Game from "./Game.js";
+import Publicity from "../data/enums/publicity.js";
+import { RoomSettings } from "../packets/PacketElements/RoomSettings.js";
 
 class Room {
     public players: /*TODO: player array*/ any[];

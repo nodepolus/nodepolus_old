@@ -1,5 +1,5 @@
-import RoomCode from "../PacketElements/RoomCode";
-import PolusBuffer from "../../util/PolusBuffer";
+import RoomCode from "../PacketElements/RoomCode.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface SetGameCodePacket {
 	RoomCode: string

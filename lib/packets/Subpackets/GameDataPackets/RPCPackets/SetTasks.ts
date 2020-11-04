@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
+import PolusBuffer from "../../../../util/PolusBuffer.js";
 
 export interface SetTasksPacket {
 	PlayerID: number,
@@ -9,10 +9,11 @@ export interface SetTasksPacket {
 export default class SetTasks {
 
 	parse(packet: PolusBuffer): SetTasksPacket {
-		let returnData: SetTasksPacket;
-		returnData.PlayerID = packet.readU8();
-		returnData.TaskCount = packet.readVarInt();
-		returnData.Tasks = Array(Number(returnData.TaskCount))
+		let returnData: SetTasksPacket = {
+			PlayerID: packet.readU8(),
+			TaskCount: packet.readVarInt(),
+			Tasks: []
+		};
 		for (let i = 0; i < returnData.Tasks.length; i++) {
 			returnData.Tasks[i] = packet.readU8();
 		}

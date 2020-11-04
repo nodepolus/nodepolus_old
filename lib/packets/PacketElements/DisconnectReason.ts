@@ -1,5 +1,5 @@
-import Room from "../../util/Room";
-import PolusBuffer from "../../util/PolusBuffer";
+import Room from "../../util/Room.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
 
 enum DisconnectReasons {
 	ExitGame = 0,
@@ -28,13 +28,16 @@ export default class DisconnectReason {
 	reason: string;
 
 	constructor(private packet: PolusBuffer, private room: Room){
-		this.reasonInt = packet.readU8();
+		if(packet.dataRemaining().length > 1) {
+			this.reasonInt = packet.readU32();
+		} else {
+			if(packet.dataRemaining().length != 0) {
+				this.reasonInt = packet.readU8();
+			}
+		}
 		if (this.reasonInt == DisconnectReasons.Custom) {
 			this.reason = this.packet.readString();
-		} else {
-			this.reason = Object.keys(DisconnectReasons).find(key => DisconnectReasons[key] === this.reasonInt);
 		}
-
 	}
 	toString() {
 		switch (this.reasonInt) {
@@ -68,11 +71,13 @@ export default class DisconnectReason {
 		}
 	}
 	serialize() {
-		var buf = new PolusBuffer(1);
-		buf.writeU8(this.reasonInt);
-		if(this.reasonInt == 0x08) {
-			buf.writeString(this.reason)
-		} 
+		var buf = new PolusBuffer();
+		if(this.reasonInt) {
+			buf.writeU8(this.reasonInt);
+			if(this.reasonInt == 0x08) {
+				buf.writeString(this.reason)
+			} 
+		}
 		return buf;
 	}
 }

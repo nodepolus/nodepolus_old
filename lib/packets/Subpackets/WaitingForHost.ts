@@ -1,5 +1,5 @@
-import PolusBuffer from "../../util/PolusBuffer";
-import RoomCode from "../PacketElements/RoomCode";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import RoomCode from "../PacketElements/RoomCode.js";
 
 export interface WaitingForHostPacket {
 	RoomCode: string,

@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
+import PolusBuffer from "../../../../util/PolusBuffer.js";
 
 export interface TaskState {
 	TaskID: bigint,
@@ -28,34 +28,48 @@ export interface UpdateGameDataPacket {
 	PlayerData: PlayerData[]
 }
 
-export default class SetTasks {
-
+export default class UpdateGameData {
 	parse(packet: PolusBuffer): UpdateGameDataPacket {
-		let retData: UpdateGameDataPacket;
-		retData.PlayerDataLength = packet.read16()
-		retData.PlayerData = new Array(retData.PlayerDataLength)
-		for (let i = 0; i < retData.PlayerData.length; i++) {
+		let retData: UpdateGameDataPacket = {
+			PlayerDataLength: packet.read16(),
+			PlayerData: [],
+		};
+		let i = 0;
+		let subpkt = packet.readBytes(retData.PlayerDataLength)
+		while (subpkt.dataRemaining().length > 0) {
+			console.log(subpkt.dataRemaining())
+			retData.PlayerData[i] = {
+				PlayerID: subpkt.readU8(),
+				PlayerName: subpkt.readString(),
+				Color: subpkt.readU8(),
+				HatID: subpkt.readVarInt(),
+				PetID: subpkt.readVarInt(),
+				SkinID: subpkt.readVarInt(),
+				Flags: {
+					Disconnected: false,
+					Impostor: false,
+					Dead: false
+				},
+				Tasks: []
+			}
 			let PlayerData = retData.PlayerData[i]
-			PlayerData.PlayerID = packet.readU8();
-			PlayerData.PlayerName = packet.readString();
-			PlayerData.Color = packet.readU8();
-			PlayerData.HatID = packet.readVarInt();
-			PlayerData.PetID = packet.readVarInt();
-			PlayerData.SkinID = packet.readVarInt();
-			let FlagsBitfield = packet.readU8();
+			let FlagsBitfield = subpkt.readU8();
 			PlayerData.Flags = {
 				Disconnected: (FlagsBitfield & 0b00000001) != 0, 
 				Impostor: (FlagsBitfield & 0b00000010) != 0,
 				Dead: (FlagsBitfield & 0b00000100) != 0
 			}
-			PlayerData.TaskAmount = packet.readU8();
+			PlayerData.TaskAmount = subpkt.readU8();
 			PlayerData.Tasks = Array(retData.PlayerData[i].TaskAmount)
 			for (let i2 = 0; i2 < PlayerData.Tasks.length; i2++) {
-				PlayerData.Tasks[i2] = {
-					TaskID: packet.readVarInt(),
-					TaskCompleted: packet.readBoolean()
+				if(subpkt.dataRemaining().length > 0) {
+					PlayerData.Tasks[i2] = {
+						TaskID: subpkt.readVarInt(),
+						TaskCompleted: subpkt.readBoolean()
+					}
 				}
 			}
+			i++;
 		}
 		return retData
 	}

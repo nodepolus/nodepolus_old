@@ -1,4 +1,4 @@
-import PolusBuffer from "../util/PolusBuffer";
+import PolusBuffer from "../util/PolusBuffer.js";
 
 export interface PingPacket {
 	Nonce: number
@@ -12,7 +12,7 @@ class Ping {
 	}
 	serialize(packet: PingPacket): PolusBuffer {
 		var buf = new PolusBuffer();
-		buf.writeU16(packet.Nonce);
+		buf.writeU16(packet.Nonce, true);
 		return buf;
 	}
 }

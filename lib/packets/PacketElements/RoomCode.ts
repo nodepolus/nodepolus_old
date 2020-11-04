@@ -1,4 +1,4 @@
-import PolusBuffer from "../../util/PolusBuffer";
+import PolusBuffer from "../../util/PolusBuffer.js";
 
 class RoomCode {
 	V2Int: number[] = [ 25, 21, 19, 10, 8, 11, 12, 13, 22, 15, 16, 6, 24, 23, 18, 7, 0, 3, 9, 4, 14, 20, 1, 2, 5, 17 ];

@@ -88,7 +88,7 @@ export default class PolusBuffer {
 
 	readString(): string {
 		const length = this.readVarInt();
-		return this.readBytes(Number(length)).toString();
+		return this.readBytes(Number(length)).buf.toString();
 	}
 
 	readBytes(length: number): PolusBuffer {
@@ -211,7 +211,7 @@ export default class PolusBuffer {
 	dataRemaining(): Buffer {
 		return this.buf.slice(this.cursor);
 	}
-	static concat(...PolusBuffers: any[]) {
+	static concat(...PolusBuffers: PolusBuffer[]) {
 		return new PolusBuffer(Buffer.concat(PolusBuffers.map(PB => PB.buf)))
 	}
 	get length(): number {

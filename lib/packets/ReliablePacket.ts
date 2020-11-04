@@ -1,6 +1,7 @@
-import { UnreliablePacket, Unreliable } from "./UnreliablePacket";
-import PolusBuffer from "../util/PolusBuffer";
-import { ParsedPacket } from "./Packet";
+import Unreliable, { UnreliablePacket } from "./UnreliablePacket.js";
+import PolusBuffer from "../util/PolusBuffer.js";
+import { ParsedPacket } from "./Packet.js";
+import Room from "../util/Room.js";
 
 export interface ReliablePacket {
 	Nonce: number,
@@ -8,17 +9,18 @@ export interface ReliablePacket {
 }
 
 class Reliable {
-	constructor(private toServer: boolean) {}
-	UnreliablePacketHandler = new Unreliable()
+	constructor(private room: Room, private toServer: boolean) {}
+	UnreliablePacketHandler = new Unreliable(this.room, this.toServer)
 	parse(packet: PolusBuffer): ReliablePacket {
 		return {
 			Nonce: packet.readU16(true),
-			Data: this.UnreliablePacketHandler.parsePacket(packet, this.toServer)
+			Data: this.UnreliablePacketHandler.parse(packet)
 		};
 	}
 	serialize(packet: ParsedPacket): PolusBuffer {
 		var buf = new PolusBuffer();
-		buf.writeU16(packet.Nonce);
+		buf.writeU16(packet.Nonce, true);
+		buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data))
 		return buf;
 	}
 }

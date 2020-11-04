@@ -1,8 +1,8 @@
 
 import { EventEmitter } from "events";
-import Packet, { ParsedPacket, PacketType } from "../packets/Packet";
-import Room from "./Room"
-import PolusBuffer from "./PolusBuffer";
+import Packet, { ParsedPacket, PacketType } from "../packets/Packet.js";
+import Room from "./Room.js"
+import PolusBuffer from "./PolusBuffer.js";
 import { RemoteInfo } from "dgram";
 
 export default class Connection extends EventEmitter{

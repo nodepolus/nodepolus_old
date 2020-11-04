@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
-import StateByte, {StateByteInterface} from "../../../PacketElements/StateByte";	
+import PolusBuffer from "../../../../util/PolusBuffer.js";
+import StateByte, { StateByteInterface } from "../../../PacketElements/StateByte.js";	
 
 export interface VotingCompletePacket {
 	StatesLength?: bigint;
@@ -10,8 +10,12 @@ export interface VotingCompletePacket {
 
 export default class VotingComplete {
 	parse(packet: PolusBuffer): VotingCompletePacket {
-		let data: VotingCompletePacket;
-		data.StatesLength = packet.readVarInt();
+		let data: VotingCompletePacket = {
+			StatesLength: packet.readVarInt(),
+			States: [],
+			ExiledPlayerPlayerID: 0,
+			IsTie: false
+		};
 		data.States = new Array(Number(data.StatesLength));
 		for (let i = 0; i < data.States.length; i++) {
 			data.States[i] = StateByte.parse(packet.readU8())

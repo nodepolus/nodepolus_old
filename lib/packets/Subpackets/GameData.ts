@@ -1,14 +1,17 @@
-import RoomCode from "../PacketElements/RoomCode";
-import PolusBuffer from "../../util/PolusBuffer";
-import Room from "../../util/Room";
+import RoomCode from "../PacketElements/RoomCode.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import Room from "../../util/Room.js";
 
-import Data from "./GameDataPackets/Data";
-import RPC from "./GameDataPackets/RPC";
-import Spawn from "./GameDataPackets/Spawn";
+import Data from "./GameDataPackets/Data.js";
+import RPC from "./GameDataPackets/RPC.js";
+import Spawn from "./GameDataPackets/Spawn.js";
+import Ready from "./GameDataPackets/Ready.js";
+import SceneChange from "./GameDataPackets/SceneChange.js";
+import Despawn from "./GameDataPackets/Despawn.js";
 
 export interface GameDataPacket {
 	RoomCode: string,
-	RecipientNetID?: BigInt,
+	RecipientNetID?: bigint,
 	Packets: any[]
 }
 
@@ -18,8 +21,7 @@ export enum GameDataPacketType {
 	Spawn = 0x04,
 	Despawn = 0x05,
 	SceneChange = 0x06,
-	Ready = 0x07,
-	JoinedGame = 0x09
+	Ready = 0x07
 }
 
 export default class GameData {
@@ -30,11 +32,12 @@ export default class GameData {
 	DespawnPacketHandler = new Despawn();
 	SceneChangePacketHandler = new SceneChange();
 	ReadyPacketHandler = new Ready();
-	JoinedGamePacketHandler = new JoinedGame();
 
 	parse(packet: PolusBuffer, isGameDataTo: Boolean): GameDataPacket {
-		let data: GameDataPacket;
-		data.RoomCode = RoomCode.intToString(packet.read32());
+		let data: GameDataPacket = {
+			RoomCode: RoomCode.intToString(packet.read32()),
+			Packets: new Array()
+		};
 		if (isGameDataTo) {
 			data.RecipientNetID = packet.readVarInt();
 		}
@@ -61,9 +64,6 @@ export default class GameData {
 				case GameDataPacketType.Ready:
 					data.Packets.push({ type: GameDataPacketType.Ready, ...this.ReadyPacketHandler.parse(rawdata) })
 					break;
-				case GameDataPacketType.JoinedGame:
-					data.Packets.push({type: GameDataPacketType.JoinedGame, ...this.JoinedGamePacketHandler.parse(rawdata)})
-					break;
 			}
 			
 		}
@@ -71,6 +71,41 @@ export default class GameData {
 	}
 
 	serialize(packet: GameDataPacket): PolusBuffer {
-		return new PolusBuffer();
+		var pb = new PolusBuffer();
+		pb.write32(RoomCode.stringToInt(packet.RoomCode))
+		if(packet.RecipientNetID) {
+			pb.writeVarInt(packet.RecipientNetID)
+		}
+		pb.writeBytes(PolusBuffer.concat(...packet.Packets.map(subpacket => {
+			let dataPB;
+			switch(subpacket.type) {
+				case GameDataPacketType.Data:
+					dataPB = this.DataPacketHandler.serialize(subpacket)
+					break;
+				case GameDataPacketType.RPC:
+					dataPB = this.RPCPacketHandler.serialize(subpacket)
+					break;
+				case GameDataPacketType.Spawn:
+					dataPB = this.SpawnPacketHandler.serialize(subpacket)
+					break;
+				case GameDataPacketType.Despawn:
+					dataPB = this.DespawnPacketHandler.serialize(subpacket)
+					break;
+				case GameDataPacketType.SceneChange:
+					dataPB = this.SceneChangePacketHandler.serialize(subpacket)
+					break;
+				case GameDataPacketType.Ready:
+					dataPB = this.ReadyPacketHandler.serialize(subpacket)
+					break;
+				default:
+					console.error("AA?A??A?A?A??A??A?AAAAA GAME DATA SERIALIZATION FAILED. UNK PACKET TYPE", packet)
+					process.exit()
+			}
+			let dataPBlenPB = new PolusBuffer(3)
+			dataPBlenPB.writeU16(dataPB.length)
+			dataPBlenPB.writeU8(subpacket.type)
+			return PolusBuffer.concat(dataPBlenPB, dataPB)
+		})))
+		return pb;
 	}
 };

@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
-import RoomSettings from "../../../PacketElements/RoomSettings";
+import PolusBuffer from "../../../../util/PolusBuffer.js";
+import RoomSettings from "../../../PacketElements/RoomSettings.js";
 
 export interface SyncSettingsPacket {
 	RoomSettings: RoomSettings

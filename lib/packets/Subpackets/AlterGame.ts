@@ -1,8 +1,9 @@
-import PolusBuffer from "../../util/PolusBuffer";
-import RoomCode from "../PacketElements/RoomCode";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import RoomCode from "../PacketElements/RoomCode.js";
 
 export interface AlterGamePacket {
-    RoomCode: string,
+	RoomCode: string,
+	AlterGameTag: number
     IsPublic: boolean
 }
 
@@ -10,6 +11,7 @@ export default class AlterGame {
 	parse(packet: PolusBuffer): AlterGamePacket {
 		return {
 			RoomCode: RoomCode.intToString(packet.read32()),
+			AlterGameTag: packet.readU8(),
 			IsPublic: packet.readBoolean()
 		};
 	}
@@ -17,6 +19,7 @@ export default class AlterGame {
 	serialize(packet: AlterGamePacket): PolusBuffer {
 		const buf = new PolusBuffer(5);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
+		buf.writeU8(packet.AlterGameTag);
 		buf.writeBoolean(packet.IsPublic);
 		return buf;
 	}

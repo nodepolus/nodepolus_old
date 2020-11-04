@@ -1,8 +1,8 @@
 import { EventEmitter } from "events";
-import PolusBuffer from "./PolusBuffer";
+import PolusBuffer from "./PolusBuffer.js";
 
 export abstract class PacketHandler extends EventEmitter{
-	abstract HandlePacket(buffer: PolusBuffer);
+	abstract HandlePacket(buffer: PolusBuffer):any;
 }
 
 export abstract class Event { }

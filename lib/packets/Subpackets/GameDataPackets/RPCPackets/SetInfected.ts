@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
+import PolusBuffer from "../../../../util/PolusBuffer.js";
 
 export interface SetInfectedPacket {
 	InfectedCount?: bigint,
@@ -8,9 +8,10 @@ export interface SetInfectedPacket {
 export default class SetInfected {
 
 	parse(packet: PolusBuffer): SetInfectedPacket {
-		let returnData: SetInfectedPacket;
-		returnData.InfectedCount = packet.readVarInt();
-		returnData.InfectedPlayerIDs = Array(Number(returnData.InfectedCount))
+		let returnData: SetInfectedPacket = {
+			InfectedCount: packet.readVarInt(),
+			InfectedPlayerIDs: []
+		};
 		for (let i = 0; i < returnData.InfectedPlayerIDs.length; i++) {
 			returnData.InfectedPlayerIDs[i] = packet.readVarInt();
 		}

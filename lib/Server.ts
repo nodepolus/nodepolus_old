@@ -1,8 +1,8 @@
 import { Socket, createSocket, RemoteInfo } from "dgram";
 import { EventEmitter } from "events";
-import Room from "./util/Room";
-import Packet, { ParsedPacket } from "./packets/Packet";
-import Connection from "./util/Connection";
+import Room from "./util/Room.js";
+import Packet, { ParsedPacket } from "./packets/Packet.js";
+import Connection from "./util/Connection.js";
 
 class LimboRoom extends Room {
     constructor() {

@@ -1,9 +1,9 @@
-import PolusBuffer from "../../util/PolusBuffer";
-import AmongUsMap from "../../data/enums/AmongUsMap";
-import Room from "../../util/Room";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import AmongUsMap from "../../data/enums/AmongUsMap.js";
+import Room from "../../util/Room.js";
 
 export class RoomSettings {
-	Length: bigint;
+	Length: number;
 	Version: number;
 	MaxPlayers: number;
 	Language: number;
@@ -29,6 +29,13 @@ export class RoomSettings {
 	constructor(private room?:Room) {}
 	serialize(): PolusBuffer {
 		let buf;
+		console.log(this);
+		if(!this.Version) {
+			this.Version = 1;
+			if (this.EmergencyCooldown != undefined) this.Version++;
+			if (this.ConfirmEjects != undefined) this.Version++;
+			if (this.TaskBarUpdates != undefined) this.Version++;
+		}
 		switch (this.Version) {
 			case 1:
 				buf = new PolusBuffer(42);
@@ -79,7 +86,7 @@ export class RoomSettings {
 	}
 
 	parse(buf: PolusBuffer) {
-		this.Length = buf.readVarInt();
+		this.Length = buf.readU8();
 		this.Version = buf.readU8();
 		this.MaxPlayers = buf.readU8();
 		this.Language = buf.readU32();

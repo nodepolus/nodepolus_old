@@ -1,6 +1,6 @@
-import PolusBuffer from "../../util/PolusBuffer";
-import Room from "../../util/Room";
-import DisconnectReason from "../PacketElements/DisconnectReason";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import Room from "../../util/Room.js";
+import DisconnectReason from "../PacketElements/DisconnectReason.js";
 
 export interface JoinGameErrorPacket {
 	DisconnectReason: DisconnectReason

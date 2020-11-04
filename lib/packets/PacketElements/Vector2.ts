@@ -1,4 +1,4 @@
-import PolusBuffer from "../../util/PolusBuffer";
+import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface Position {
 	X: number,
@@ -7,10 +7,10 @@ export interface Position {
 
 export default class Vector2 {
 	constructor(public X?: number, public Y?: number) {}
-	parse(buffer: PolusBuffer):Vector2 {
-		const x = buffer.readU16() / 65535
-		const y = buffer.readU16() / 65535
-		return new Vector2(this.lerp(-40, 40, x), this.lerp(-40, 40, y))
+    parse(buffer: PolusBuffer): Vector2 {
+		this.X = this.lerp(-40, 40, buffer.readU16() / 65535);
+		this.Y = this.lerp(-40, 40, buffer.readU16() / 65535);
+		return this;
 	}
 	serialize():PolusBuffer {
 		var buf = new PolusBuffer(4);

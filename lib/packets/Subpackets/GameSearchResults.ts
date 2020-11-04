@@ -1,5 +1,5 @@
-import RoomCode from "../PacketElements/RoomCode";
-import PolusBuffer from "../../util/PolusBuffer";
+import RoomCode from "../PacketElements/RoomCode.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface RoomListing {
 	IP: string,
@@ -22,8 +22,9 @@ export interface GameSearchResultsPacket {
 
 class GameSearchResults {
 	parse(packet: PolusBuffer): GameSearchResultsPacket {
-		let searchPacket: GameSearchResultsPacket;
-		searchPacket.RoomList = new Array<RoomListing>();
+		let searchPacket: GameSearchResultsPacket = {
+			RoomList: new Array<RoomListing>()
+		};
 
 		while (packet.dataRemaining().length != 0) {
 			const length = packet.readU16();
@@ -59,7 +60,7 @@ class GameSearchResults {
 
 	serialize(packet: GameSearchResultsPacket): PolusBuffer {
 		let GameCountBuffer: PolusBuffer;
-		if (packet.SkeldGameCount && packet.MiraHQGameCount && packet.PolusGameCount) {
+		if (packet.SkeldGameCount != undefined && packet.MiraHQGameCount != undefined && packet.PolusGameCount != undefined) {
 			GameCountBuffer = new PolusBuffer(15);
 			GameCountBuffer.writeU16(12);
 			GameCountBuffer.writeU8(1);
@@ -67,7 +68,7 @@ class GameSearchResults {
 			GameCountBuffer.writeU32(packet.MiraHQGameCount);
 			GameCountBuffer.writeU32(packet.PolusGameCount);
 		}
-		let GameBuffers = PolusBuffer.concat(packet.RoomList.map((singleRoom) => {
+		let GameBuffers = PolusBuffer.concat(...packet.RoomList.map((singleRoom) => {
 			const sizeBuffer = new PolusBuffer(3);
 			const roomBuffer = new PolusBuffer(10);
 			const roomIP = singleRoom.IP.split(".").map(e => parseInt(e));
@@ -86,6 +87,7 @@ class GameSearchResults {
 		}));
 		const GlobalGameBuffersSize = new PolusBuffer(3);
 		GlobalGameBuffersSize.writeU16(GameBuffers.length)
+		GlobalGameBuffersSize.writeU8(0x00)
 		GameBuffers = PolusBuffer.concat(GlobalGameBuffersSize, GameBuffers);
 		if (GameCountBuffer) {
 			return PolusBuffer.concat(GameCountBuffer, GameBuffers);

@@ -1,4 +1,4 @@
-import PolusBuffer from "../util/PolusBuffer";
+import PolusBuffer from "../util/PolusBuffer.js";
 
 export interface AcknowledgementPacket {
 	Nonce: number
@@ -12,7 +12,7 @@ class Acknowledgement {
 	}
 	serialize(packet: AcknowledgementPacket): PolusBuffer {
 		var buf = new PolusBuffer(3);
-		buf.writeU16(packet.Nonce);
+		buf.writeU16(packet.Nonce, true);
 		buf.writeU8(0xFF);
 		return buf;
 	}

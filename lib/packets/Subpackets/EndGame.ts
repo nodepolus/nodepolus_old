@@ -1,11 +1,21 @@
-import RoomCode from "../PacketElements/RoomCode";
-import PolusBuffer from "../../util/PolusBuffer";
-import DisconnectReason from "../PacketElements/DisconnectReason";
-import Room from "../../util/Room";
+import RoomCode from "../PacketElements/RoomCode.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import DisconnectReason from "../PacketElements/DisconnectReason.js";
+import Room from "../../util/Room.js";
+
+export enum EndReason {
+	HumansByVote = 0x00,
+	HumansByTask = 0x01,
+	ImpostorsByVote = 0x02,
+	ImpostorsByKill = 0x03,
+	ImpostorsBySabotage = 0x04,
+	HumansByDisconnect = 0x05,
+	ImpostorsByDisconnect = 0x06
+}
 
 export interface EndGamePacket {
 	RoomCode: string,
-	EndReason: DisconnectReason,
+	EndReason: EndReason,
 	ShowAdvert: boolean
 }
 
@@ -14,14 +24,14 @@ export class EndGame {
 	parse(packet: PolusBuffer): EndGamePacket {
 		return {
 			RoomCode: RoomCode.intToString(packet.read32()),
-			EndReason: new DisconnectReason(new PolusBuffer(packet.readU8()), this.room),
+			EndReason: packet.readU8(),
 			ShowAdvert: packet.readBoolean()
 		};
 	}
 	serialize(packet: EndGamePacket): PolusBuffer {
 		const buf = new PolusBuffer(6);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
-		buf.writeU8(packet.EndReason.reasonInt);
+		buf.writeU8(packet.EndReason);
 		buf.writeBoolean(packet.ShowAdvert);
 		return buf;
 	};

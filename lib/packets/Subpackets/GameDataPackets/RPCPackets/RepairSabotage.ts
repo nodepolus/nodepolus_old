@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../../util/PolusBuffer";
+import PolusBuffer from "../../../../util/PolusBuffer.js";
 
 export interface RepairSabotagePacket {
 	PlayerPlayerID: number,

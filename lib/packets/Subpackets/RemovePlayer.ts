@@ -1,7 +1,7 @@
-import DisconnectReason from "../PacketElements/DisconnectReason";
-import PolusBuffer from "../../util/PolusBuffer";
-import RoomCode from "../PacketElements/RoomCode"
-import Room from "../../util/Room";
+import DisconnectReason from "../PacketElements/DisconnectReason.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
+import RoomCode from "../PacketElements/RoomCode.js"
+import Room from "../../util/Room.js";
 
 export interface RemovePlayerPacket {
 	RoomCode: string,

@@ -1,5 +1,5 @@
-import RoomCode from "../PacketElements/RoomCode";
-import PolusBuffer from "../../util/PolusBuffer";
+import RoomCode from "../PacketElements/RoomCode.js";
+import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface JoinedGamePacket {
 	RoomCode: string,
@@ -11,7 +11,7 @@ export interface JoinedGamePacket {
 
 export default class JoinedGame {
 	parse(packet: PolusBuffer): JoinedGamePacket {
-		const baseObject = {
+		const baseObject:JoinedGamePacket = {
 			RoomCode: RoomCode.intToString(packet.read32()),
 			PlayerClientID: packet.readU32(),
 			HostClientID: packet.readU32(),

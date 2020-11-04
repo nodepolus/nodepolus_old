@@ -1,10 +1,10 @@
-import PolusBuffer from "../../../util/PolusBuffer";
-import Component from "../../PacketElements/Component";
-import Room from "../../../util/Room";
+import PolusBuffer from "../../../util/PolusBuffer.js";
+import Component from "../../PacketElements/Component.js";
+import Room from "../../../util/Room.js";
 
 export interface SpawnPacket {
-	SpawnId: number,
-	OwnerId: number,
+	SpawnId: bigint,
+	OwnerId: bigint,
 	Flags: SpawnFlags,
 	Components: Component[]
 }
@@ -27,20 +27,29 @@ export enum SpawnFlags{
 
 export default class Spawn{
 	constructor(private room: Room){}
-	deserialize(buffer: PolusBuffer): SpawnPacket {
+	parse(buffer: PolusBuffer): SpawnPacket {
 		const spawnPacket: SpawnPacket = {
-			SpawnId: Number(buffer.readVarInt()),
-			OwnerId: Number(buffer.readVarInt()),
+			SpawnId: buffer.readVarInt(),
+			OwnerId: buffer.readVarInt(),
 			Flags: <SpawnFlags>buffer.readU8(),
 			Components: []
 		} 
-		let len = Number(buffer.readVarInt());
+		let len = buffer.readVarInt();
 		for(let i=0;i<len;i++){
 			spawnPacket.Components.push(new Component(spawnPacket.SpawnId, i, true, this.room, buffer));
 		}
 		return spawnPacket;
 	}
 	serialize(packet: SpawnPacket): PolusBuffer {
-		return null;
+		let PB = new PolusBuffer();
+		PB.writeVarInt(packet.SpawnId);
+		PB.writeVarInt(packet.OwnerId);
+		PB.writeU8(packet.Flags);
+		PB.writeVarInt(BigInt(packet.Components.length));
+		for (let i = 0; i < packet.Components.length; i++) {
+			const component = packet.Components[i];
+			PB.writeBytes(component.serialize())
+		}
+		return PB
 	};
 };

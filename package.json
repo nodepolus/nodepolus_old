@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm-run-all --parallel watch:build watch:server --print-label",
+    "watch:build": "tsc --watch",
+    "watch:server": "nodemon './dist/index.js' --watch './dist'",
+    "lint": "eslint . --ext .ts",
+    "lint-and-fix": "eslint . --ext .ts --fix"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "^14.14.6",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.12.1",
     "eslint-config-recommended": "4.1.0",
     "ts-node": "^9.0.0",
