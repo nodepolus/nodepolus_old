@@ -61,19 +61,12 @@ class Room extends EventEmitter {
         // @ts-ignore
         switch(packet.type) {
             case "GameData":
-                connection.startPacketGroup();
                 (<GameDataPacket>packet).Packets.forEach(GDPacket => {
 					// @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)
                     }
-                    // @ts-ignore
-                    if(GDPacket.type == GameDataPacketType.RPC) {
-                        // @ts-ignore
-                        connection.send("GameData", {RoomCode: connection.player.room.code, Packets: [GDPacket]});
-                    }
                 })
-                connection.endPacketGroup();
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
                     // @ts-ignore

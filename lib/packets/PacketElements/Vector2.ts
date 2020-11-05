@@ -1,5 +1,5 @@
 import PolusBuffer from "../../util/PolusBuffer.js";
-1899
+
 export interface Position {
 	X: number,
 	Y: number

@@ -15,7 +15,7 @@ class Server extends EventEmitter {
     sock: Socket;
     rooms: Map<string, Room> = new Map();
     clientConnectionMap: Map<string, Connection>;
-    private clientIDIncrementer = 0;
+    private clientIDIncrementer = 256;
     constructor(port:number = 22023) {
         super();
         this.clientConnectionMap = new Map();

@@ -161,7 +161,7 @@ export default class Connection extends EventEmitter{
             RoomCode: room.code,
             PlayerClientID: this.ID,
             HostClientID: room.host.ID,
-            OtherPlayers: room.connections.map(con => BigInt(con.ID))
+            OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID))
         })
         this.send("SetGameCode", {
             RoomCode: room.code
