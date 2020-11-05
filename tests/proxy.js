@@ -23,25 +23,10 @@ let room = new Room();
 
 UDPProxy.on('message', function (message, senderRaw) {
 	if(message[0] != PacketType.PingPacket && message[0] != PacketType.AcknowledgementPacket) console.log("C => S", message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
-	var pkt = new Packet(room, true);
-	var parsed = pkt.parse(new PolusBuffer(message));
-	console.log(parsed);
-	console.log(" ");
-	var cerealPkt = new Packet(room, true);
-	var cereal = cerealPkt.serialize(parsed);
-	assert.equal(cereal.buf.toString('hex'), message.toString('hex'))
 })
 
 UDPProxy.on('proxyMsg', function (message, sender, peer) {
 	if (message[0] != PacketType.PingPacket && message[0] != PacketType.AcknowledgementPacket) console.log("S => C", message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
-	var pkt = new Packet(room, false);
-	var parsed = pkt.parse(new PolusBuffer(message));
-	console.log(parsed);
-	console.log(" ");
-	var cerealPkt = new Packet(room, false);
-	var cereal = cerealPkt.serialize(parsed);
-	assert.strictEqual(cereal.buf.toString('hex'), message.toString('hex'))
-	handlePacket(parsed, senderRaw)
 })
 
 /*

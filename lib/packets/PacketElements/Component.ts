@@ -64,7 +64,7 @@ interface PlayerVoteBanSystem {
 
 type ComponentDataTyped = | ShipStatusData | StateByteInterface | PlayerControlData | CustomTransformData | GameDataPlayerData | bigint | PlayerVoteBanSystem;
 
-const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room) => object, write: (obj: any, buf: PolusBuffer, room: Room) => void}> = new Map();
+const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, spawn: boolean) => object, write: (obj: any, buf: PolusBuffer, room: Room, spawn: boolean) => void}> = new Map();
 {
 	statusHandler.set(SystemType.Electrical, {
 		read: (buf, rm) => {
@@ -83,7 +83,6 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room) =>
 	statusHandler.set(SystemType.Medbay, {
 		read: (buf, rm) => {
 			const length = Number(buf.readVarInt());
-			console.log("medbay scan length pepega",length)
 			const users = [];
 			for(let i=0;i<length;i++)users.push(buf.readU8());
 			return {
@@ -194,15 +193,18 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room) =>
 	});
 	const doorcnts = [13, 0, 12];
 	statusHandler.set(SystemType.Doors, {
-		read: (buf, rm) => {
+		read: (buf, rm, spawn) => {
 			let doors = [];
-			for (let i=0;i<13;i++)doors.push(buf.readBoolean());
+			let length = spawn ? doorcnts[rm.settings.Map] : buf.readVarInt();
+			for (let i=0;i<length;i++)doors.push(buf.readBoolean());
 			return {
 				Doors: doors
 			}
 		},
-		write: (obj, buf, rm) => {
-			buf.writeVarInt(obj.Doors.length);
+		write: (obj, buf, rm, spawn) => {
+			if (spawn) {
+				buf.writeVarInt(obj.Doors.length);
+			}
 			for (let i = 0; i < obj.Doors.length; i++) {
 				buf.writeBoolean(obj.Doors[i])
 			}
@@ -231,12 +233,18 @@ export default class Component {
 	rawData: PolusBuffer;
 	Type: Components;
 	Data: ComponentDataTyped[];
+	private OldData: ComponentDataTyped[];
+	constructor(private spawnId: bigint, private componentIndex: number, private room: Room){
 
-	constructor(private spawnId: bigint, private componentIndex: number, private spawn: boolean, private room: Room, source: PolusBuffer) {
-		this.netID = source.readVarInt();
-		this.length = source.readU16();
-		this.type = source.readU8();
+	}
+	parse(spawn: boolean, source: PolusBuffer) {
+		if(spawn) {
+			this.netID = source.readVarInt();
+			this.length = source.readU16();
+			this.type = source.readU8();
+		}
 		this.Data = [];
+		const {room, spawnId, componentIndex} = this;
 		//todo finish components
 		//todo make changes for non-onspawn parsing
 		switch(Number(spawnId)){
@@ -244,29 +252,25 @@ export default class Component {
 			case ObjectType.AprilShipStatus:
 			case ObjectType.PlanetMap:
 			case ObjectType.HeadQuarters:
-				console.log("luv ya cut g",source.dataRemaining());
-				this.Type = Components.ShipStatus;				
-				switch(room.settings.Map) {
-					case AmongUsMap.THE_SKELD:
-						for(let i=0;i<skeldSystems.length;i++){
-							this.Data.push(<ShipStatusData>{system:skeldSystems[i],data:statusHandler.get(skeldSystems[i]).read(source, room)});
-						}
-						break;
-					default:
-						throw new Error("Map ID: " + room.settings.Map + " not Implemented.");
-
+				this.Type = Components.ShipStatus;		
+				let db = spawn ? 0xFFFFFFFF : Number(source.readVarInt());
+				let systems = (room.settings.Map == 0 ? skeldSystems : (room.settings.Map == 1 ? miraSystems : polusSystems));
+				for(let i=0;i<systems.length;i++){
+					if (spawn || (db & Number(1<<systems[i])) != 0){
+						this.Data[i] = <ShipStatusData>{system:systems[i],data:statusHandler.get(systems[i]).read(source, room, spawn)};
+					}
 				}
 				break;
 			case ObjectType.MeetingHud://do it do what
 				this.Type = Components.MeetingHud;
 				for (let i=0;i<this.length;i++){
-					this.Data.push(StateByte.parse(source.readU8()));
+					this.Data[i] = (StateByte.parse(source.readU8()));
 				}
 				break;
 			case ObjectType.Player:
 				if (componentIndex == 0){
 					this.Type = Components.PlayerControl;
-					this.Data.push({
+					this.Data[0] = ({
 						new: spawn ? source.readBoolean() : false,
 						id: source.readU8()
 					});
@@ -277,7 +281,7 @@ export default class Component {
 						targetPosition: new Vector2().parse(source),
 						targetVelocity: new Vector2().parse(source)
 					};
-					this.Data.push(dataObj);
+					this.Data[0] = dataObj;
 				}else {
 					this.Type = Components.PhysicsControl;
 				}
@@ -289,10 +293,7 @@ export default class Component {
 			case ObjectType.GameData:
 				if (componentIndex == 0){
 					this.Type = Components.GameData;
-					//let NetID = source.readVarInt();
-					//let Length = source.readU16();
-					// let Tag = source.readU8();
-					let PlayerCount = source.readU8();
+					let PlayerCount = spawn ? source.readVarInt() : source.readU8();
 					let PlayerData: GameDataPlayerData;
 					for (let i = 0; i < PlayerCount; i++) {
 						PlayerData = {
@@ -347,20 +348,41 @@ export default class Component {
 						//Length Byte
 							//ClientID VarInt
 				}
+				break;
 		}
 	}
 
-	serialize():PolusBuffer{
+	serialize(spawn: boolean):PolusBuffer{
 		let pb = new PolusBuffer();
 		let datalen = this.Data.length;
-		pb.writeVarInt(this.netID);
-		pb.writeU16(this.length);
-		pb.writeU8(this.type);
+		if(spawn) {
+			pb.writeVarInt(this.netID);
+			pb.writeU16(this.length);
+			pb.writeU8(0x01)
+		}
 		switch (this.Type){
 			case Components.ShipStatus:
+				let db = 0;
+				let systemBufs = [];
 				for(let i=0;i<datalen;i++){
 					let data: ShipStatusData = <ShipStatusData>this.Data[i];
-					statusHandler.get(data.system).write(data.data, pb, this.room);
+					if (spawn){
+						statusHandler.get(data.system).write(data.data, pb, this.room, spawn);
+					} else {
+						//TODO HACKY FIX FOR SYSTEMS
+						let buf = new PolusBuffer();
+						statusHandler.get(data.system).write(data.data, buf, this.room, spawn);
+						let compx = buf.buf.toString("hex");
+						let bufe = buf;
+						buf.buf = Buffer.alloc(buf.length);
+						buf.cursor = 0;
+						statusHandler.get(data.system).write((<ShipStatusData>this.OldData[i]).data, buf, this.room, spawn);
+						let compy = buf.buf.toString("hex");
+						if (compx === compy){
+							db |= 1 << (data.system & 31);
+							systemBufs.push(bufe);
+						}
+					}
 				}
 				break;
 			case Components.MeetingHud:
@@ -371,7 +393,7 @@ export default class Component {
 			case Components.PlayerControl:
 				for(let i=0;i<datalen;i++){
 					const data: PlayerControlData = <PlayerControlData>this.Data[i];
-					pb.writeBoolean(data.new);
+					if (spawn)pb.writeBoolean(data.new);
 					pb.writeU8(data.id);
 				}
 				break;
@@ -385,7 +407,8 @@ export default class Component {
 			case Components.PhysicsControl:
 				break;
 			case Components.GameData:
-				pb.writeU8(datalen)
+				if (spawn)pb.writeVarInt(BigInt(datalen));
+				else pb.writeU8(datalen);
 				for (let i=0;i<datalen;i++){
 					let player: GameDataPlayerData = <GameDataPlayerData>this.Data[i];
 					pb.writeU8(player.PlayerID);
@@ -417,6 +440,7 @@ export default class Component {
 				}
 				break;
 		}
-		return pb
+
+		return pb;
 	}
 }

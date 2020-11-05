@@ -24,27 +24,24 @@ export interface PlayerData {
 }
 
 export interface UpdateGameDataPacket {
-	PlayerDataLength?: number,
 	PlayerData: PlayerData[]
 }
 
 export default class UpdateGameData {
 	parse(packet: PolusBuffer): UpdateGameDataPacket {
 		let retData: UpdateGameDataPacket = {
-			PlayerDataLength: packet.read16(),
 			PlayerData: [],
 		};
 		let i = 0;
-		let subpkt = packet.readBytes(retData.PlayerDataLength)
-		while (subpkt.dataRemaining().length > 0) {
-			console.log(subpkt.dataRemaining())
+		while (packet.dataRemaining().length > 0) {
+			packet.readBytes(2);
 			retData.PlayerData[i] = {
-				PlayerID: subpkt.readU8(),
-				PlayerName: subpkt.readString(),
-				Color: subpkt.readU8(),
-				HatID: subpkt.readVarInt(),
-				PetID: subpkt.readVarInt(),
-				SkinID: subpkt.readVarInt(),
+				PlayerID: packet.readU8(),
+				PlayerName: packet.readString(),
+				Color: packet.readU8(),
+				HatID: packet.readVarInt(),
+				PetID: packet.readVarInt(),
+				SkinID: packet.readVarInt(),
 				Flags: {
 					Disconnected: false,
 					Impostor: false,
@@ -53,19 +50,19 @@ export default class UpdateGameData {
 				Tasks: []
 			}
 			let PlayerData = retData.PlayerData[i]
-			let FlagsBitfield = subpkt.readU8();
+			let FlagsBitfield = packet.readU8();
 			PlayerData.Flags = {
 				Disconnected: (FlagsBitfield & 0b00000001) != 0, 
 				Impostor: (FlagsBitfield & 0b00000010) != 0,
 				Dead: (FlagsBitfield & 0b00000100) != 0
 			}
-			PlayerData.TaskAmount = subpkt.readU8();
+			PlayerData.TaskAmount = packet.readU8();
 			PlayerData.Tasks = Array(retData.PlayerData[i].TaskAmount)
 			for (let i2 = 0; i2 < PlayerData.Tasks.length; i2++) {
-				if(subpkt.dataRemaining().length > 0) {
+				if(packet.dataRemaining().length > 0) {
 					PlayerData.Tasks[i2] = {
-						TaskID: subpkt.readVarInt(),
-						TaskCompleted: subpkt.readBoolean()
+						TaskID: packet.readVarInt(),
+						TaskCompleted: packet.readBoolean()
 					}
 				}
 			}
@@ -75,26 +72,29 @@ export default class UpdateGameData {
 	}
 	serialize(packet: UpdateGameDataPacket): PolusBuffer {
 		let buf = new PolusBuffer();
-		buf.writeU16(packet.PlayerDataLength ? Number(packet.PlayerDataLength) : packet.PlayerData.length);
 		for (let i = 0; i < packet.PlayerData.length; i++) {
+			var lenbuf = new PolusBuffer(2)
+			var tmpbuf = new PolusBuffer();
 			let PlayerData = packet.PlayerData[i];
-			buf.writeU8(PlayerData.PlayerID);
-			buf.writeString(PlayerData.PlayerName);
-			buf.writeU8(PlayerData.Color);
-			buf.writeVarInt(PlayerData.HatID);
-			buf.writeVarInt(PlayerData.PetID);
-			buf.writeVarInt(PlayerData.SkinID);
+			tmpbuf.writeU8(PlayerData.PlayerID);
+			tmpbuf.writeString(PlayerData.PlayerName);
+			tmpbuf.writeU8(PlayerData.Color);
+			tmpbuf.writeVarInt(PlayerData.HatID);
+			tmpbuf.writeVarInt(PlayerData.PetID);
+			tmpbuf.writeVarInt(PlayerData.SkinID);
 			let FlagsBitfield = 0;
 			if (PlayerData.Flags.Disconnected) FlagsBitfield += 0b00000001
 			if (PlayerData.Flags.Impostor)     FlagsBitfield += 0b00000010
 			if (PlayerData.Flags.Dead)         FlagsBitfield += 0b00000100
-			buf.writeU8(FlagsBitfield);
-			buf.writeU8(PlayerData.TaskAmount ? Number(PlayerData.TaskAmount) : PlayerData.Tasks.length)
+			tmpbuf.writeU8(FlagsBitfield);
+			tmpbuf.writeU8(PlayerData.TaskAmount ? Number(PlayerData.TaskAmount) : PlayerData.Tasks.length)
 			for (let i = 0; i < PlayerData.Tasks.length; i++) {
 				const Task = PlayerData.Tasks[i];
-				buf.writeVarInt(Task.TaskID);
-				buf.writeBoolean(Task.TaskCompleted);
+				tmpbuf.writeVarInt(Task.TaskID);
+				tmpbuf.writeBoolean(Task.TaskCompleted);
 			}
+			lenbuf.writeU16(tmpbuf.length-1);
+			buf.writeBytes(PolusBuffer.concat(lenbuf, tmpbuf))
 		}
 		return buf;
 	};

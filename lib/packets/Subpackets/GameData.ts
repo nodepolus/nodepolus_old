@@ -2,17 +2,18 @@ import RoomCode from "../PacketElements/RoomCode.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 import Room from "../../util/Room.js";
 
-import Data from "./GameDataPackets/Data.js";
-import RPC from "./GameDataPackets/RPC.js";
+import Data, { DataPacket } from "./GameDataPackets/Data.js";
+import RPC, { RPCPacket } from "./GameDataPackets/RPC.js";
 import Spawn from "./GameDataPackets/Spawn.js";
-import Ready from "./GameDataPackets/Ready.js";
-import SceneChange from "./GameDataPackets/SceneChange.js";
-import Despawn from "./GameDataPackets/Despawn.js";
+import Ready, { ReadyPacket } from "./GameDataPackets/Ready.js";
+import SceneChange, { SceneChangePacket } from "./GameDataPackets/SceneChange.js";
+import Despawn, { DespawnPacket } from "./GameDataPackets/Despawn.js";
+import { IGameObject } from "../../util/GameObject.js";
 
 export interface GameDataPacket {
 	RoomCode: string,
 	RecipientNetID?: bigint,
-	Packets: any[]
+	Packets: (DataPacket|RPCPacket|IGameObject|ReadyPacket|SceneChangePacket|DespawnPacket)[]
 }
 
 export enum GameDataPacketType {
@@ -26,7 +27,7 @@ export enum GameDataPacketType {
 
 export default class GameData {
 	constructor(private room: Room, private toServer: boolean){}
-	DataPacketHandler = new Data();
+	DataPacketHandler = new Data(this.room);
 	RPCPacketHandler = new RPC();
 	SpawnPacketHandler = new Spawn(this.room);
 	DespawnPacketHandler = new Despawn();
@@ -47,21 +48,27 @@ export default class GameData {
 			const rawdata = packet.readBytes(length);
 			switch(type) {
 				case GameDataPacketType.Data:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Data, ...this.DataPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.RPC:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.RPC, ...this.RPCPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Spawn:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Spawn, ...this.SpawnPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Despawn:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Despawn, ...this.DespawnPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.SceneChange:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.SceneChange, ...this.SceneChangePacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Ready:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Ready, ...this.ReadyPacketHandler.parse(rawdata) })
 					break;
 			}
@@ -73,28 +80,35 @@ export default class GameData {
 	serialize(packet: GameDataPacket): PolusBuffer {
 		var pb = new PolusBuffer();
 		pb.write32(RoomCode.stringToInt(packet.RoomCode))
-		if(packet.RecipientNetID) {
+		if(packet.RecipientNetID || packet.RecipientNetID === 0n) {
 			pb.writeVarInt(packet.RecipientNetID)
 		}
 		pb.writeBytes(PolusBuffer.concat(...packet.Packets.map(subpacket => {
 			let dataPB;
+			// @ts-ignore
 			switch(subpacket.type) {
 				case GameDataPacketType.Data:
+					// @ts-ignore
 					dataPB = this.DataPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.RPC:
+					// @ts-ignore
 					dataPB = this.RPCPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.Spawn:
+					// @ts-ignore
 					dataPB = this.SpawnPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.Despawn:
+					// @ts-ignore
 					dataPB = this.DespawnPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.SceneChange:
+					// @ts-ignore
 					dataPB = this.SceneChangePacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.Ready:
+					// @ts-ignore
 					dataPB = this.ReadyPacketHandler.serialize(subpacket)
 					break;
 				default:
@@ -103,6 +117,7 @@ export default class GameData {
 			}
 			let dataPBlenPB = new PolusBuffer(3)
 			dataPBlenPB.writeU16(dataPB.length)
+			// @ts-ignore
 			dataPBlenPB.writeU8(subpacket.type)
 			return PolusBuffer.concat(dataPBlenPB, dataPB)
 		})))

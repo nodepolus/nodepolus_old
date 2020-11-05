@@ -153,7 +153,7 @@ export default class Unreliable {
 					type = 0x04;
 					break;
 				case 'GameData':
-					type = (<GameDataPacket>subpacket).RecipientNetID?0x06:0x05;
+					type = ((<GameDataPacket>subpacket).RecipientNetID || (<GameDataPacket>subpacket).RecipientNetID===0n)?0x06:0x05;
 					break;
 				case 'JoinedGame':
 					type = 0x07;

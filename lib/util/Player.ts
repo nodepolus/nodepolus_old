@@ -1,27 +1,45 @@
 import { EventEmitter } from "events";
-import Room from "./Room";
-import Component from "../packets/PacketElements/Component";
-import Vector2 from "../packets/PacketElements/Vector2";
+import Room from "./Room.js";
+import Component from "../packets/PacketElements/Component.js";
+import Vector2 from "../packets/PacketElements/Vector2.js";
+import { PlayerColor, PlayerSkin, PlayerHat, PlayerPet, Vent } from "../data/enums/playerEnums.js";
+import Task from "./Task.js";
 
 export default class Player extends EventEmitter {
 	room?: Room;
-	clientID: number;
+	clientID: number; // otherwise known as OwnerID
 	playerID: number;
-	gameObject: GameObject;
-	get position():Vector2 {};
-	get acceleration():Vector2 {};
+	netID: number;
+	get components():Component[] {
+		return this.room.GameObjects.find(GO => GO.ClientID == BigInt(this.clientID)).Components
+	}
+	get position():Vector2 {
+		// do pos handling
+		return new Vector2(0,0)
+	};
+	get acceleration():Vector2 {
+		// do accel handling
+		return new Vector2(0,0)
+	};
 	color: PlayerColor;
 	skin: PlayerSkin;
 	hat: PlayerHat;
 	pet: PlayerPet;
 	tasks: Task[];
 	isAlive: boolean;
-	get votedFor() {}; // if a meeting is in session, return the player this player voted for, if they voted skip return 0. If they haven't voted return undefined
-	get calledMeeting() {} // if a meeting is in session, return true if this player called the meeting
+	get votedFor():Player|undefined {
+		return undefined;
+	}; 
+	get skippedVote():boolean {
+		return false;
+	}
+	get calledMeeting():boolean {
+		return false
+	}
 	isScanning: boolean;
 	isImpostor: boolean;
 	isVenting: boolean;
-	vent: Vent;
+	vent?: Vent;
 	isExiled: boolean;
 	isKilled: boolean;
 	hasDisconnected: boolean;
@@ -30,5 +48,9 @@ export default class Player extends EventEmitter {
 
 	constructor(public name?: string, private ClientVersion?: number, public HazelVersion?: number) {
 		super();
+	}
+
+	enterVent() {
+		
 	}
 }

@@ -29,7 +29,6 @@ export class RoomSettings {
 	constructor(private room?:Room) {}
 	serialize(): PolusBuffer {
 		let buf;
-		console.log(this);
 		if(!this.Version) {
 			this.Version = 1;
 			if (this.EmergencyCooldown != undefined) this.Version++;

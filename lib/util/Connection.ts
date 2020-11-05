@@ -8,31 +8,44 @@ import PolusBuffer from "./PolusBuffer.js";
 import { HelloPacket } from "../packets/HelloPacket.js";
 import Room from "./Room.js";
 import { UnreliablePacket, Packet as UnreliablePacketPacket } from "../packets/UnreliablePacket.js";
+// @ts-ignore
+import assert from "assert";
+// @ts-ignore
+import util from "util"
 
-let nullRoom = new Room();
+let nullRoom = new Room(null);
 
 export default class Connection extends EventEmitter{
     player: Player;
-    address: RemoteInfo;
-    nonce: number = 0;
+    nonce: number = 1;
     private inGroup:boolean;
-    private groupArr: ({type: string, packet: UnreliablePacketPacket})[];
+    private groupArr: ({type: string, packet: UnreliablePacketPacket})[] = [];
     private packetGroupReliability: PacketType;
     unacknowledgedPackets: Map<number, number> = new Map();
-    constructor(address: RemoteInfo, private socket: Socket, public isToClient: boolean){
+    constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
         super();
         this.once("message", (msg) => {
-            if(msg.Type != PacketType.HelloPacket) {
+            const parsed = new Packet(nullRoom, this.isToClient).parse(new PolusBuffer(msg));
+            if (parsed.Type != PacketType.HelloPacket) {
                 this.disconnect();
             }
-            this.handlePacket(new Packet(nullRoom, this.isToClient).parse(msg))
+            this.handlePacket(parsed)
         })
     }
     handlePacket(packet: ParsedPacket){
         if (!this.player && packet.Type == PacketType.HelloPacket){
             this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
+            this.player.room = nullRoom;
             this.on("message", (msg) => {
-                const parsed = new Packet(this.player.room, this.isToClient).parse(msg);
+                console.log(this.address.address + ":" + this.address.port + "  ==> S", msg)
+                const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
+                const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
+                try {
+                    assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
+                } catch(err) {
+                    console.log(err)
+                }
+                // console.log(util.inspect(parsed, {depth: Infinity}))
                 this.handlePacket(parsed);
             })
         }
@@ -67,7 +80,8 @@ export default class Connection extends EventEmitter{
         if(o.Reliable) {
             o.Nonce = this.newNonce();
         }
-        let pb = new Packet(this.player.room, this.isToClient).serialize(o);
+        let pb = new Packet(this.player?(this.player.room?this.player.room:nullRoom):nullRoom, this.isToClient).serialize(o);
+        console.log(this.address.address + ":" + this.address.port, " <== S", pb.buf)
         this.socket.send(pb.buf, this.address.port, this.address.address)
         this.unacknowledgedPackets.set(o.Nonce, 0);
         let interval = setInterval(() => {
@@ -111,11 +125,15 @@ export default class Connection extends EventEmitter{
         this.packetGroupReliability = PacketType.UnreliablePacket
     }
     public endPacketGroup() {
-        this.write(PacketType.ReliablePacket, {
-            Packets: this.groupArr.map(i => {
-                return {Type: i.type, ...i.packet}
+        this.inGroup = false;
+        if(this.groupArr.length > 0) {
+            this.write(PacketType.ReliablePacket, {
+                Packets: this.groupArr.map(i => {
+                    return {type: i.type, ...i.packet}
+                })
             })
-        })
+        }
+        this.groupArr = [];
     }
     public endUnreliablePacketGroup = this.endPacketGroup;
     disconnect() {
@@ -137,7 +155,17 @@ export default class Connection extends EventEmitter{
     }
     public moveRoom(room: Room) {
         this.player.room = room;
+        room.handleNewConnection(this);
         this.startPacketGroup();
-        this.send("JoinedGame")
+        this.send("JoinedGame", {
+            RoomCode: room.code,
+            PlayerClientID: this.ID,
+            HostClientID: room.host.ID,
+            OtherPlayers: room.connections.map(con => BigInt(con.ID))
+        })
+        this.send("SetGameCode", {
+            RoomCode: room.code
+        })
+        this.endPacketGroup();
     }
 }
