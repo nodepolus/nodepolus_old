@@ -68,10 +68,12 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 {
 	statusHandler.set(SystemType.Electrical, {
 		read: (buf, rm) => {
+			let expected = buf.readU8().toString(2).padStart(5, "0").split('').map(c=>c=="1")
+			let actual = buf.readU8().toString(2).padStart(5, "0").split('').map(c=>c=="1")
 			return {
-				ExpectedSwitches: buf.readU8(),
-				ActualSwitches: buf.readU8(),
-				Value: buf.readU8()
+				ExpectedSwitches: expected,
+				ActualSwitches: actual,
+				Value: buf.readU8()/2.55
 			};
 		},
 		write: (obj, buf, rm) => {
@@ -237,7 +239,7 @@ export default class Component {
 	type: number;
 	rawData: PolusBuffer;
 	Type: Components;
-	Data: ComponentDataTyped[];
+	Data: ComponentDataTyped[] = [];
 	private OldData: ComponentDataTyped[];
 	constructor(private spawnId: bigint, private componentIndex: number, private room: Room){
 
@@ -248,7 +250,7 @@ export default class Component {
 			this.length = source.readU16();
 			this.type = source.readU8();
 		}
-		this.Data = [];
+
 		const {room, spawnId, componentIndex} = this;
 		//todo finish components
 		//todo make changes for non-onspawn parsing
@@ -257,12 +259,13 @@ export default class Component {
 			case ObjectType.AprilShipStatus:
 			case ObjectType.PlanetMap:
 			case ObjectType.HeadQuarters:
-				this.Type = Components.ShipStatus;		
+				this.Type = Components.ShipStatus;
 				let db = spawn ? 0xFFFFFFFF : Number(source.readVarInt());
 				let systems = (room.settings.Map == 0 ? skeldSystems : (room.settings.Map == 1 ? miraSystems : polusSystems));
 				for(let i=0;i<systems.length;i++){
-					if (spawn || (db & Number(1<<systems[i])) != 0){
+					if (spawn || (db & Number(1<<(systems[i]&31))) != 0){
 						this.Data[i] = <ShipStatusData>{system:systems[i],data:statusHandler.get(systems[i]).read(source, room, spawn)};
+						console.log(this.Data[i]);
 					}
 				}
 				break;
@@ -356,6 +359,7 @@ export default class Component {
 				}
 				break;
 		}
+		this.OldData = this.Data;
 	}
 
 	serialize(spawn: boolean):PolusBuffer{
@@ -371,13 +375,19 @@ export default class Component {
 				let db = 0;
 				let systemBufs = [];
 				for(let i=0;i<datalen;i++){
+					console.log(i, this.Data[i]);
 					let data: ShipStatusData = <ShipStatusData>this.Data[i];
 					if (spawn){
 						statusHandler.get(data.system).write(data.data, pb, this.room, spawn);
-					} else {
+					} else if (this.Data[i] !== undefined){
 						//TODO HACKY FIX FOR SYSTEMS
 						let buf = new PolusBuffer();
 						statusHandler.get(data.system).write(data.data, buf, this.room, spawn);
+						if (this.OldData[i] == undefined){
+							systemBufs.push(buf);
+							db |= 1 << (data.system & 31);
+							continue;
+						}
 						let compx = buf.buf.toString("hex");
 						let bufe = buf;
 						buf.buf = Buffer.alloc(buf.length);
@@ -400,7 +410,7 @@ export default class Component {
 				for(let i=0;i<datalen;i++){
 					const data: PlayerControlData = <PlayerControlData>this.Data[i];
 					if (spawn){
-						console.log("is new player",data.id,data.new);
+						//console.log("is new player",data.id,data.new);
 						pb.writeBoolean(data.new);
 					}
 					pb.writeU8(data.id);
@@ -449,7 +459,7 @@ export default class Component {
 				}
 				break;
 		}
-
+		this.OldData = this.Data;
 		return pb;
 	}
 }

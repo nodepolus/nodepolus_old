@@ -5,27 +5,36 @@ import Room from "../../util/Room.js";
 
 export interface RemovePlayerPacket {
 	RoomCode: string,
-	PlayerClientID: number,
-	HostClientID: number,
+	PlayerClientID: bigint,
+	HostClientID?: number,
 	DisconnectReason: DisconnectReason
 }
 
 class RemovePlayer {
 	constructor(public room: Room) {}
 	parse(packet: PolusBuffer): RemovePlayerPacket {
+		let roomCode = RoomCode.intToString(packet.read32())
+		let PlayerClientID = packet.readVarInt()
+		let HostClientID;
+		if(packet.dataRemaining().length != 1) {
+			HostClientID = packet.readU32();
+		}
 		return {
-			RoomCode: RoomCode.intToString(packet.read32()),
-			PlayerClientID: packet.readU32(),
-			HostClientID: packet.readU32(),
+			RoomCode: roomCode,
+			PlayerClientID,
+			HostClientID,
 			DisconnectReason: new DisconnectReason(packet, this.room)
 		};
 	}
 	serialize(packet: RemovePlayerPacket) {
 		var buf = new PolusBuffer(12);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
-		buf.writeU32(packet.PlayerClientID);
-		buf.writeU32(packet.HostClientID);
-		buf.writeBytes(packet.DisconnectReason.serialize())
+		buf.writeVarInt(packet.PlayerClientID);
+		if(packet.HostClientID) {
+			buf.writeU32(packet.HostClientID);
+		}
+		buf.writeBytes(packet.DisconnectReason.serialize());
+		return buf;
 	}
 }
 

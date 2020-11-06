@@ -62,6 +62,22 @@ class Room extends EventEmitter {
     handlePacket(packet: Subpacket, connection: Connection) {
         // @ts-ignore
         switch(packet.type) {
+            case "EndGame":
+            case "StartGame":
+                this.connections.forEach(otherClient => {
+                    // @ts-ignore
+                    otherClient.send(packet.type, packet)
+                })
+                break;
+            case "KickPlayer":
+            case "RemovePlayer":
+                this.connections.forEach(otherClient => {
+                    // @ts-ignore
+                    otherClient.send(packet.type, packet)
+                })
+                //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
+                //TODOPRIORITY: CRITICAL
+                break;
             case "GameData":
                 if ((<GameDataPacket>packet).RecipientNetID && (<GameDataPacket>packet).RecipientNetID === 2147483646n) {
                     connection.send("RemovePlayer", {
@@ -79,22 +95,6 @@ class Room extends EventEmitter {
                         this.GameObjects.push(<IGameObject>GDPacket)
                     }
                 })
-            case "EndGame":
-            case "StartGame":
-                this.connections.forEach(otherClient => {
-                    // @ts-ignore
-                    otherClient.send(packet.type, packet)
-                })
-                break;
-            case "KickPlayer":
-            case "RemovePlayer":
-                this.connections.forEach(otherClient => {
-                    // @ts-ignore
-                    otherClient.send(packet.type, packet)
-                })
-                //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
-                //TODOPRIORITY: CRITICAL
-                break;
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
                     // @ts-ignore

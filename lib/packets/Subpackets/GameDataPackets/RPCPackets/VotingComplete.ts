@@ -26,8 +26,8 @@ export default class VotingComplete {
 	}
 	serialize(packet: VotingCompletePacket): PolusBuffer {
 		let buf = new PolusBuffer()
-		buf.writeVarInt(packet.StatesLength ? packet.StatesLength : BigInt(packet.States.length));
-		for (var i = 0; i < packet.StatesLength ? packet.StatesLength : BigInt(packet.States.length); i++) {
+		buf.writeVarInt(BigInt(packet.States.length));
+		for (var i = 0; i < packet.States.length; i++) {
 			buf.writeU8(StateByte.serialize(packet.States[i]));
 		}
 		buf.writeU8(packet.ExiledPlayerPlayerID);
