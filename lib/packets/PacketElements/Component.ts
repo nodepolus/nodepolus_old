@@ -90,7 +90,7 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 			}
 		},
 		write: (obj, buf, rm) => {
-			buf.writeVarInt(obj.Users.length)
+			buf.writeVarInt(BigInt(obj.Users.length))
 			for (let i = 0; i < obj.Users.length; i++) {
 				buf.writeU8(obj.Users[i])
 			}
@@ -109,7 +109,6 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 					ActiveConsoles: active,
 					CompletedConsoles: completed
 				}
-				return;
 			}else {
 				return {
 					IsSabotaged: buf.readBoolean()
@@ -118,10 +117,12 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 		},
 		write: (obj, buf, rm) => {
 			if (rm.settings.Map == AmongUsMap.MIRA_HQ){
+				buf.writeVarInt(BigInt(obj.ActiveConsoles.length))
 				for(let i=0;i<obj.ActiveConsoles.length;i++){
 					buf.writeU8(obj.ActiveConsoles[i][0]);
 					buf.writeU8(obj.ActiveConsoles[i][1]);
 				}
+				buf.writeVarInt(BigInt(obj.CompletedConsoles.length))
 				for(let i=0;i<obj.CompletedConsoles.length;i++){
 					buf.writeU8(obj.CompletedConsoles[i]);
 				}
@@ -140,7 +141,7 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 			}
 		},
 		write: (obj, buf, rm) => {
-			buf.writeVarInt(obj.Users.length)
+			buf.writeVarInt(BigInt(obj.Users.length))
 			for (let i = 0; i < obj.Users.length; i++) {
 				buf.writeU8(obj.Users[i])
 			}
@@ -161,7 +162,7 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 		},
 		write: (obj, buf, rm) => {
 			buf.writeFloat32(obj.Countdown);
-			let entries = obj.UserConsolePairs.entries();
+			let entries = [...obj.UserConsolePairs.entries()];
 			buf.writeVarInt(BigInt(entries.length));
 			for (let i = 0; i < entries.length; i++) {
 				const entry = entries[i];
@@ -185,7 +186,7 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 		},
 		write: (obj, buf, rm) => {
 			buf.writeFloat32(obj.Countdown);
-			buf.writeVarInt(obj.Consoles.length);
+			buf.writeVarInt(BigInt(obj.Consoles.length));
 			for (let i = 0; i < obj.Consoles.length; i++) {
 				buf.writeU8(obj.Consoles[i])
 			}
@@ -195,15 +196,19 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 	statusHandler.set(SystemType.Doors, {
 		read: (buf, rm, spawn) => {
 			let doors = [];
-			let length = spawn ? doorcnts[rm.settings.Map] : buf.readVarInt();
+			let length = doorcnts[rm.settings.Map];
+			let dirtyBits;
+			if(!spawn) {
+				dirtyBits = buf.readVarInt();
+			}
 			for (let i=0;i<length;i++)doors.push(buf.readBoolean());
 			return {
 				Doors: doors
 			}
 		},
 		write: (obj, buf, rm, spawn) => {
-			if (spawn) {
-				buf.writeVarInt(obj.Doors.length);
+			if (!spawn) {
+				buf.writeVarInt(BigInt(0x00)); // should be dirtyBits
 			}
 			for (let i = 0; i < obj.Doors.length; i++) {
 				buf.writeBoolean(obj.Doors[i])
@@ -274,6 +279,7 @@ export default class Component {
 						new: spawn ? source.readBoolean() : false,
 						id: source.readU8()
 					});
+					console.log(this.Data[0]);
 				}else if (componentIndex == 2){
 					this.Type = Components.CustomTransform;
 					let dataObj: CustomTransformData = {
@@ -393,7 +399,10 @@ export default class Component {
 			case Components.PlayerControl:
 				for(let i=0;i<datalen;i++){
 					const data: PlayerControlData = <PlayerControlData>this.Data[i];
-					if (spawn)pb.writeBoolean(data.new);
+					if (spawn){
+						console.log("is new player",data.id,data.new);
+						pb.writeBoolean(data.new);
+					}
 					pb.writeU8(data.id);
 				}
 				break;

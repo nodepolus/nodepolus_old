@@ -12,6 +12,7 @@ import { UnreliablePacket, Packet as UnreliablePacketPacket } from "../packets/U
 import assert from "assert";
 // @ts-ignore
 import util from "util"
+import { GameDataPacketType } from "../packets/Subpackets/GameData.js";
 
 let nullRoom = new Room(null);
 
@@ -37,7 +38,6 @@ export default class Connection extends EventEmitter{
             this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
             this.player.room = nullRoom;
             this.on("message", (msg) => {
-                console.log(this.address.address + ":" + this.address.port + "  ==> S", msg)
                 const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
                 try {
@@ -81,22 +81,24 @@ export default class Connection extends EventEmitter{
             o.Nonce = this.newNonce();
         }
         let pb = new Packet(this.player?(this.player.room?this.player.room:nullRoom):nullRoom, this.isToClient).serialize(o);
-        console.log(this.address.address + ":" + this.address.port, " <== S", pb.buf)
+        console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
         this.socket.send(pb.buf, this.address.port, this.address.address)
         this.unacknowledgedPackets.set(o.Nonce, 0);
-        let interval = setInterval(() => {
-            if(this.unacknowledgedPackets.has(o.Nonce)) {
-                this.unacknowledgedPackets.set(o.Nonce, this.unacknowledgedPackets.get(o.Nonce) + 1);
-                if(this.unacknowledgedPackets.get(o.Nonce) == 10) {
-                    this.disconnect()
-                    clearInterval(interval)
+        if(o.Reliable) {
+            let interval = setInterval(() => {
+                if(this.unacknowledgedPackets.has(o.Nonce)) {
+                    this.unacknowledgedPackets.set(o.Nonce, this.unacknowledgedPackets.get(o.Nonce) + 1);
+                    if(this.unacknowledgedPackets.get(o.Nonce) == 10) {
+                        this.disconnect()
+                        clearInterval(interval)
+                    } else {
+                        this.socket.send(pb.buf, this.address.port, this.address.address)
+                    }
                 } else {
-                    this.socket.send(pb.buf, this.address.port, this.address.address)
+                    clearInterval(interval)
                 }
-            } else {
-                clearInterval(interval)
-            }
-        }, 1000)
+            }, 1000)
+        }
     }
     public send(type: string, packet: UnreliablePacketPacket) {
         if(!this.inGroup) {
@@ -141,7 +143,7 @@ export default class Connection extends EventEmitter{
         this.write(PacketType.DisconnectPacket, {DisconnectReason: new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {
-        let pb = new Packet(this.player.room, this.isToClient).serialize({
+        let pb = new Packet(this.player ? (this.player.room ? this.player.room : nullRoom) : nullRoom, this.isToClient).serialize({
             Type: PacketType.AcknowledgementPacket,
             Reliable: false,
             Nonce: packet.Nonce
@@ -167,5 +169,38 @@ export default class Connection extends EventEmitter{
             RoomCode: room.code
         })
         this.endPacketGroup();
+        // if(room.host.ID == this.ID) {
+        //     this.startPacketGroup();
+        //     this.send("PlayerJoinedGame", {
+        //         RoomCode: room.code,
+        //         PlayerClientID: 2147483646,
+        //         HostClientID: room.host.ID
+        //     })
+        //     this.send("GameData", {
+        //         RoomCode: room.code,
+        //         Packets: [
+        //             {
+        //                 //@ts-ignore
+        //                 type: GameDataPacketType.SceneChange,
+        //                 ClientID: 2147483646n,
+        //                 Scene: "OnlineGame"
+        //             }
+        //         ]
+        //     })
+        //     this.endPacketGroup();
+        // }
+        // this.startPacketGroup(); 
+        // this.send("JoinedGame", {
+        //     RoomCode: room.code,
+        //     PlayerClientID: this.ID,
+        //     HostClientID: room.host.ID,
+        //     OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID))
+        // })
+        // this.send("AlterGame", {
+        //     RoomCode: room.code,
+        //     AlterGameTag: 1,
+        //     IsPublic: false
+        // })
+        // this.endPacketGroup();
     }
 }

@@ -22,7 +22,6 @@ export default class PlayerJoinedGame {
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
 		buf.writeU32(packet.PlayerClientID);
 		buf.writeU32(packet.HostClientID);
-
 		return buf;
 	}
 }

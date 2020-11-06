@@ -22,11 +22,11 @@ let room = new Room();
 
 
 UDPProxy.on('message', function (message, senderRaw) {
-	if(message[0] != PacketType.PingPacket && message[0] != PacketType.AcknowledgementPacket) console.log("C => S", message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
+	if (message[0] != PacketType.PingPacket && message[0] != PacketType.AcknowledgementPacket) console.log(senderRaw.address + ":" + senderRaw.port + " => S", message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
 })
 
 UDPProxy.on('proxyMsg', function (message, sender, peer) {
-	if (message[0] != PacketType.PingPacket && message[0] != PacketType.AcknowledgementPacket) console.log("S => C", message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
+	if (message[0] != PacketType.PingPacket && message[0] != PacketType.AcknowledgementPacket) console.log("S => " + peer.address + ":" + peer.port, message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
 })
 
 /*

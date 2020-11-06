@@ -81,7 +81,7 @@ export default class Unreliable {
 						if (data.length <= 4) {
 							packets.push({ type: "JoinGameError", ...this.JoinGameErrorPacketHandler.parse(data) });
 						} else {
-							packets.push({ type: "PlayerJoinedGame", ...this.PlayerJoinedGamePacketHandler.parse(data) });
+							packets.push({ type: "", ...this.PlayerJoinedGamePacketHandler.parse(data) });
 						}
 					}
 					break;
@@ -163,6 +163,12 @@ export default class Unreliable {
 					break;
 				case 'AlterGame':
 					type = 0x0a;
+					break;
+				case "KickPlayer":
+					type = 0x0b;
+					break;
+				case "WaitingForHost":
+					type = 0x0c;
 					break;
 				case 'MasterServers':
 					type = 0x0e;

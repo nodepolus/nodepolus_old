@@ -14,14 +14,15 @@ export default class SetTasks {
 			TaskCount: packet.readVarInt(),
 			Tasks: []
 		};
-		for (let i = 0; i < returnData.Tasks.length; i++) {
+		for (let i = 0; i < returnData.TaskCount; i++) {
 			returnData.Tasks[i] = packet.readU8();
 		}
 		return returnData;
 	}
 	serialize(packet: SetTasksPacket): PolusBuffer {
 		let buf = new PolusBuffer();
-		buf.writeVarInt(packet.TaskCount ? packet.TaskCount : BigInt(packet.Tasks.length));
+		buf.writeU8(packet.PlayerID);
+		buf.writeVarInt(BigInt(packet.Tasks.length));
 		for (let i = 0; i < packet.Tasks.length; i++) {
 			buf.writeU8(packet.Tasks[i]);
 		}

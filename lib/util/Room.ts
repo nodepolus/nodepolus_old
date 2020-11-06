@@ -14,6 +14,8 @@ import randomstring from "randomstring";
 import { addr2str } from "./misc.js";
 import {inspect} from 'util';
 import { RPCPacket } from "../packets/Subpackets/GameDataPackets/RPC.js";
+import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
+import PolusBuffer from "./PolusBuffer.js";
 
 class Room extends EventEmitter {
     constructor(public server: Server) {
@@ -61,12 +63,38 @@ class Room extends EventEmitter {
         // @ts-ignore
         switch(packet.type) {
             case "GameData":
+                if ((<GameDataPacket>packet).RecipientNetID && (<GameDataPacket>packet).RecipientNetID === 2147483646n) {
+                    connection.send("RemovePlayer", {
+                        RoomCode: this.code,
+                        PlayerClientID: 2147483646,
+                        HostClientID: this.host.ID,
+                        DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
+                    })
+                    break;
+                }
                 (<GameDataPacket>packet).Packets.forEach(GDPacket => {
+                    console.log(GDPacket)
 					// @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)
                     }
                 })
+            case "EndGame":
+            case "StartGame":
+                this.connections.forEach(otherClient => {
+                    // @ts-ignore
+                    otherClient.send(packet.type, packet)
+                })
+                break;
+            case "KickPlayer":
+            case "RemovePlayer":
+                this.connections.forEach(otherClient => {
+                    // @ts-ignore
+                    otherClient.send(packet.type, packet)
+                })
+                //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
+                //TODOPRIORITY: CRITICAL
+                break;
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
                     // @ts-ignore
