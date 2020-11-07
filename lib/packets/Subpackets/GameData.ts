@@ -12,7 +12,7 @@ import { IGameObject } from "../../util/GameObject.js";
 
 export interface GameDataPacket {
 	RoomCode: string,
-	RecipientNetID?: bigint,
+	RecipientClientID?: bigint,
 	Packets: (DataPacket|RPCPacket|IGameObject|ReadyPacket|SceneChangePacket|DespawnPacket)[]
 }
 
@@ -40,7 +40,7 @@ export default class GameData {
 			Packets: new Array()
 		};
 		if (isGameDataTo) {
-			data.RecipientNetID = packet.readVarInt();
+			data.RecipientClientID = packet.readVarInt();
 		}
 		while(packet.dataRemaining().length != 0) {
 			const length = packet.readU16();
@@ -80,8 +80,8 @@ export default class GameData {
 	serialize(packet: GameDataPacket): PolusBuffer {
 		var pb = new PolusBuffer();
 		pb.write32(RoomCode.stringToInt(packet.RoomCode))
-		if(packet.RecipientNetID || packet.RecipientNetID === 0n) {
-			pb.writeVarInt(packet.RecipientNetID)
+		if (packet.RecipientClientID || packet.RecipientClientID === 0n) {
+			pb.writeVarInt(packet.RecipientClientID)
 		}
 		pb.writeBytes(PolusBuffer.concat(...packet.Packets.map(subpacket => {
 			let dataPB;

@@ -4,14 +4,15 @@ import Component from "../packets/PacketElements/Component.js";
 import Vector2 from "../packets/PacketElements/Vector2.js";
 import { PlayerColor, PlayerSkin, PlayerHat, PlayerPet, Vent } from "../data/enums/playerEnums.js";
 import Task from "./Task.js";
+import Connection from "./Connection.js";
 
 export default class Player extends EventEmitter {
 	room?: Room;
-	clientID: number; // otherwise known as OwnerID
 	playerID: number;
+	connection: Connection;
 	netID: number;
 	get components():Component[] {
-		return this.room.GameObjects.find(GO => GO.ClientID == BigInt(this.clientID)).Components
+		return this.room.GameObjects.find(GO => GO.ClientID == BigInt(this.connection.ID)).Components
 	}
 	get position():Vector2 {
 		// do pos handling

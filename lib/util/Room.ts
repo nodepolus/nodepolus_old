@@ -5,7 +5,6 @@ import { RoomSettings } from "../packets/PacketElements/RoomSettings.js";
 import { EventEmitter } from "events";
 import Player from "./Player.js";
 import { Packet as Subpacket } from "../packets/UnreliablePacket.js";
-import Component from "../packets/PacketElements/Component.js";
 import Server from "../Server.js";
 import { IGameObject } from "./GameObject.js";
 import { GameDataPacket, GameDataPacketType } from "../packets/Subpackets/GameData.js";
@@ -79,7 +78,7 @@ class Room extends EventEmitter {
                 //TODOPRIORITY: CRITICAL
                 break;
             case "GameData":
-                if ((<GameDataPacket>packet).RecipientNetID && (<GameDataPacket>packet).RecipientNetID === 2147483646n) {
+                if ((<GameDataPacket>packet).RecipientClientID && (<GameDataPacket>packet).RecipientClientID === 2147483646n) {
                     connection.send("RemovePlayer", {
                         RoomCode: this.code,
                         PlayerClientID: 2147483646,
@@ -87,6 +86,12 @@ class Room extends EventEmitter {
                         DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
                     })
                     break;
+                }
+                if ((<GameDataPacket>packet).RecipientClientID) {
+                    this.connections.filter(conn => BigInt(conn.ID) == (<GameDataPacket>packet).RecipientClientID).forEach(recipient => {
+                        // @ts-ignore
+                        recipient.send(packet.type, packet)
+                    })
                 }
                 (<GameDataPacket>packet).Packets.forEach(GDPacket => {
                     console.log(GDPacket)

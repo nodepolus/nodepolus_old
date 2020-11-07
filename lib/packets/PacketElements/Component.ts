@@ -77,9 +77,9 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 			};
 		},
 		write: (obj, buf, rm) => {
-			buf.writeU8(obj.ExpectedSwitches);
-			buf.writeU8(obj.ActualSwitches);
-			buf.writeU8(obj.Value);
+			buf.writeU8(parseInt(obj.ExpectedSwitches.map((e: boolean)=>e?"1":"0").join(''), 2));
+			buf.writeU8(parseInt(obj.ActualSwitches.map((e:boolean)=>e?"1":"0").join(''), 2));
+			buf.writeU8(obj.Value*2.55);
 		}
 	});
 	statusHandler.set(SystemType.Medbay, {
@@ -265,7 +265,7 @@ export default class Component {
 				for(let i=0;i<systems.length;i++){
 					if (spawn || (db & Number(1<<(systems[i]&31))) != 0){
 						this.Data[i] = <ShipStatusData>{system:systems[i],data:statusHandler.get(systems[i]).read(source, room, spawn)};
-						console.log(this.Data[i]);
+						//console.log(this.Data[i]);
 					}
 				}
 				break;
@@ -374,32 +374,35 @@ export default class Component {
 			case Components.ShipStatus:
 				let db = 0;
 				let systemBufs = [];
-				for(let i=0;i<datalen;i++){
-					console.log(i, this.Data[i]);
+				for(let i=0;i<datalen;i++){//is there a length for this packet
 					let data: ShipStatusData = <ShipStatusData>this.Data[i];
 					if (spawn){
 						statusHandler.get(data.system).write(data.data, pb, this.room, spawn);
-					} else if (this.Data[i] !== undefined){
+					} else if (this.Data[i]){
 						//TODO HACKY FIX FOR SYSTEMS
-						let buf = new PolusBuffer();
+						let buf = new PolusBuffer();//i realize my error for what you're talking about not the entire issue
 						statusHandler.get(data.system).write(data.data, buf, this.room, spawn);
-						if (this.OldData[i] == undefined){
-							systemBufs.push(buf);
-							db |= 1 << (data.system & 31);
-							continue;
-						}
 						let compx = buf.buf.toString("hex");
-						let bufe = buf;
-						buf.buf = Buffer.alloc(buf.length);
-						buf.cursor = 0;
-						statusHandler.get(data.system).write((<ShipStatusData>this.OldData[i]).data, buf, this.room, spawn);
-						let compy = buf.buf.toString("hex");
-						if (compx === compy){
-							db |= 1 << (data.system & 31);
-							systemBufs.push(bufe);
+						let bufe = new PolusBuffer();
+						statusHandler.get(data.system).write((<ShipStatusData>this.OldData[i]).data, bufe, this.room, spawn);
+						let compy = bufe.buf.toString("hex");//no
+						console.log("kognise", i, this.Data[i], this.OldData[i], db.toString(2), compx == compy);
+						console.log(compx,compy);
+						/**
+						 * 	if ((this.DirtyBits & (1L << (systemTypes & 31)))
+						 * 		!= 0UL && this.Systems.TryGetValue(systemTypes, out systemType2))
+							{
+								systemType2.Serialize(writer, false);
+							}
+						 */
+						if (compx != compy){//if old and new aren't the same, send that data
+							db |= 1 << data.system;
+							systemBufs.push(buf);
 						}
 					}
 				}
+				let systemBufferCombined = PolusBuffer.concat(...systemBufs);
+				pb.writeBytes(systemBufferCombined);
 				break;
 			case Components.MeetingHud:
 				for(let i=0;i<datalen;i++){

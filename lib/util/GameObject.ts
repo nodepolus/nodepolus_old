@@ -1,4 +1,4 @@
-import Component from "../packets/PacketElements/Component";
+import Component from "../packets/PacketElements/Component.js";
 
 export enum SpawnFlags {
 	None = 0,
