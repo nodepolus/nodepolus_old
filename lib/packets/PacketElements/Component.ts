@@ -199,18 +199,22 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 		read: (buf, rm, spawn) => {
 			let doors = [];
 			let length = doorcnts[rm.settings.Map];
-			let dirtyBits;
+			let mask;
 			if(!spawn) {
-				dirtyBits = buf.readVarInt();
+				mask = Number(buf.readVarInt());
 			}
-			for (let i=0;i<length;i++)doors.push(buf.readBoolean());
+			for (let i=0;i<length;i++){
+				if (mask === undefined || (mask & (1 << i)) !== 0)doors.push(buf.readBoolean());
+			}
 			return {
-				Doors: doors
+				Mask: mask,
+				Doors: doors,
+				UnmodifiedDoors: doors
 			}
 		},
 		write: (obj, buf, rm, spawn) => {
 			if (!spawn) {
-				buf.writeVarInt(BigInt(0x00)); // should be dirtyBits
+				buf.writeVarInt(BigInt(obj.Mask)); // should be dirtyBits
 			}
 			for (let i = 0; i < obj.Doors.length; i++) {
 				buf.writeBoolean(obj.Doors[i])
@@ -231,7 +235,7 @@ const statusHandler: Map<SystemType, {read: (buffer: PolusBuffer, room: Room, sp
 
 const skeldSystems = [SystemType.Reactor, SystemType.Electrical, SystemType.O2, SystemType.Medbay, SystemType.Security, SystemType.Communications, SystemType.Doors, SystemType.Sabotage];
 const miraSystems = [SystemType.Reactor, SystemType.Electrical, SystemType.O2, SystemType.Medbay, SystemType.Communications, SystemType.Sabotage];
-const polusSystems = [SystemType.Reactor, SystemType.Electrical, SystemType.Medbay, SystemType.Security, SystemType.Communications, SystemType.Doors, SystemType.Sabotage];
+const polusSystems = [SystemType.Electrical, SystemType.Medbay, SystemType.Security, SystemType.Communications, SystemType.Doors, SystemType.Sabotage, SystemType.Laboratory];
 
 export default class Component {
 	netID: bigint;
@@ -239,6 +243,7 @@ export default class Component {
 	type: number;
 	rawData: PolusBuffer;
 	Type: Components;
+	mask: BigInt;
 	Data: ComponentDataTyped[] = [];
 	private OldData: ComponentDataTyped[];
 	constructor(private spawnId: bigint, private componentIndex: number, private room: Room){
@@ -260,16 +265,31 @@ export default class Component {
 			case ObjectType.PlanetMap:
 			case ObjectType.HeadQuarters:
 				this.Type = Components.ShipStatus;
-				let db = spawn ? 0xFFFFFFFF : Number(source.readVarInt());
-				let systems = (room.settings.Map == 0 ? skeldSystems : (room.settings.Map == 1 ? miraSystems : polusSystems));
-				for(let i=0;i<systems.length;i++){
-					if (spawn || (db & Number(1<<(systems[i]&31))) != 0){
-						this.Data[i] = <ShipStatusData>{system:systems[i],data:statusHandler.get(systems[i]).read(source, room, spawn)};
-						//console.log(this.Data[i]);
+				this.mask = spawn ? BigInt(0xFFFFFFFF) : source.readVarInt();
+				let systems = (room.settings.Map == 0 || room.settings.Map == 7 ? skeldSystems : (room.settings.Map == 1 ? miraSystems : polusSystems));
+				const len = Object.keys(SystemType).length/2;
+				let h = 0;
+				for(let i=0;i<len;i++){
+					if (spawn){
+						for (let j of systems){
+							if (i == j){
+								this.Data.push({system: i, data: statusHandler.get(i).read(source, room, true)});
+							}
+						}
+					}else {
+						//do not convert mask to number later
+						if ((Number(this.mask) & (1 << i)) !== 0){
+							for (let j of systems){
+								if (i == j){
+									let data = <ShipStatusData>this.Data[h++];
+									data.data = statusHandler.get(data.system).read(source, room, false);
+								}
+							}
+						}
 					}
 				}
 				break;
-			case ObjectType.MeetingHud://do it do what
+			case ObjectType.MeetingHud:
 				this.Type = Components.MeetingHud;
 				for (let i=0;i<this.length;i++){
 					this.Data[i] = (StateByte.parse(source.readU8()));
@@ -282,7 +302,7 @@ export default class Component {
 						new: spawn ? source.readBoolean() : false,
 						id: source.readU8()
 					});
-					console.log(this.Data[0]);
+					//console.log(this.Data[0]);
 				}else if (componentIndex == 2){
 					this.Type = Components.CustomTransform;
 					let dataObj: CustomTransformData = {
@@ -359,7 +379,7 @@ export default class Component {
 				}
 				break;
 		}
-		this.OldData = this.Data;
+		//this.OldData = this.Data;
 	}
 
 	serialize(spawn: boolean):PolusBuffer{
@@ -372,35 +392,20 @@ export default class Component {
 		}
 		switch (this.Type){
 			case Components.ShipStatus:
-				let db = 0;
 				let systemBufs = [];
 				for(let i=0;i<datalen;i++){//is there a length for this packet
 					let data: ShipStatusData = <ShipStatusData>this.Data[i];
+					let buf = new PolusBuffer();
 					if (spawn){
-						statusHandler.get(data.system).write(data.data, pb, this.room, spawn);
+						statusHandler.get(data.system).write(data.data, buf, this.room, true);
 					} else if (this.Data[i]){
-						//TODO HACKY FIX FOR SYSTEMS
-						let buf = new PolusBuffer();//i realize my error for what you're talking about not the entire issue
-						statusHandler.get(data.system).write(data.data, buf, this.room, spawn);
-						let compx = buf.buf.toString("hex");
-						let bufe = new PolusBuffer();
-						statusHandler.get(data.system).write((<ShipStatusData>this.OldData[i]).data, bufe, this.room, spawn);
-						let compy = bufe.buf.toString("hex");//no
-						console.log("kognise", i, this.Data[i], this.OldData[i], db.toString(2), compx == compy);
-						console.log(compx,compy);
-						/**
-						 * 	if ((this.DirtyBits & (1L << (systemTypes & 31)))
-						 * 		!= 0UL && this.Systems.TryGetValue(systemTypes, out systemType2))
-							{
-								systemType2.Serialize(writer, false);
-							}
-						 */
-						if (compx != compy){//if old and new aren't the same, send that data
-							db |= 1 << data.system;
+						if (Number(this.mask) & (1 << i)){
+							statusHandler.get(data.system).write(data.data, buf, this.room, false);
 							systemBufs.push(buf);
 						}
 					}
 				}
+				pb.writeVarInt(BigInt(this.mask));
 				let systemBufferCombined = PolusBuffer.concat(...systemBufs);
 				pb.writeBytes(systemBufferCombined);
 				break;
@@ -462,7 +467,6 @@ export default class Component {
 				}
 				break;
 		}
-		this.OldData = this.Data;
 		return pb;
 	}
 }

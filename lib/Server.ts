@@ -23,7 +23,7 @@ class Server extends EventEmitter {
         this.sock = createSocket("udp4");
         this.sock.on("listening", () => this.emit("listening", this.port));
         this.sock.on("message", (msg, remote) => {
-            console.log(`${addr2str(remote)} ==> S`, msg.toString('hex'))
+            //console.log(`${addr2str(remote)} ==> S`, msg.toString('hex'))
             if(!this.clientConnectionMap.has(addr2str(remote))) {
                 this.buildConnection(remote);
             }

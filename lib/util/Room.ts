@@ -94,7 +94,7 @@ class Room extends EventEmitter {
                     })
                 }
                 (<GameDataPacket>packet).Packets.forEach(GDPacket => {
-                    console.log(GDPacket)
+                    //console.log(GDPacket)
 					// @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)

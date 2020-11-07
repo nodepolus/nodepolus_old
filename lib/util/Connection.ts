@@ -41,7 +41,7 @@ export default class Connection extends EventEmitter{
                 const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
                 try {
-                    assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
+                    if (packet.Type != PacketType.UnreliablePacket)assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
                 } catch(err) {
                     console.log(err)
                 }
@@ -81,7 +81,7 @@ export default class Connection extends EventEmitter{
             o.Nonce = this.newNonce();
         }
         let pb = new Packet(this.player?(this.player.room?this.player.room:nullRoom):nullRoom, this.isToClient).serialize(o);
-        console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
+        //console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
         this.socket.send(pb.buf, this.address.port, this.address.address)
         this.unacknowledgedPackets.set(o.Nonce, 0);
         if(o.Reliable) {

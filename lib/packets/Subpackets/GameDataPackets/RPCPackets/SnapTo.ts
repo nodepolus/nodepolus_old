@@ -8,7 +8,7 @@ export interface SnapToPacket {
 export default class SnapTo {
 
 	parse(packet: PolusBuffer): SnapToPacket {
-		var pos = new Vector2()
+		const pos = new Vector2()
 		pos.parse(packet)
 		return {
 			Position: pos
