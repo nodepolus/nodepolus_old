@@ -40,6 +40,7 @@ export default class Connection extends EventEmitter{
             this.on("message", (msg) => {
                 console.log(msg.toString('hex'))
                 const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
+                console.log("RawParsed", parsed)
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
                 try {
                     if (packet.Type != PacketType.UnreliablePacket)assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
@@ -166,7 +167,6 @@ export default class Connection extends EventEmitter{
           PlayerClientID: this.ID,
           HostClientID: room.host.ID,
           OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID)),
-          PlayerCount: 0n // TODO: this was missing?
         })
 
         this.send({

@@ -2,11 +2,11 @@ import RoomCode from "../PacketElements/RoomCode.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface JoinedGamePacket {
-  type: 'JoinedGame',
+  	type: 'JoinedGame',
 	RoomCode: string,
 	PlayerClientID: number,
 	HostClientID: number,
-	PlayerCount: bigint,
+	PlayerCount?: bigint,
 	OtherPlayers: bigint[]
 }
 

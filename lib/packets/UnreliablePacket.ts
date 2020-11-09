@@ -131,6 +131,7 @@ export default class Unreliable {
 	}
 	serialize(packet: UnreliablePacket):PolusBuffer {
 		var buf = new PolusBuffer();
+		console.log(packet)
 		packet.Packets.forEach(subpacket => {
 			// @ts-ignore
 			let serialized:PolusBuffer = this[subpacket.type + "PacketHandler"].serialize(subpacket)

@@ -10,18 +10,11 @@ import SceneChange, { SceneChangePacket } from "./GameDataPackets/SceneChange.js
 import Despawn, { DespawnPacket } from "./GameDataPackets/Despawn.js";
 import { IGameObject } from "../../util/GameObject.js";
 
-type SubPacket = DataPacket |
-  RPCPacket |
-  IGameObject |
-  ReadyPacket |
-  SceneChangePacket |
-  DespawnPacket
-
 export interface GameDataPacket {
   type: 'GameData',
 	RoomCode: string,
 	RecipientClientID?: bigint,
-	Packets: SubPacket[]
+	Packets: (DataPacket|RPCPacket|IGameObject|ReadyPacket|SceneChangePacket|DespawnPacket)[]
 }
 
 export enum GameDataPacketType {
@@ -44,7 +37,7 @@ export default class GameData {
 
 	parse(packet: PolusBuffer, isGameDataTo: Boolean): GameDataPacket {
 		let data: GameDataPacket = {
-      type: 'GameData',
+      		type: 'GameData',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			Packets: new Array()
 		};
@@ -57,21 +50,27 @@ export default class GameData {
 			const rawdata = packet.readBytes(length);
 			switch(type) {
 				case GameDataPacketType.Data:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Data, ...this.DataPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.RPC:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.RPC, ...this.RPCPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Spawn:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Spawn, ...this.SpawnPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Despawn:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Despawn, ...this.DespawnPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.SceneChange:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.SceneChange, ...this.SceneChangePacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Ready:
+					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Ready, ...this.ReadyPacketHandler.parse(rawdata) })
 					break;
 			}
@@ -87,32 +86,36 @@ export default class GameData {
 			pb.writeVarInt(packet.RecipientClientID)
 		}
 		pb.writeBytes(PolusBuffer.concat(...packet.Packets.map(subpacket => {
-      let dataPB;
-
+			let dataPB;
+			// @ts-ignore
 			switch(subpacket.type) {
-        case GameDataPacketType.Data:
+				case GameDataPacketType.Data:
+					// @ts-ignore
 					dataPB = this.DataPacketHandler.serialize(subpacket)
-          break;
-        case GameDataPacketType.RPC:
+					break;
+				case GameDataPacketType.RPC:
+					// @ts-ignore
 					dataPB = this.RPCPacketHandler.serialize(subpacket)
-          break;
-        // TODO: ideally this should work, but
-        //       SpawnPacket is actually an IGameObject
-        //       can we safely assume all packets are going
-        //       to be spawn packets?
-        // @ts-ignore
-        case GameDataPacketType.Spawn:
+					break;
+				case GameDataPacketType.Spawn:
+					// @ts-ignore
 					dataPB = this.SpawnPacketHandler.serialize(subpacket)
-          break;
-        case GameDataPacketType.Despawn:
+					break;
+				case GameDataPacketType.Despawn:
+					// @ts-ignore
 					dataPB = this.DespawnPacketHandler.serialize(subpacket)
-          break;
-        case GameDataPacketType.SceneChange:
+					break;
+				case GameDataPacketType.SceneChange:
+					// @ts-ignore
 					dataPB = this.SceneChangePacketHandler.serialize(subpacket)
-          break;
-        case GameDataPacketType.Ready:
+					break;
+				case GameDataPacketType.Ready:
+					// @ts-ignore
 					dataPB = this.ReadyPacketHandler.serialize(subpacket)
 					break;
+				default:
+					console.error("AA?A??A?A?A??A??A?AAAAA GAME DATA SERIALIZATION FAILED. UNK PACKET TYPE", packet)
+					process.exit()
 			}
 			let dataPBlenPB = new PolusBuffer(3)
 			dataPBlenPB.writeU16(dataPB.length)
