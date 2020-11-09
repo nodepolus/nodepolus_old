@@ -56,7 +56,7 @@ export interface ReactorSystem {
 
 export interface O2System {
 	Countdown: number,
-	Consoles: number[]
+	Consoles: bigint[]
 }
 
 export interface DoorSystem {

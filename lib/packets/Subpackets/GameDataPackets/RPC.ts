@@ -27,7 +27,7 @@ import CastVote, { CastVotePacket } from "./RPCPackets/CastVote.js";
 import ClearVote, { ClearVotePacket } from "./RPCPackets/ClearVote.js";
 import CastVoteKick, { CastVoteKickPacket } from "./RPCPackets/CastVoteKick.js";
 import CloseDoorsOfType, { CloseDoorsOfTypePacket } from "./RPCPackets/CloseDoorsOfType.js";
-import RepairSabotage, { RepairSabotagePacket } from "./RPCPackets/RepairSabotage.js";
+import RepairSabotage, { RepairSystemPacket as RepairSabotagePacket } from "./RPCPackets/RepairSabotage.js";
 import SetTasks, { SetTasksPacket } from "./RPCPackets/SetTasks.js";
 import UpdateGameData, { UpdateGameDataPacket } from "./RPCPackets/UpdateGameData.js";
 

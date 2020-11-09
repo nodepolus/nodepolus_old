@@ -11,15 +11,14 @@ export default class Data {
 	parse(packet: PolusBuffer): DataPacket {
 		let ComponentNetID = packet.readVarInt();
 		let Component = this.room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
-		Component.parse(false, packet);
-		return { Component };
+		return { Component: Component.parse(packet) };
 	}
 	serialize(packet: DataPacket): PolusBuffer {
 		let {Component} = packet;
 		let ComponentNetID = Component.netID;
 		let buf = new PolusBuffer();
 		buf.writeVarInt(ComponentNetID);
-		let serialized = Component.serialize(false);
+		let serialized = Component.serialize();
 		buf.writeBytes(serialized);
 		return buf;
 	};

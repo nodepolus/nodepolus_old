@@ -15,6 +15,7 @@ import {inspect} from 'util';
 import { RPCPacket } from "../packets/Subpackets/GameDataPackets/RPC.js";
 import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
 import PolusBuffer from "./PolusBuffer.js";
+import { DataPacket } from "../packets/Subpackets/GameDataPackets/Data.js";
 
 class Room extends EventEmitter {
     constructor(public server: Server) {
@@ -98,6 +99,16 @@ class Room extends EventEmitter {
 					// @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)
+                    }
+					// @ts-ignore
+                    if(GDPacket.type == GameDataPacketType.Data) {
+                        let gthis = this;
+                        this.GameObjects.forEach((gameObject, idx) => {
+                            let oldcomp = gameObject.Components.findIndex(testcomp => testcomp.netID == (<DataPacket>GDPacket).Component.netID);
+                            if(oldcomp != -1) {
+                                gthis.GameObjects[idx].Components[oldcomp] = (<DataPacket>GDPacket).Component
+                            }
+                        })
                     }
                 })
             default:

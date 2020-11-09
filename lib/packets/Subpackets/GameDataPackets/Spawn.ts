@@ -26,8 +26,8 @@ export default class Spawn{
 		let len = buffer.readVarInt();
 		for(let i=0;i<len;i++){
 			let newComponent = new Component(spawnPacket.SpawnID, i, this.room);
-			newComponent.parse(true, buffer);
-			spawnPacket.Components.push(newComponent);
+			newComponent.old = undefined;
+			spawnPacket.Components.push(newComponent.parse(buffer));
 		}
 		return spawnPacket;
 	}
@@ -39,7 +39,8 @@ export default class Spawn{
 		PB.writeVarInt(BigInt(packet.Components.length));
 		for (let i = 0; i < packet.Components.length; i++) {
 			const component = packet.Components[i];
-			PB.writeBytes(component.serialize(true))
+			console.log(component)
+			PB.writeBytes(component.serialize())
 		}
 		return PB;
 	};
