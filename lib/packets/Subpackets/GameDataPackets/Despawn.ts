@@ -1,6 +1,7 @@
 import PolusBuffer from "../../../util/PolusBuffer.js";
 
 export interface DespawnPacket {
+  type: 'Despawn',
 	NetID: bigint
 }
 
@@ -8,6 +9,7 @@ export default class Despawn {
 	constructor() { }
 	parse(buffer: PolusBuffer): DespawnPacket {
 		return {
+      type: 'Despawn',
 			NetID: buffer.readVarInt()
 		}
 	}

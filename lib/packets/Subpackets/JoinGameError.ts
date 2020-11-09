@@ -3,6 +3,7 @@ import Room from "../../util/Room.js";
 import DisconnectReason from "../PacketElements/DisconnectReason.js";
 
 export interface JoinGameErrorPacket {
+  type: 'JoinGameError',
 	DisconnectReason: DisconnectReason
 }
 
@@ -10,7 +11,10 @@ export default class JoinGameError {
 	constructor(private room: Room) {}
 
 	parse(packet: PolusBuffer): JoinGameErrorPacket {
-		return {DisconnectReason: new DisconnectReason(packet, this.room)}
+		return {
+      type: 'JoinGameError',
+      DisconnectReason: new DisconnectReason(packet, this.room)
+    }
 	}
 
 	serialize(packet: JoinGameErrorPacket): PolusBuffer {

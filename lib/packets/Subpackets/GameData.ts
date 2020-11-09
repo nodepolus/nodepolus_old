@@ -11,6 +11,7 @@ import Despawn, { DespawnPacket } from "./GameDataPackets/Despawn.js";
 import { IGameObject } from "../../util/GameObject.js";
 
 export interface GameDataPacket {
+  type: 'GameData',
 	RoomCode: string,
 	RecipientClientID?: bigint,
 	Packets: (DataPacket|RPCPacket|IGameObject|ReadyPacket|SceneChangePacket|DespawnPacket)[]
@@ -36,6 +37,7 @@ export default class GameData {
 
 	parse(packet: PolusBuffer, isGameDataTo: Boolean): GameDataPacket {
 		let data: GameDataPacket = {
+      type: 'GameData',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			Packets: new Array()
 		};
