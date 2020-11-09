@@ -1,9 +1,10 @@
 import PolusBuffer from "../../../util/PolusBuffer.js";
 import Component from "../../PacketElements/Component.js";
 import Room from "../../../util/Room.js";
+import { GameDataPacketType } from "../GameData.js";
 
 export interface DataPacket {
-  type: 'Data',
+  type: GameDataPacketType.Data,
 	Component: Component;
 }
 
@@ -13,7 +14,7 @@ export default class Data {
 		let ComponentNetID = packet.readVarInt();
 		let Component = this.room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
 		return {
-			type: 'Data',
+			type: GameDataPacketType.Data,
 			Component: Component.parse(packet)
 		};
 	}
