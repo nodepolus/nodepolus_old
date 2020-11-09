@@ -8,6 +8,7 @@ interface MasterServer {
 }
 
 export interface MasterServersPacket {
+  type: 'MasterServers',
 	MasterServers: MasterServer[]
 }
 
@@ -25,7 +26,10 @@ class MasterServers {
 				PlayerCount: packet.readVarInt()
 			};
 		}
-		return {MasterServers};
+		return {
+      type: 'MasterServers',
+      MasterServers
+    };
 	}
 	serialize(packet: MasterServersPacket): PolusBuffer {
 		var buf = new PolusBuffer();

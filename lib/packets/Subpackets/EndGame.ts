@@ -14,6 +14,7 @@ export enum EndReason {
 }
 
 export interface EndGamePacket {
+  type: 'EndGame',
 	RoomCode: string,
 	EndReason: EndReason,
 	ShowAdvert: boolean
@@ -23,6 +24,7 @@ export class EndGame {
 	constructor(private room: Room) {}
 	parse(packet: PolusBuffer): EndGamePacket {
 		return {
+      type: 'EndGame',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			EndReason: packet.readU8(),
 			ShowAdvert: packet.readBoolean()

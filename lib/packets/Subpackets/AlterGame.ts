@@ -2,6 +2,7 @@ import PolusBuffer from "../../util/PolusBuffer.js";
 import RoomCode from "../PacketElements/RoomCode.js";
 
 export interface AlterGamePacket {
+  type: 'AlterGame',
 	RoomCode: string,
 	AlterGameTag: number
     IsPublic: boolean
@@ -10,6 +11,7 @@ export interface AlterGamePacket {
 export default class AlterGame {
 	parse(packet: PolusBuffer): AlterGamePacket {
 		return {
+      type: 'AlterGame',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			AlterGameTag: packet.readU8(),
 			IsPublic: packet.readBoolean()

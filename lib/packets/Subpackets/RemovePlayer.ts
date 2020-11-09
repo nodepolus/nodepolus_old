@@ -4,6 +4,7 @@ import RoomCode from "../PacketElements/RoomCode.js"
 import Room from "../../util/Room.js";
 
 export interface RemovePlayerPacket {
+  type: 'RemovePlayer',
 	RoomCode: string,
 	PlayerClientID: bigint,
 	HostClientID?: number,
@@ -20,6 +21,7 @@ class RemovePlayer {
 			HostClientID = packet.readU32();
 		}
 		return {
+      type: 'RemovePlayer',
 			RoomCode: roomCode,
 			PlayerClientID,
 			HostClientID,

@@ -1,6 +1,7 @@
 import PolusBuffer from "../../../util/PolusBuffer.js";
 
 export interface ReadyPacket {
+  type: 'Ready',
 	ClientID: bigint
 }
 
@@ -8,6 +9,7 @@ export default class Ready {
 
 	parse(packet: PolusBuffer): ReadyPacket {
 		return {
+      type: 'Ready',
 			ClientID: packet.readVarInt()
 		}
 	}

@@ -3,6 +3,7 @@ import Component from "../../PacketElements/Component.js";
 import Room from "../../../util/Room.js";
 
 export interface DataPacket {
+  type: 'Data',
 	Component: Component;
 }
 
@@ -12,7 +13,10 @@ export default class Data {
 		let ComponentNetID = packet.readVarInt();
 		let Component = this.room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
 		Component.parse(false, packet);
-		return { Component };
+    return {,
+      type: 'Data',
+      Component
+    };
 	}
 	serialize(packet: DataPacket): PolusBuffer {
 		let {Component} = packet;

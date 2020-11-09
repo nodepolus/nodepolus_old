@@ -1,6 +1,7 @@
 import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface KickPlayerPacket {
+  type: 'KickPlayer',
 	ClientID: bigint,
 	isBanned: boolean
 }
@@ -9,6 +10,7 @@ export default class KickPlayer {
 
 	parse(packet: PolusBuffer): KickPlayerPacket {
 		return {
+      type: 'KickPlayer',
 			ClientID: packet.readVarInt(),
 			isBanned: packet.readBoolean()
 		};
