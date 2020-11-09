@@ -1,7 +1,8 @@
 import PolusBuffer from "../../../util/PolusBuffer.js";
+import { GameDataPacketType } from "../GameData.js";
 
 export interface ReadyPacket {
-  type: 'Ready',
+  type: GameDataPacketType.Ready,
 	ClientID: bigint
 }
 
@@ -9,7 +10,7 @@ export default class Ready {
 
 	parse(packet: PolusBuffer): ReadyPacket {
 		return {
-      type: 'Ready',
+      type: GameDataPacketType.Ready,
 			ClientID: packet.readVarInt()
 		}
 	}

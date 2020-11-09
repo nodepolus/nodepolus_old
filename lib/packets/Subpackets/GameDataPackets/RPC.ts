@@ -30,8 +30,10 @@ import CloseDoorsOfType, { CloseDoorsOfTypePacket } from "./RPCPackets/CloseDoor
 import RepairSabotage, { RepairSystemPacket as RepairSabotagePacket } from "./RPCPackets/RepairSabotage.js";
 import SetTasks, { SetTasksPacket } from "./RPCPackets/SetTasks.js";
 import UpdateGameData, { UpdateGameDataPacket } from "./RPCPackets/UpdateGameData.js";
+import { GameDataPacketType } from "../GameData.js";
 
 export interface RPCPacket {
+  type: GameDataPacketType.RPC,
 	NetID: bigint,
 	RPCFlag: RPCPacketType,
 	Packet: PlayAnimationPacket | 
@@ -135,6 +137,7 @@ export default class GameData {
 
 	parse(packet: PolusBuffer): RPCPacket {
 		let data: RPCPacket = {
+      type: GameDataPacketType.RPC,
 			NetID: -1n,
 			RPCFlag: -1,
 			Packet: {}

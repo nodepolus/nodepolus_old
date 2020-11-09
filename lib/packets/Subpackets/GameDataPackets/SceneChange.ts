@@ -1,7 +1,8 @@
 import PolusBuffer from "../../../util/PolusBuffer.js";
+import { GameDataPacketType } from "../GameData.js";
 
 export interface SceneChangePacket {
-  type: 'SceneChange',
+  type: GameDataPacketType.SceneChange,
 	ClientID: bigint,
 	Scene: string
 }
@@ -9,7 +10,7 @@ export interface SceneChangePacket {
 export default class SceneChange {
 	parse(packet: PolusBuffer): SceneChangePacket {
 		return {
-      type: 'SceneChange',
+      type: GameDataPacketType.SceneChange,
 			ClientID: packet.readVarInt(),
 			Scene: packet.readString()
 		}

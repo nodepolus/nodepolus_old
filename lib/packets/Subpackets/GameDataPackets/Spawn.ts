@@ -2,6 +2,7 @@ import PolusBuffer from "../../../util/PolusBuffer.js";
 import Component from "../../PacketElements/Component.js";
 import Room from "../../../util/Room.js";
 import { IGameObject, SpawnFlags } from "../../../util/GameObject.js";
+import { GameDataPacketType } from "../GameData.js";
 
 export enum ObjectType{
 	ShipStatus = 0,
@@ -18,6 +19,7 @@ export default class Spawn{
 	constructor(private room: Room){}
 	parse(buffer: PolusBuffer): IGameObject {
 		const spawnPacket: IGameObject = {
+      type: GameDataPacketType.Spawn,
 			SpawnID: buffer.readVarInt(),
 			ClientID: buffer.readVarInt(),
 			Flags: <SpawnFlags>buffer.readU8(),
