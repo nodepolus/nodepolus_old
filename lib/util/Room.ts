@@ -65,14 +65,14 @@ class Room extends EventEmitter {
             case "StartGame":
                 this.connections.forEach(otherClient => {
                     // @ts-ignore
-                    otherClient.send(packet.type, packet)
+                    otherClient.send(packet)
                 })
                 break;
             case "KickPlayer":
             case "RemovePlayer":
                 this.connections.forEach(otherClient => {
                     // @ts-ignore
-                    otherClient.send(packet.type, packet)
+                    otherClient.send(packet)
                 })
                 //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
                 //TODOPRIORITY: CRITICAL
@@ -91,16 +91,16 @@ class Room extends EventEmitter {
                 if (packet.RecipientClientID) {
                     this.connections.filter(conn => BigInt(conn.ID) == packet.RecipientClientID).forEach(recipient => {
                         // @ts-ignore
-                        recipient.send(packet.type, packet)
+                        recipient.send(packet)
                     })
                 }
                 packet.Packets.forEach(GDPacket => {
                     //console.log(GDPacket)
-					// @ts-ignore
+                    // @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)
                     }
-					// @ts-ignore
+                    // @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Data) {
                         let gthis = this;
                         this.GameObjects.forEach((gameObject, idx) => {
@@ -114,7 +114,7 @@ class Room extends EventEmitter {
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
                     // @ts-ignore
-                    otherClient.send(packet.type, packet)
+                    otherClient.send(packet)
                 })
                 break;
         }
