@@ -2,6 +2,7 @@ import PolusBuffer from "../../util/PolusBuffer.js";
 import RoomCode from "../PacketElements/RoomCode.js";
 
 export interface WaitingForHostPacket {
+  type: 'WaitingForHost',
 	RoomCode: string,
 	WaitingClientID: number
 }
@@ -10,6 +11,7 @@ export default class WaitingForHost {
 
 	parse(packet: PolusBuffer): WaitingForHostPacket {
 		return {
+      type: 'WaitingForHost',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			WaitingClientID: packet.readU32()
 		};

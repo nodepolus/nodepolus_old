@@ -2,12 +2,14 @@ import RoomCode from "../PacketElements/RoomCode.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface StartGamePacket {
+  type: 'StartGame',
 	RoomCode: string
 }
 
 class StartGame {
 	parse(packet: PolusBuffer): StartGamePacket {
 		return {
+      type: 'StartGame',
 			RoomCode: RoomCode.intToString(packet.read32())
 		};
 	}

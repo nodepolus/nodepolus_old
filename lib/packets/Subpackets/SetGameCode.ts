@@ -2,13 +2,15 @@ import RoomCode from "../PacketElements/RoomCode.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface SetGameCodePacket {
+  type: 'SetGameCode',
 	RoomCode: string
 }
 
 export default class SetGameCode {
 	parse(packet: PolusBuffer): SetGameCodePacket {
 		return {
-			RoomCode: RoomCode.intToString(packet.read32())
+      type: 'SetGameCode',
+      RoomCode: RoomCode.intToString(packet.read32())
 		};
 	}
 	serialize(packet: SetGameCodePacket): PolusBuffer {

@@ -14,6 +14,7 @@ export interface RoomListing {
 }
 
 export interface GameSearchResultsPacket {
+  type: 'GameSearchResults',
 	RoomList: RoomListing[],
 	SkeldGameCount?: number,
 	MiraHQGameCount?: number,
@@ -23,6 +24,7 @@ export interface GameSearchResultsPacket {
 class GameSearchResults {
 	parse(packet: PolusBuffer): GameSearchResultsPacket {
 		let searchPacket: GameSearchResultsPacket = {
+      type: 'GameSearchResults',
 			RoomList: new Array<RoomListing>()
 		};
 

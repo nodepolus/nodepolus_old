@@ -60,7 +60,6 @@ class Room extends EventEmitter {
         return this.connections.find(con => con.player.isHost);
     }
     handlePacket(packet: Subpacket, connection: Connection) {
-        // @ts-ignore
         switch(packet.type) {
             case "EndGame":
             case "StartGame":
@@ -79,22 +78,23 @@ class Room extends EventEmitter {
                 //TODOPRIORITY: CRITICAL
                 break;
             case "GameData":
-                if ((<GameDataPacket>packet).RecipientClientID && (<GameDataPacket>packet).RecipientClientID === 2147483646n) {
-                    connection.send("RemovePlayer", {
-                        RoomCode: this.code,
-                        PlayerClientID: 2147483646,
-                        HostClientID: this.host.ID,
-                        DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
+                if (packet.RecipientClientID && packet.RecipientClientID === 2147483646n) {
+                    connection.send({
+                      type: 'RemovePlayer',
+                      RoomCode: this.code,
+                      PlayerClientID: 2147483646n,
+                      HostClientID: this.host.ID,
+                      DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
                     })
                     break;
                 }
-                if ((<GameDataPacket>packet).RecipientClientID) {
-                    this.connections.filter(conn => BigInt(conn.ID) == (<GameDataPacket>packet).RecipientClientID).forEach(recipient => {
+                if (packet.RecipientClientID) {
+                    this.connections.filter(conn => BigInt(conn.ID) == packet.RecipientClientID).forEach(recipient => {
                         // @ts-ignore
                         recipient.send(packet.type, packet)
                     })
                 }
-                (<GameDataPacket>packet).Packets.forEach(GDPacket => {
+                packet.Packets.forEach(GDPacket => {
                     //console.log(GDPacket)
 					// @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
@@ -122,11 +122,12 @@ class Room extends EventEmitter {
     handleNewConnection(connection: Connection) {
         if(!this.host) connection.player.isHost = true;
         this.connections.forEach(conn => {
-            conn.send("PlayerJoinedGame", {
-                RoomCode: this.code,
-                PlayerClientID: connection.ID,
-                HostClientID: this.host.ID
-            })
+          conn.send({
+            type: 'PlayerJoinedGame',
+            RoomCode: this.code,
+            PlayerClientID: connection.ID,
+            HostClientID: this.host.ID
+          })
         })
         this.connections.push(connection);
     }

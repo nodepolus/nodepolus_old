@@ -2,6 +2,7 @@ import RoomCode from "../PacketElements/RoomCode.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 
 export interface JoinGamePacket {
+  type: 'JoinGame',
 	RoomCode: string,
 	MapOwnership: number
 }
@@ -9,6 +10,7 @@ export interface JoinGamePacket {
 export default class JoinGame {
 	parse(packet: PolusBuffer): JoinGamePacket {
 		return {
+      type: 'JoinGame',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			MapOwnership: packet.readU8()
 		};

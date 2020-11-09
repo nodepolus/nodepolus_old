@@ -20,7 +20,7 @@ export default class Connection extends EventEmitter{
     player: Player;
     nonce: number = 1;
     private inGroup:boolean;
-    private groupArr: ({type: string, packet: UnreliablePacketPacket})[] = [];
+    private groupArr: UnreliablePacketPacket[] = [];
     private packetGroupReliability: PacketType;
     unacknowledgedPackets: Map<number, number> = new Map();
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
@@ -103,22 +103,22 @@ export default class Connection extends EventEmitter{
             }, 1000)
         }
     }
-    public send(type: string, packet: UnreliablePacketPacket) {
+    public send(packet: UnreliablePacketPacket) {
         if(!this.inGroup) {
             this.startPacketGroup();
-            this.groupArr.push({type, packet})
+            this.groupArr.push(packet)
             this.endPacketGroup();
         } else {
-            this.groupArr.push({ type, packet })
+            this.groupArr.push(packet)
         }
     }
     public sendUnreliable(type: string, packet: UnreliablePacketPacket) {
         if (!this.inGroup) {
             this.startUnreliablePacketGroup();
-            this.groupArr.push({ type, packet })
+            this.groupArr.push(packet)
             this.endPacketGroup();
         } else {
-            this.groupArr.push({ type, packet })
+            this.groupArr.push(packet)
         }
     }
     public startPacketGroup() {
@@ -133,9 +133,7 @@ export default class Connection extends EventEmitter{
         this.inGroup = false;
         if(this.groupArr.length > 0) {
             this.write(PacketType.ReliablePacket, {
-                Packets: this.groupArr.map(i => {
-                    return {type: i.type, ...i.packet}
-                })
+                Packets: this.groupArr
             })
         }
         this.groupArr = [];
@@ -162,15 +160,20 @@ export default class Connection extends EventEmitter{
         this.player.room = room;
         room.handleNewConnection(this);
         this.startPacketGroup();
-        this.send("JoinedGame", {
-            RoomCode: room.code,
-            PlayerClientID: this.ID,
-            HostClientID: room.host.ID,
-            OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID))
+        this.send({
+          type: 'JoinedGame',
+          RoomCode: room.code,
+          PlayerClientID: this.ID,
+          HostClientID: room.host.ID,
+          OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID)),
+          PlayerCount: 0n // TODO: this was missing?
         })
-        this.send("SetGameCode", {
-            RoomCode: room.code
+
+        this.send({
+          type: 'SetGameCode',
+          RoomCode: room.code
         })
+
         this.endPacketGroup();
         // if(room.host.ID == this.ID) {
         //     this.startPacketGroup();

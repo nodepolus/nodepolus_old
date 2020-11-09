@@ -1,13 +1,8 @@
 import { Socket, createSocket, RemoteInfo } from "dgram";
 import { EventEmitter } from "events";
 import Room from "./util/Room.js";
-import Packet, { ParsedPacket } from "./packets/Packet.js";
 import Connection from "./util/Connection.js";
 import { Packet as Subpacket } from "./packets/UnreliablePacket.js";
-import { GameCreatePacket } from "./packets/Subpackets/GameCreate.js";
-import { JoinedGamePacket } from "./packets/Subpackets/JoinedGame.js";
-import { SetGameCodePacket } from "./packets/Subpackets/SetGameCode.js";
-import { JoinGamePacket } from "./packets/Subpackets/JoinGame.js";
 import { addr2str } from "./util/misc.js";
 
 class Server extends EventEmitter {
@@ -23,38 +18,48 @@ class Server extends EventEmitter {
         this.sock = createSocket("udp4");
         this.sock.on("listening", () => this.emit("listening", this.port));
         this.sock.on("message", (msg, remote) => {
-            //console.log(`${addr2str(remote)} ==> S`, msg.toString('hex'))
-            if(!this.clientConnectionMap.has(addr2str(remote))) {
-                this.buildConnection(remote);
-            }
-            this.clientConnectionMap.get(addr2str(remote)).emit("message", msg);
+          const connection = this.getConnection(remote);
+          connection.emit("message", msg);
         });
         this.sock.bind(this.port);
     }
     private handlePacket(packet: Subpacket, connection: Connection){
-        // @ts-ignore
         switch(packet.type) {
-            case 'GameCreate':
+            case 'GameCreate': {
                 let room = new Room(this);
-                room.settings = (<GameCreatePacket>packet).RoomSettings
+                room.settings = packet.RoomSettings;
                 this.emit("roomCreated", room);
                 this.rooms.set(room.code, room);
-                connection.send("SetGameCode", <SetGameCodePacket>{
-                    RoomCode: room.code
+                connection.send({
+                  type: 'SetGameCode',
+                  RoomCode: room.code
                 });
                 break;
-            case 'JoinGame':
-                if(this.rooms.has((<JoinGamePacket>packet).RoomCode)) {
-                    connection.moveRoom(this.rooms.get((<JoinGamePacket>packet).RoomCode))
-                } else {
-                    connection.disconnect()
-                }
-                break;
-            default:    
-                connection.player.room.handlePacket(packet, connection);
+            }
+            case 'JoinGame': {
+              const room = this.rooms.get(packet.RoomCode);
+
+              if (room) {
+                connection.moveRoom(room);
+              } else {
+                connection.disconnect();
+              }
+
+              break;
+            }
+            default: {
+              connection.player?.room?.handlePacket(packet, connection);
+            }
         }
     }
-    private buildConnection(remote:RemoteInfo) {
+
+    private getConnection (remote: RemoteInfo): Connection {
+      let connection = this.clientConnectionMap.get(addr2str(remote));
+      if (!connection) connection = this.buildConnection(remote);
+      return connection
+    }
+
+    private buildConnection(remote:RemoteInfo): Connection {
         let conn = new Connection(remote, this.sock, true, this.requestClientID())
         this.clientConnectionMap.set(addr2str(remote), conn);
         conn.on("packet", (packet: Subpacket) => {
@@ -63,6 +68,7 @@ class Server extends EventEmitter {
         conn.on("closed", () => {
             this.clientConnectionMap.delete(addr2str(remote));
         })
+        return conn
     }
     private requestClientID() {
         let i = this.clientIDIncrementer;
