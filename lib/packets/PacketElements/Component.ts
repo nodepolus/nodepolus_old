@@ -4,7 +4,8 @@ import PolusBuffer from "../../util/PolusBuffer.js";
 import AmongUsMap from "../../data/enums/AmongUsMap.js";
 import { ObjectType } from "../Subpackets/GameDataPackets/Spawn.js";
 import StateByte, { StateByteInterface } from "./StateByte.js";
-import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData } from "./ComponentTypes.js";
+import DeconStateByte, { DeconStateByteInterface } from "./DeconStateByte.js";
+import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, DeconSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData } from "./ComponentTypes.js";
 import Vector2 from "./Vector2.js";
 
 function shallowEqual(object1: any, object2: any) {
@@ -284,7 +285,26 @@ SYSTEM_HANDLER.set(SystemType.Sabotage, {
 	}
 });
 
+SYSTEM_HANDLER.set(SystemType.Decontamination, {
+    read: (buf, rm) => {
+        return {
+            Timer: buf.readU8(),
+            State: DeconStateByte.parse(buf.readU8())
+        }
+    },
+    write: (obj: DeconSystem, buf, rm) => {
+        buf.writeU8(obj.Timer);
+        buf.writeU8(DeconStateByte.serialize(<DeconStateByteInterface>(<DeconSystem>obj).State));
+    },
+    check: (curr: DeconSystem, old: DeconSystem) => {
+        if (curr.Timer != old.Timer) return true
+        if (curr.State != old.State) return true
+        return false
+    }
+});
+
 SYSTEM_HANDLER.set(SystemType.Laboratory, SYSTEM_HANDLER.get(SystemType.Reactor));
+SYSTEM_HANDLER.set(SystemType.Decontamination2, SYSTEM_HANDLER.get(SystemType.Decontamination));
 
 const MAP_SYSTEM_ORDER = [
 	[
@@ -303,7 +323,8 @@ const MAP_SYSTEM_ORDER = [
 		SystemType.O2,
 		SystemType.Medbay,
 		SystemType.Communications,
-		SystemType.Sabotage
+        SystemType.Sabotage,
+        SystemType.Decontamination
 	],
 	[
 		SystemType.Electrical,
@@ -311,8 +332,10 @@ const MAP_SYSTEM_ORDER = [
 		SystemType.Security,
 		SystemType.Communications,
 		SystemType.Doors,
-		SystemType.Sabotage,
-		SystemType.Laboratory
+        SystemType.Sabotage,
+        SystemType.Decontamination,
+        SystemType.Laboratory,
+        SystemType.Decontamination2
 	]
 ]
 

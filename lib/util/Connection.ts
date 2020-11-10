@@ -43,10 +43,10 @@ export default class Connection extends EventEmitter{
                 console.log("RawParsed", parsed)
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
                 try {
-                    if (packet.Type != PacketType.UnreliablePacket)assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
+                    if (packet.Type != PacketType.UnreliablePacket)assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
                 } catch(err) {
-                    console.log(msg.toString('hex'))
-                    console.log(serialized.buf.toString('hex'))
+                    console.log("actual  ", serialized.buf.toString('hex'))
+                    console.log("expected", msg.toString('hex'))
                     console.log(err)
                 }
                 // console.log(util.inspect(parsed, {depth: Infinity}))
@@ -195,7 +195,7 @@ export default class Connection extends EventEmitter{
         //     })
         //     this.endPacketGroup();
         // }
-        // this.startPacketGroup(); 
+        // this.startPacketGroup();
         // this.send("JoinedGame", {
         //     RoomCode: room.code,
         //     PlayerClientID: this.ID,
