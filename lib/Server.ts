@@ -23,6 +23,11 @@ class Server extends EventEmitter {
         });
         this.sock.bind(this.port);
     }
+    public disconnect() {
+      this.sock.close(() => {
+        console.log(`server connection closed on port ${this.port}`)
+      })
+    }
     private handlePacket(packet: Subpacket, connection: Connection){
         switch(packet.type) {
             case 'GameCreate': {
