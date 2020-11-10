@@ -558,9 +558,9 @@ export default class Component{
 				case ObjectType.MeetingHud:
 					var num = 0;
 					for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
-						const current = (<MeetingHud>this.Data).players[i];
-						const historical = (<MeetingHud>this.old.Data).players[i];
-						i += 2**(shallowEqual(current, historical)?1:0);
+						if ((<MeetingHud>this.Data).players[i]) {
+							num |= 1 << i;
+						}
 					}
 					return num;
 			}
