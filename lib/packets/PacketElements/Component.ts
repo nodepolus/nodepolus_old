@@ -90,7 +90,7 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
 	}
 });
 
-/// *** Medbay *** ///
+/// *** Communications *** ///
 
 SYSTEM_HANDLER.set(SystemType.Communications, {
 	read: (buf, rm) => {
@@ -130,12 +130,14 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 	check: (curr: CommsSystem, old: CommsSystem) => {
 		if("IsSabotaged" in curr && "IsSabotaged" in old) {
 			// assume SimpleComsSystem
-			return curr.IsSabotaged == curr.IsSabotaged
+			return curr.IsSabotaged != curr.IsSabotaged
 		} else {
 			// assume MiraComsSystem
 			if (!arraysEqual((<MiraCommsSystem>curr).ActiveConsoles.flat(), (<MiraCommsSystem>old).ActiveConsoles.flat())) return true
 			if (!arraysEqual((<MiraCommsSystem>curr).CompletedConsoles.flat(), (<MiraCommsSystem>old).CompletedConsoles.flat())) return true
 		}
+		
+		return false
 	}
 });
 
@@ -183,7 +185,6 @@ SYSTEM_HANDLER.set(SystemType.Reactor, {
 		for (let i = 0; i < entries.length; i++) {
 			const entry = entries[i];
 			buf.writeU8(entry[0])
-			buf.writeU8(entry[1])
 			buf.writeU8(entry[1])
 		}
 	},
@@ -252,9 +253,12 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
 				mask |= 2**(i)
 			}
 			maskBuf.writeVarInt(BigInt(mask));
-
-		}else for (let i = 0; i < obj.Doors.length; i++) {
-			buf.writeBoolean(obj.Doors[i]);
+			buf.writeBytes(maskBuf);
+			buf.writeBytes(doorBuf);
+		} else {
+			for (let i = 0; i < obj.Doors.length; i++) {
+				buf.writeBoolean(obj.Doors[i]);
+			}
 		}
 	},
 	check: (curr:DoorSystem, old:DoorSystem) => {
