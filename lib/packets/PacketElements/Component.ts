@@ -130,7 +130,7 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 	check: (curr: CommsSystem, old: CommsSystem) => {
 		if("IsSabotaged" in curr && "IsSabotaged" in old) {
 			// assume SimpleComsSystem
-			return curr.IsSabotaged != curr.IsSabotaged
+			return curr.IsSabotaged != old.IsSabotaged
 		} else {
 			// assume MiraComsSystem
 			if (!arraysEqual((<MiraCommsSystem>curr).ActiveConsoles.flat(), (<MiraCommsSystem>old).ActiveConsoles.flat())) return true
