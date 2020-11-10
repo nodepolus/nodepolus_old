@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
-import StateByte, { StateByteInterface } from "../../../PacketElements/StateByte.js";	
+import PolusBuffer from "../../../../util/PolusBuffer";
+import StateByte, { StateByteInterface } from "../../../PacketElements/StateByte";	
 
 export interface VotingCompletePacket {
 	StatesLength?: bigint;

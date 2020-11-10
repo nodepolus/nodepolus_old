@@ -1,18 +1,18 @@
 
 import { EventEmitter } from "events";
-import Packet, { ParsedPacket, PacketType, ParsedPacketData } from "../packets/Packet.js";
+import Packet, { ParsedPacket, PacketType, ParsedPacketData } from "../packets/Packet";
 import { RemoteInfo, Socket } from "dgram";
-import Player from "./Player.js"
-import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
-import PolusBuffer from "./PolusBuffer.js";
-import { HelloPacket } from "../packets/HelloPacket.js";
-import Room from "./Room.js";
-import { UnreliablePacket, Packet as UnreliablePacketPacket } from "../packets/UnreliablePacket.js";
+import Player from "./Player"
+import DisconnectReason from "../packets/PacketElements/DisconnectReason";
+import PolusBuffer from "./PolusBuffer";
+import { HelloPacket } from "../packets/HelloPacket";
+import Room from "./Room";
+import { UnreliablePacket, Packet as UnreliablePacketPacket } from "../packets/UnreliablePacket";
 // @ts-ignore
 import assert from "assert";
 // @ts-ignore
 import util from "util"
-import { GameDataPacketType } from "../packets/Subpackets/GameData.js";
+import { GameDataPacketType } from "../packets/Subpackets/GameData";
 
 let nullRoom = new Room(null);
 

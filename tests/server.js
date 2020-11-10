@@ -1,4 +1,4 @@
-import Server from "../dist/Server.js"
+import Server from "../dist/Server"
 
 const server = new Server(22023);
 

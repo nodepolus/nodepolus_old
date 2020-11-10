@@ -1,8 +1,8 @@
 import udp from 'udp-proxy';
 const { createServer } = udp;
-import Packet, { PacketType } from "../dist/packets/Packet.js";
-import Room from "../dist/util/Room.js";
-import PolusBuffer from "../dist/util/PolusBuffer.js";
+import Packet, { PacketType } from "../dist/packets/Packet";
+import Room from "../dist/util/Room";
+import PolusBuffer from "../dist/util/PolusBuffer";
 import assert from 'assert';
 
 const options = {

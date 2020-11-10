@@ -1,11 +1,11 @@
-import SystemType from "./SystemType.js";
-import Room from "../../util/Room.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
-import AmongUsMap from "../../data/enums/AmongUsMap.js";
-import { ObjectType } from "../Subpackets/GameDataPackets/Spawn.js";
-import StateByte, { StateByteInterface } from "./StateByte.js";
-import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData } from "./ComponentTypes.js";
-import Vector2 from "./Vector2.js";
+import SystemType from "./SystemType";
+import Room from "../../util/Room";
+import PolusBuffer from "../../util/PolusBuffer";
+import AmongUsMap from "../../data/enums/AmongUsMap";
+import { ObjectType } from "../Subpackets/GameDataPackets/Spawn";
+import StateByte, { StateByteInterface } from "./StateByte";
+import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData } from "./ComponentTypes";
+import Vector2 from "./Vector2";
 
 function shallowEqual(object1: any, object2: any) {
 	const keys1 = Object.keys(object1);

@@ -1,6 +1,6 @@
-import PolusBuffer from "../../util/PolusBuffer.js";
-import AmongUsMap from "../../data/enums/AmongUsMap.js";
-import Room from "../../util/Room.js";
+import PolusBuffer from "../../util/PolusBuffer";
+import AmongUsMap from "../../data/enums/AmongUsMap";
+import Room from "../../util/Room";
 
 export class RoomSettings {
 	Length: number;

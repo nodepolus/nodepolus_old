@@ -2,7 +2,7 @@
   "name": "nodepolus2",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index",
   "type": "module",
   "scripts": {
     "start": "npm-run-all --parallel watch:build watch:server --print-label",

@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
-import SystemType from "../../../PacketElements/SystemType.js"
+import PolusBuffer from "../../../../util/PolusBuffer";
+import SystemType from "../../../PacketElements/SystemType"
 
 export enum RepairAction {
 	Repaired = 0x01,

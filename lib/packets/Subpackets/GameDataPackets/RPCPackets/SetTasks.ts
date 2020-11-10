@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
+import PolusBuffer from "../../../../util/PolusBuffer";
 
 export interface SetTasksPacket {
 	PlayerID: number,

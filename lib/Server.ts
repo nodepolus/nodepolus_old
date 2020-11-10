@@ -1,9 +1,9 @@
 import { Socket, createSocket, RemoteInfo } from "dgram";
 import { EventEmitter } from "events";
-import Room from "./util/Room.js";
-import Connection from "./util/Connection.js";
-import { Packet as Subpacket } from "./packets/UnreliablePacket.js";
-import { addr2str } from "./util/misc.js";
+import Room from "./util/Room";
+import Connection from "./util/Connection";
+import { Packet as Subpacket } from "./packets/UnreliablePacket";
+import { addr2str } from "./util/misc";
 
 class Server extends EventEmitter {
     port: number;
@@ -53,7 +53,7 @@ class Server extends EventEmitter {
               break;
             }
             default: {
-              connection.player?.room?.handlePacket(packet, connection);
+              connection.player.room.handlePacket(packet, connection);
             }
         }
     }

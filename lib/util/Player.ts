@@ -1,10 +1,10 @@
 import { EventEmitter } from "events";
-import Room from "./Room.js";
-import Component from "../packets/PacketElements/Component.js";
-import Vector2 from "../packets/PacketElements/Vector2.js";
-import { PlayerColor, PlayerSkin, PlayerHat, PlayerPet, Vent } from "../data/enums/playerEnums.js";
-import Task from "./Task.js";
-import Connection from "./Connection.js";
+import Room from "./Room";
+import Component from "../packets/PacketElements/Component";
+import Vector2 from "../packets/PacketElements/Vector2";
+import { PlayerColor, PlayerSkin, PlayerHat, PlayerPet, Vent } from "../data/enums/playerEnums";
+import Task from "./Task";
+import Connection from "./Connection";
 
 export default class Player extends EventEmitter {
 	room?: Room;

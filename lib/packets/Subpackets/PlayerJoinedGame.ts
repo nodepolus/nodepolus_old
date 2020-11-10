@@ -1,5 +1,5 @@
-import RoomCode from "../PacketElements/RoomCode.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
+import RoomCode from "../PacketElements/RoomCode";
+import PolusBuffer from "../../util/PolusBuffer";
 
 export interface PlayerJoinedGamePacket {
   type: 'PlayerJoinedGame',

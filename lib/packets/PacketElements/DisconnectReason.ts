@@ -1,5 +1,5 @@
-import Room from "../../util/Room.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
+import Room from "../../util/Room";
+import PolusBuffer from "../../util/PolusBuffer";
 
 enum DisconnectReasons {
 	ExitGame = 0,
