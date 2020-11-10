@@ -295,7 +295,7 @@ export default class GameData {
 				buf.writeBytes(this.SetScannerPacketHandler.serialize(<SetScannerPacket>packet.Packet))
 				break;
 			case RPCPacketType.SendChatNote:
-				buf.writeBytes(this.SetScannerPacketHandler.serialize(<SetScannerPacket>packet.Packet))
+				buf.writeBytes(this.SendChatNotePacketHandler.serialize(<SendChatNotePacket>packet.Packet))
 				break;
 			case RPCPacketType.SetPet:
 				buf.writeBytes(this.SetPetPacketHandler.serialize(<SetPetPacket>packet.Packet))
