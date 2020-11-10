@@ -90,7 +90,7 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
 	}
 });
 
-/// *** Medbay *** ///
+/// *** Communications *** ///
 
 SYSTEM_HANDLER.set(SystemType.Communications, {
 	read: (buf, rm) => {
@@ -130,12 +130,14 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 	check: (curr: CommsSystem, old: CommsSystem) => {
 		if("IsSabotaged" in curr && "IsSabotaged" in old) {
 			// assume SimpleComsSystem
-			return curr.IsSabotaged == curr.IsSabotaged
+			return curr.IsSabotaged != old.IsSabotaged
 		} else {
 			// assume MiraComsSystem
 			if (!arraysEqual((<MiraCommsSystem>curr).ActiveConsoles.flat(), (<MiraCommsSystem>old).ActiveConsoles.flat())) return true
 			if (!arraysEqual((<MiraCommsSystem>curr).CompletedConsoles.flat(), (<MiraCommsSystem>old).CompletedConsoles.flat())) return true
 		}
+		
+		return false
 	}
 });
 
@@ -183,7 +185,6 @@ SYSTEM_HANDLER.set(SystemType.Reactor, {
 		for (let i = 0; i < entries.length; i++) {
 			const entry = entries[i];
 			buf.writeU8(entry[0])
-			buf.writeU8(entry[1])
 			buf.writeU8(entry[1])
 		}
 	},
@@ -252,9 +253,12 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
 				mask |= 2**(i)
 			}
 			maskBuf.writeVarInt(BigInt(mask));
-
-		}else for (let i = 0; i < obj.Doors.length; i++) {
-			buf.writeBoolean(obj.Doors[i]);
+			buf.writeBytes(maskBuf);
+			buf.writeBytes(doorBuf);
+		} else {
+			for (let i = 0; i < obj.Doors.length; i++) {
+				buf.writeBoolean(obj.Doors[i]);
+			}
 		}
 	},
 	check: (curr:DoorSystem, old:DoorSystem) => {
@@ -424,8 +428,16 @@ export default class Component{
 				break;
 			case ObjectType.MeetingHud:
 				const mh: MeetingHud = {players: []};
+				let mask
+				
+				if (!spawn) {
+					mask = Number(pb.readVarInt())
+				}
+				
 				for (let i = 0; i < this.length; i++) {
-					mh.players[i] = StateByte.parse(pb.readU8());
+					if (spawn || (mask & (1 << i)) != 0) {
+						mh.players[i] = StateByte.parse(pb.readU8());
+					}
 				}
 				this.Data = mh;
 				break;
@@ -523,8 +535,13 @@ export default class Component{
 				break;
 			case ObjectType.MeetingHud:
 				let dirtyBits = this.calculateDirtyBits()
+				
+				if (!spawn) {
+					pb.writeVarInt(BigInt(dirtyBits))
+				}
+				
 				for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
-					if((Number(dirtyBits) & (1 << i)) != 0) {
+					if(spawn || (Number(dirtyBits) & (1 << i)) != 0) {
 						pb.writeU8(StateByte.serialize(<StateByteInterface>(<MeetingHud>this.Data).players[i]));
 					}
 				}
@@ -554,9 +571,9 @@ export default class Component{
 				case ObjectType.MeetingHud:
 					var num = 0;
 					for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
-						const current = (<MeetingHud>this.Data).players[i];
-						const historical = (<MeetingHud>this.old.Data).players[i];
-						i += 2**(shallowEqual(current, historical)?1:0);
+						if ((<MeetingHud>this.Data).players[i]) {
+							num |= 1 << i;
+						}
 					}
 					return num;
 			}
