@@ -93,6 +93,8 @@ class Room extends EventEmitter {
                         // @ts-ignore
                         recipient.send(packet)
                     })
+                    
+                    break;
                 }
                 packet.Packets.forEach(GDPacket => {
                     //console.log(GDPacket)
