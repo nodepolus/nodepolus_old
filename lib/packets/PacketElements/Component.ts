@@ -428,8 +428,16 @@ export default class Component{
 				break;
 			case ObjectType.MeetingHud:
 				const mh: MeetingHud = {players: []};
+				let mask
+				
+				if (!spawn) {
+					mask = Number(pb.readVarInt())
+				}
+				
 				for (let i = 0; i < this.length; i++) {
-					mh.players[i] = StateByte.parse(pb.readU8());
+					if (spawn || (mask & (1 << i)) != 0) {
+						mh.players[i] = StateByte.parse(pb.readU8());
+					}
 				}
 				this.Data = mh;
 				break;
@@ -527,8 +535,13 @@ export default class Component{
 				break;
 			case ObjectType.MeetingHud:
 				let dirtyBits = this.calculateDirtyBits()
+				
+				if (!spawn) {
+					pb.writeVarInt(BigInt(dirtyBits))
+				}
+				
 				for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
-					if((Number(dirtyBits) & (1 << i)) != 0) {
+					if(spawn || (Number(dirtyBits) & (1 << i)) != 0) {
 						pb.writeU8(StateByte.serialize(<StateByteInterface>(<MeetingHud>this.Data).players[i]));
 					}
 				}
