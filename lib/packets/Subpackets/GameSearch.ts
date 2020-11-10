@@ -1,12 +1,13 @@
-import PolusBuffer from "../../util/PolusBuffer.js";
-import RoomSettings from "../PacketElements/RoomSettings.js";
+import PolusBuffer from '../../util/PolusBuffer'
+import RoomSettings from '../PacketElements/RoomSettings'
+import { SubpacketClass } from './subpacket'
 
 export interface GameSearchPacket {
   type: 'GameSearch',
 	RoomSettings: RoomSettings;
 }
 
-export class GameSearch {
+export const GameSearch: SubpacketClass<GameSearchPacket> = {
 	parse(packet: PolusBuffer): GameSearchPacket {
 		var rs = new RoomSettings();
 		rs.parse(packet)
@@ -15,9 +16,9 @@ export class GameSearch {
 			RoomSettings: rs
 		}
 		return gameCreatePacket;
-	}
+	},
 
 	serialize(packet: GameSearchPacket): PolusBuffer {
 		return packet.RoomSettings.serialize();
-	};
+	}
 }

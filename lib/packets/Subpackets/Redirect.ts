@@ -1,4 +1,5 @@
-import PolusBuffer from "../../util/PolusBuffer.js";
+import PolusBuffer from '../../util/PolusBuffer'
+import { SubpacketClass } from './subpacket'
 
 export interface RedirectPacket {
   type: 'Redirect',
@@ -6,14 +7,14 @@ export interface RedirectPacket {
 	Port: number
 }
 
-export default class Redirect {
+export const Redirect: SubpacketClass<RedirectPacket> = {
 	parse(packet: PolusBuffer): RedirectPacket {
 		return {
       type: 'Redirect',
 			IP: ([packet.readU8(), packet.readU8(), packet.readU8(), packet.readU8()]).join("."),
 			Port: packet.readU16()
 		};
-	}
+	},
 
 	serialize(packet: RedirectPacket): PolusBuffer {
 		var buf = new PolusBuffer(12);

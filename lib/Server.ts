@@ -2,7 +2,8 @@ import { Socket, createSocket, RemoteInfo } from "dgram";
 import { EventEmitter } from "events";
 import Room from "./util/Room.js";
 import Connection from "./util/Connection.js";
-import { Packet as Subpacket } from "./packets/UnreliablePacket.js";
+
+import { SubPacket } from './packets/Subpackets/subpacket'
 import { addr2str } from "./util/misc.js";
 
 class Server extends EventEmitter {
@@ -23,7 +24,7 @@ class Server extends EventEmitter {
         });
         this.sock.bind(this.port);
     }
-    private handlePacket(packet: Subpacket, connection: Connection){
+    private handlePacket(packet: SubPacket, connection: Connection){
         switch(packet.type) {
             case 'GameCreate': {
                 let room = new Room(this);
@@ -62,7 +63,7 @@ class Server extends EventEmitter {
     private buildConnection(remote:RemoteInfo): Connection {
         let conn = new Connection(remote, this.sock, true, this.requestClientID())
         this.clientConnectionMap.set(addr2str(remote), conn);
-        conn.on("packet", (packet: Subpacket) => {
+        conn.on("packet", (packet: SubPacket) => {
             this.handlePacket(packet, conn)
         });
         conn.on("closed", () => {

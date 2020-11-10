@@ -11,10 +11,10 @@ export interface ReliablePacket {
 class Reliable {
 	constructor(private room: Room, private toServer: boolean) {}
 	UnreliablePacketHandler = new Unreliable(this.room, this.toServer)
-	parse(packet: PolusBuffer): ReliablePacket {
+	parse(packet: PolusBuffer, room: Room): ReliablePacket {
 		return {
 			Nonce: packet.readU16(true),
-			Data: this.UnreliablePacketHandler.parse(packet)
+			Data: this.UnreliablePacketHandler.parse(packet, room)
 		};
 	}
 	serialize(packet: ParsedPacket): PolusBuffer {

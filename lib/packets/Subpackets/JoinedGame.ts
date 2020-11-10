@@ -1,8 +1,9 @@
-import RoomCode from "../PacketElements/RoomCode.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
+import RoomCode from '../PacketElements/RoomCode'
+import PolusBuffer from '../../util/PolusBuffer'
+import { SubpacketClass } from './subpacket'
 
 export interface JoinedGamePacket {
-  	type: 'JoinedGame',
+  type: 'JoinedGame',
 	RoomCode: string,
 	PlayerClientID: number,
 	HostClientID: number,
@@ -10,7 +11,7 @@ export interface JoinedGamePacket {
 	OtherPlayers: bigint[]
 }
 
-export default class JoinedGame {
+export const JoinedGame: SubpacketClass<JoinedGamePacket> = {
 	parse(packet: PolusBuffer): JoinedGamePacket {
 		const baseObject:JoinedGamePacket = {
       type: 'JoinedGame',
@@ -24,7 +25,8 @@ export default class JoinedGame {
 			baseObject.OtherPlayers.push(packet.readVarInt());
 		}
 		return baseObject;
-	}
+  },
+
 	serialize(packet: JoinedGamePacket): PolusBuffer {
 		var buf = new PolusBuffer(12);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode))

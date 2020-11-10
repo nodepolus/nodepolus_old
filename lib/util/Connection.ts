@@ -1,3 +1,4 @@
+import * as assert from "assert"
 
 import { EventEmitter } from "events";
 import Packet, { ParsedPacket, PacketType, ParsedPacketData } from "../packets/Packet.js";
@@ -7,11 +8,11 @@ import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
 import PolusBuffer from "./PolusBuffer.js";
 import { HelloPacket } from "../packets/HelloPacket.js";
 import Room from "./Room.js";
-import { UnreliablePacket, Packet as UnreliablePacketPacket } from "../packets/UnreliablePacket.js";
-// @ts-ignore
-import assert from "assert";
-// @ts-ignore
-import util from "util"
+
+import { UnreliablePacket } from "../packets/UnreliablePacket.js";
+
+import { SubPacket } from '../packets/Subpackets/subpacket'
+
 import { GameDataPacketType } from "../packets/Subpackets/GameData.js";
 
 let nullRoom = new Room(null);
@@ -20,7 +21,7 @@ export default class Connection extends EventEmitter{
     player: Player;
     nonce: number = 1;
     private inGroup:boolean;
-    private groupArr: UnreliablePacketPacket[] = [];
+    private groupArr: SubPacket[] = [];
     private packetGroupReliability: PacketType;
     unacknowledgedPackets: Map<number, number> = new Map();
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
@@ -39,11 +40,12 @@ export default class Connection extends EventEmitter{
             this.player.room = nullRoom;
             this.on("message", (msg) => {
                 console.log(msg.toString('hex'))
-                const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
+                const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg), this.player.room);
                 console.log("RawParsed", parsed)
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
                 try {
-                    if (packet.Type != PacketType.UnreliablePacket)assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
+                    if (packet.Type !== PacketType.UnreliablePacket)
+                      assert.equal(msg.toString('hex'), serialized.buf.toString('hex'))
                 } catch(err) {
                     console.log(msg.toString('hex'))
                     console.log(serialized.buf.toString('hex'))
@@ -104,7 +106,7 @@ export default class Connection extends EventEmitter{
             }, 1000)
         }
     }
-    public send(packet: UnreliablePacketPacket) {
+    public send(packet: SubPacket) {
         if(!this.inGroup) {
             this.startPacketGroup();
             this.groupArr.push(packet)
@@ -113,7 +115,7 @@ export default class Connection extends EventEmitter{
             this.groupArr.push(packet)
         }
     }
-    public sendUnreliable(type: string, packet: UnreliablePacketPacket) {
+    public sendUnreliable(type: string, packet: SubPacket) {
         if (!this.inGroup) {
             this.startUnreliablePacketGroup();
             this.groupArr.push(packet)

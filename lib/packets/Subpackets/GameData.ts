@@ -9,6 +9,7 @@ import Ready, { ReadyPacket } from "./GameDataPackets/Ready.js";
 import SceneChange, { SceneChangePacket } from "./GameDataPackets/SceneChange.js";
 import Despawn, { DespawnPacket } from "./GameDataPackets/Despawn.js";
 import { IGameObject } from "../../util/GameObject.js";
+import { ParseOpts } from "./subpacket.js";
 
 export interface GameDataPacket {
   type: 'GameData',
@@ -27,21 +28,13 @@ export enum GameDataPacketType {
 }
 
 export default class GameData {
-	constructor(private room: Room, private toServer: boolean){}
-	DataPacketHandler = new Data(this.room);
-	RPCPacketHandler = new RPC();
-	SpawnPacketHandler = new Spawn(this.room);
-	DespawnPacketHandler = new Despawn();
-	SceneChangePacketHandler = new SceneChange();
-	ReadyPacketHandler = new Ready();
-
-	parse(packet: PolusBuffer, isGameDataTo: Boolean): GameDataPacket {
+	parse(packet: PolusBuffer, room: Room, opts?: ParseOpts): GameDataPacket {
 		let data: GameDataPacket = {
-      		type: 'GameData',
+      type: 'GameData',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			Packets: new Array()
 		};
-		if (isGameDataTo) {
+		if (opts?.isGameDataTo) {
 			data.RecipientClientID = packet.readVarInt();
 		}
 		while(packet.dataRemaining().length != 0) {

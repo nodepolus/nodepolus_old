@@ -39,14 +39,14 @@ export default class Packet {
      * 
      * @param {PolusBuffer} packet
      */
-    parse(packet: PolusBuffer): ParsedPacket {
+    parse(packet: PolusBuffer, room: Room): ParsedPacket {
         const packetType = packet.readU8();
         switch (packetType) {
             case PacketType.ReliablePacket:
-                return { Reliable: true, Type: PacketType.ReliablePacket, ...this.ReliablePacketHandler.parse(packet) };
+                return { Reliable: true, Type: PacketType.ReliablePacket, ...this.ReliablePacketHandler.parse(packet, room) };
 
             case PacketType.UnreliablePacket:
-                return { Reliable: false, Type: PacketType.UnreliablePacket, Data: this.UnreliablePacketHandler.parse(packet) };
+                return { Reliable: false, Type: PacketType.UnreliablePacket, Data: this.UnreliablePacketHandler.parse(packet, room) };
 
             case PacketType.HelloPacket:
                 return { Reliable: true, Type: PacketType.HelloPacket, ...this.HelloPacketHandler.parse(packet) };

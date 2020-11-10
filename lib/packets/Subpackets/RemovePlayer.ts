@@ -1,7 +1,8 @@
-import DisconnectReason from "../PacketElements/DisconnectReason.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
-import RoomCode from "../PacketElements/RoomCode.js"
-import Room from "../../util/Room.js";
+import DisconnectReason from '../PacketElements/DisconnectReason'
+import PolusBuffer from '../../util/PolusBuffer'
+import RoomCode from '../PacketElements/RoomCode'
+import Room from '../../util/Room'
+import { SubpacketClass } from './subpacket'
 
 export interface RemovePlayerPacket {
   type: 'RemovePlayer',
@@ -11,9 +12,8 @@ export interface RemovePlayerPacket {
 	DisconnectReason: DisconnectReason
 }
 
-class RemovePlayer {
-	constructor(public room: Room) {}
-	parse(packet: PolusBuffer): RemovePlayerPacket {
+export const RemovePlayer: SubpacketClass<RemovePlayerPacket> = {
+	parse(packet: PolusBuffer, room: Room): RemovePlayerPacket {
 		let roomCode = RoomCode.intToString(packet.read32())
 		let PlayerClientID = packet.readVarInt()
 		let HostClientID;
@@ -25,9 +25,10 @@ class RemovePlayer {
 			RoomCode: roomCode,
 			PlayerClientID,
 			HostClientID,
-			DisconnectReason: new DisconnectReason(packet, this.room)
+			DisconnectReason: new DisconnectReason(packet, room)
 		};
-	}
+  },
+
 	serialize(packet: RemovePlayerPacket) {
 		var buf = new PolusBuffer(12);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
@@ -39,5 +40,3 @@ class RemovePlayer {
 		return buf;
 	}
 }
-
-export default RemovePlayer;

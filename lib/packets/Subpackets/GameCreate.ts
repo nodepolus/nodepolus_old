@@ -1,23 +1,25 @@
-import PolusBuffer from "../../util/PolusBuffer.js";
-import RoomSettings from "../PacketElements/RoomSettings.js";
+import { SubpacketClass, SubPacketType } from './subpacket'
+
+import PolusBuffer from '../../util/PolusBuffer'
+import RoomSettings from '../PacketElements/RoomSettings'
 
 export interface GameCreatePacket {
-  type: 'GameCreate',
+  type: SubPacketType.GameCreate,
 	RoomSettings: RoomSettings;
 }
 
-export default class GameCreate {
-	parse(packet: PolusBuffer): GameCreatePacket {
+export const GameCreate: SubpacketClass<GameCreatePacket> = {
+  parse(packet: PolusBuffer): GameCreatePacket {
 		var rs = new RoomSettings();
 		rs.parse(packet)
 		const gameCreatePacket: GameCreatePacket = {
-      type: 'GameCreate',
+      type: SubPacketType.GameCreate,
 			RoomSettings: rs
 		}
 		return gameCreatePacket;
-	}
+	},
 
 	serialize(packet: GameCreatePacket): PolusBuffer {
 		return packet.RoomSettings.serialize();
-	};
+	}
 }
