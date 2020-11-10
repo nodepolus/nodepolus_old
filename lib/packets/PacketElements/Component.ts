@@ -24,7 +24,7 @@ function shallowEqual(object1: any, object2: any) {
 	return true;
 }
 
-//stolen from SO 
+//stolen from SO
 function arraysEqual(a: any[], b: any[]) {
 	if (a === b) return true;
 	if (a == null || b == null) return false;
@@ -64,7 +64,7 @@ SYSTEM_HANDLER.set(SystemType.Electrical, {
 		if(obj.Value !== old.Value) return true;
 		if (!arraysEqual(obj.ExpectedSwitches, old.ExpectedSwitches))return true;
 		return !arraysEqual(obj.ActualSwitches, old.ActualSwitches);
-		
+
 	}
 })
 
@@ -136,7 +136,7 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 			if (!arraysEqual((<MiraCommsSystem>curr).ActiveConsoles.flat(), (<MiraCommsSystem>old).ActiveConsoles.flat())) return true
 			if (!arraysEqual((<MiraCommsSystem>curr).CompletedConsoles.flat(), (<MiraCommsSystem>old).CompletedConsoles.flat())) return true
 		}
-		
+
 		return false
 	}
 });
@@ -249,8 +249,10 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
 			let doorBuf = new PolusBuffer();
 			let mask = 0;
 			for (let i = 0; i < obj.Doors.length; i++) {
-				doorBuf.writeBoolean(obj.Doors[i]);
-				mask |= 2**(i)
+                if (typeof obj.Doors[i] !== "undefined") {
+                    doorBuf.writeBoolean(obj.Doors[i]);
+                    mask |= 1 << i
+                }
 			}
 			maskBuf.writeVarInt(BigInt(mask));
 			buf.writeBytes(maskBuf);
@@ -296,20 +298,20 @@ const MAP_SYSTEM_ORDER = [
 		SystemType.Sabotage
 	],
 	[
-		SystemType.Reactor, 
-		SystemType.Electrical, 
+		SystemType.Reactor,
+		SystemType.Electrical,
 		SystemType.O2,
-		SystemType.Medbay, 
-		SystemType.Communications, 
+		SystemType.Medbay,
+		SystemType.Communications,
 		SystemType.Sabotage
 	],
 	[
-		SystemType.Electrical, 
-		SystemType.Medbay, 
-		SystemType.Security, 
-		SystemType.Communications, 
-		SystemType.Doors, 
-		SystemType.Sabotage, 
+		SystemType.Electrical,
+		SystemType.Medbay,
+		SystemType.Security,
+		SystemType.Communications,
+		SystemType.Doors,
+		SystemType.Sabotage,
 		SystemType.Laboratory
 	]
 ]
@@ -323,7 +325,7 @@ export default class Component{
 	//if old, not spawn!
 
 	constructor (private spawnId: bigint, public index: number, public room: Room) {}
-	
+
 	private readData(pb: PolusBuffer) {
 		const spawn = !(this.old && this.old.Data);
 		switch (Number(this.spawnId)){
@@ -341,12 +343,13 @@ export default class Component{
 				if (spawn){
 					for (let k of mapOrder){
 						(<ShipStatus>this.Data).systems[k] = {
-							system: k, 
+							system: k,
 							data: SYSTEM_HANDLER.get(k).read(pb, this.room, true)
 						};
 					}
 				}else {
-					const mask = Number(pb.readVarInt());
+                    const mask = Number(pb.readVarInt());
+                    (<ShipStatus>this.Data).mask = mask;
 					for (let k of mapOrder){
 						if ((mask & (1<<k)) != 0){
 							(<ShipStatus>this.Data).systems[k] = {
@@ -429,11 +432,11 @@ export default class Component{
 			case ObjectType.MeetingHud:
 				const mh: MeetingHud = {players: []};
 				let mask
-				
+
 				if (!spawn) {
 					mask = Number(pb.readVarInt())
 				}
-				
+
 				for (let i = 0; i < this.length; i++) {
 					if (spawn || (mask & (1 << i)) != 0) {
 						mh.players[i] = StateByte.parse(pb.readU8());
@@ -462,23 +465,19 @@ export default class Component{
 						let data = (<ShipStatus>this.Data).systems[k];
 						SYSTEM_HANDLER.get(data.system).write(data.data, pb, this.room, true);
 					}
-				}else {
-					let i=0;
-					let mask = 0;
-					let buffers: PolusBuffer[] = [new PolusBuffer()];
-					for (let k of mapOrder){
-						console.log("IMPORTANT!!LMAO", k);
-						console.log(this.Data)
-						// console.trace((<ShipStatus>this.Data).systems[k].data, (<ShipStatus>this.old.Data).systems[k].data)
-						// console.log(SYSTEM_HANDLER.get(k).check((<ShipStatus>this.Data).systems[k].data, (<ShipStatus>this.old.Data).systems[k].data))
-						// if (SYSTEM_HANDLER.get(k).check((<ShipStatus>this.Data).systems[k].data, (<ShipStatus>this.old.Data).systems[k].data)){
-							let data = (<ShipStatus>this.Data).systems[k];
+				} else {
+                    let mask = (<ShipStatus>this.Data).mask;
+                    let buffers: PolusBuffer[] = [new PolusBuffer()];
+
+                    for (let k of mapOrder) {
+                        if ((Number(mask) & (1 << k)) != 0) {
+                            let data = (<ShipStatus>this.Data).systems[k];
 							let buf = new PolusBuffer();
 							SYSTEM_HANDLER.get(k).write(data.data, buf, this.room, false, (<ShipStatus>this.old.Data).systems[k].data)
 							buffers.push(buf);
-							mask |= 1 << k;
-						// }
-					}
+                        }
+                    }
+
 					buffers[0].writeVarInt(BigInt(mask));
 					pb.writeBytes(PolusBuffer.concat(...buffers));
 				}
@@ -519,7 +518,7 @@ export default class Component{
 							pb.writeVarInt(task.TaskID)
 							pb.writeBoolean(task.TaskCompleted)
 						}
-					})	
+					})
 				}
 				if(this.index == 1) {
 					//@ts-ignore
@@ -535,11 +534,11 @@ export default class Component{
 				break;
 			case ObjectType.MeetingHud:
 				let dirtyBits = this.calculateDirtyBits()
-				
+
 				if (!spawn) {
 					pb.writeVarInt(BigInt(dirtyBits))
 				}
-				
+
 				for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
 					if(spawn || (Number(dirtyBits) & (1 << i)) != 0) {
 						pb.writeU8(StateByte.serialize(<StateByteInterface>(<MeetingHud>this.Data).players[i]));
