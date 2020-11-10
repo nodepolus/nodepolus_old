@@ -12,6 +12,13 @@ export enum OpenAction {
 	Unchanged = 0x02
 }
 
+export enum DecontaminationAction {
+    HeadInsideNeedsDecontaminated = 0x01,
+    HeadOutsideNeedsDecontaminated = 0x02,
+    HeadInsideAlreadyDecontaminated = 0x03,
+    HeadOutsideAlreadyDecontaminated = 0x04
+}
+
 export interface RepairLightsAmount {
 	switchFlipped: number
 }
@@ -19,7 +26,7 @@ export interface RepairLightsAmount {
 export interface QueueMedbayScan {
 	playerID: number,
 	isQueuedForScan: boolean,
-	hasLeftQueue: boolean 
+	hasLeftQueue: boolean
 }
 
 export interface RepairO2Amount {
@@ -53,10 +60,14 @@ export interface RepairCommunicationsAmount {
 	isOpen?: OpenAction,
 }
 
+export interface DecontaminationAmount {
+    action: DecontaminationAction
+}
+
 export interface RepairSystemPacket {
 	System: SystemType,
 	RepairerNetID: bigint,
-	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | RepairCommunicationsAmount
+	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | RepairCommunicationsAmount | DecontaminationAmount
 }
 
 export default class RepairSystem {
@@ -132,7 +143,14 @@ export default class RepairSystem {
 					isRepaired: (amount & 0b10000000) == 0,
 					action:    ((amount & 0b00010000) != 0)?1:0,
 					isOpen: temp,
-				}
+                }
+                break;
+            case SystemType.Decontamination:
+            case SystemType.Decontamination2:
+                data.RepairAmount = {
+                    action: amount,
+                }
+                break;
 		}
 		return data;
 	}
@@ -192,8 +210,12 @@ export default class RepairSystem {
 				retInteger += (<RepairReactorAmount>packet.RepairAmount).consoleNum & 0b00000011;
 				buf.writeU8(retInteger);
 				break;
+            case SystemType.Decontamination:
+            case SystemType.Decontamination2:
+                buf.writeU8((<DecontaminationAmount>packet.RepairAmount).action);
+                break;
 			default:
-				throw new Error("RepairSystem Error: " + packet.System + " is not a valid system")	
+				throw new Error("RepairSystem Error: " + packet.System + " is not a valid system")
 
 		}
 		return buf;
