@@ -271,7 +271,7 @@ export default class GameData {
 				buf.writeBytes(this.CheckColorPacketHandler.serialize(<CheckColorPacket>packet.Packet))
 				break;
 			case RPCPacketType.SetColor:
-				buf.writeBytes(this.CheckColorPacketHandler.serialize(<SetColorPacket>packet.Packet))
+				buf.writeBytes(this.SetColorPacketHandler.serialize(<SetColorPacket>packet.Packet))
 				break;
 			case RPCPacketType.SetHat:
 				buf.writeBytes(this.SetHatPacketHandler.serialize(<SetHatPacket>packet.Packet))
