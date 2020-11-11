@@ -14,8 +14,8 @@ export default class Vector2 {
 	}
 	serialize():PolusBuffer {
 		var buf = new PolusBuffer(4);
-		buf.writeU16(Math.ceil(this.unlerp(-40, 40, this.X) * 65535));
-		buf.writeU16(Math.ceil(this.unlerp(-40, 40, this.Y) * 65535));
+		buf.writeU16(this.unlerp(-40, 40, this.X) * 65535.0);
+		buf.writeU16(this.unlerp(-40, 40, this.Y) * 65535.0);
 		return buf;
 	}
 	private lerp(min: number, max: number, value: number):number {

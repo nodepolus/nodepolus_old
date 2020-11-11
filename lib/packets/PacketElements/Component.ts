@@ -4,7 +4,8 @@ import PolusBuffer from "../../util/PolusBuffer.js";
 import AmongUsMap from "../../data/enums/AmongUsMap.js";
 import { ObjectType } from "../Subpackets/GameDataPackets/Spawn.js";
 import StateByte, { StateByteInterface } from "./StateByte.js";
-import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData } from "./ComponentTypes.js";
+import DeconStateByte, { DeconStateByteInterface } from "./DeconStateByte.js";
+import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, DeconSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData, PolusDoorSystem } from "./ComponentTypes.js";
 import Vector2 from "./Vector2.js";
 
 function shallowEqual(object1: any, object2: any) {
@@ -24,7 +25,7 @@ function shallowEqual(object1: any, object2: any) {
 	return true;
 }
 
-//stolen from SO 
+//stolen from SO
 function arraysEqual(a: any[], b: any[]) {
 	if (a === b) return true;
 	if (a == null || b == null) return false;
@@ -64,7 +65,7 @@ SYSTEM_HANDLER.set(SystemType.Electrical, {
 		if(obj.Value !== old.Value) return true;
 		if (!arraysEqual(obj.ExpectedSwitches, old.ExpectedSwitches))return true;
 		return !arraysEqual(obj.ActualSwitches, old.ActualSwitches);
-		
+
 	}
 })
 
@@ -95,14 +96,21 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
 SYSTEM_HANDLER.set(SystemType.Communications, {
 	read: (buf, rm) => {
 		if (rm.settings.Map == AmongUsMap.MIRA_HQ) {
-			let length = Number(buf.readVarInt());
-			const active = [];
-			for (let i = 0; i < length; i++)active.push([buf.readU8(), buf.readU8()]);
-			length = Number(buf.readVarInt());
-			const completed = [];
-			for (let i = 0; i < length; i++)completed.push(buf.readU8());
+            let pairsLength = Number(buf.readVarInt());
+            let userConsolePairs: number[][] = [];
+
+            for (let i = 0; i < pairsLength; i++) {
+                userConsolePairs.push([buf.readU8(), buf.readU8()]);
+            }
+
+            let completedLength = Number(buf.readVarInt());
+            let completed: number[] = [];
+
+            for (let i = 0; i < completedLength; i++) {
+                completed[i] = buf.readU8();
+            }
 			return {
-				ActiveConsoles: active,
+				ActiveConsoles: userConsolePairs,
 				CompletedConsoles: completed
 			}
 		} else {
@@ -136,7 +144,7 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 			if (!arraysEqual((<MiraCommsSystem>curr).ActiveConsoles.flat(), (<MiraCommsSystem>old).ActiveConsoles.flat())) return true
 			if (!arraysEqual((<MiraCommsSystem>curr).CompletedConsoles.flat(), (<MiraCommsSystem>old).CompletedConsoles.flat())) return true
 		}
-		
+
 		return false
 	}
 });
@@ -220,7 +228,7 @@ SYSTEM_HANDLER.set(SystemType.O2, {
 		}
 	},
 	check: (curr:O2System, old:O2System) => {
-		if(curr.Countdown != old.Countdown) return true;
+        if(curr.Countdown != old.Countdown) return true;
 		return !arraysEqual(curr.Consoles, old.Consoles);
 	}
 });
@@ -230,38 +238,73 @@ SYSTEM_HANDLER.set(SystemType.O2, {
 export const SYSTEM_DOOR_COUNT = [13, 0, 12];
 SYSTEM_HANDLER.set(SystemType.Doors, {
 	read: (buf, rm, spawn) => {
-		let doors = [];
-		let length = SYSTEM_DOOR_COUNT[rm.settings.Map];
-		let mask;
-		if (!spawn) {
-			mask = Number(buf.readVarInt());
-		}
-		for (let i = 0; i < length; i++) {
-			if (spawn || (mask & (1 << i)) !== 0) doors[i] = buf.readBoolean();
-		}
-		return {
-			Doors: doors
-		}
+        if (rm.settings.Map == AmongUsMap.POLUS) {
+            console.log("FUCK READING POLUS DOORS", buf.buf.toString("hex"))
+            let timerLength = buf.readU8();
+            let timers: Map<number, number> = new Map();
+            for (let i = 0; i < timerLength; i++) {
+                timers.set(buf.readU8(), buf.readFloat32());
+            }
+            let doors: boolean[] = [];
+
+            // 12 manual doors + 4 decontamination doors
+            for (let i = 0; i < 16; i++) {
+                doors[i] = buf.readBoolean();
+            }
+
+            return {
+                Timers: timers,
+                Doors: doors
+            }
+        } else {
+            let doors = [];
+            let length = SYSTEM_DOOR_COUNT[rm.settings.Map];
+            let mask;
+            if (!spawn) {
+                mask = Number(buf.readVarInt());
+            }
+            for (let i = 0; i < length; i++) {
+                if (spawn || (mask & (1 << i)) !== 0) doors[i] = buf.readBoolean();
+            }
+            return {
+                Doors: doors
+            }
+        }
 	},
-	write: (obj: DoorSystem, buf: PolusBuffer, rm: Room, spawn: boolean, old: DoorSystem) => {
-		if (!spawn) {
-			let maskBuf = new PolusBuffer();
-			let doorBuf = new PolusBuffer();
-			let mask = 0;
-			for (let i = 0; i < obj.Doors.length; i++) {
-				doorBuf.writeBoolean(obj.Doors[i]);
-				mask |= 2**(i)
-			}
-			maskBuf.writeVarInt(BigInt(mask));
-			buf.writeBytes(maskBuf);
-			buf.writeBytes(doorBuf);
-		} else {
-			for (let i = 0; i < obj.Doors.length; i++) {
-				buf.writeBoolean(obj.Doors[i]);
-			}
-		}
+	write: (obj: DoorSystem | PolusDoorSystem, buf: PolusBuffer, rm: Room, spawn: boolean, old: DoorSystem | PolusDoorSystem) => {
+        if (rm.settings.Map == AmongUsMap.POLUS) {
+            buf.writeU8((<PolusDoorSystem>obj).Timers.size);
+            for (let [system, timer] of (<PolusDoorSystem>obj).Timers) {
+                buf.writeU8(system);
+                buf.writeFloat32(timer);
+            }
+            for (let door of (<PolusDoorSystem>obj).Doors) {
+                buf.writeBoolean(door);
+            }
+
+            console.log("FUCK WRITING POLUS DOORS", buf.buf.toString("hex"))
+        } else {
+            if (!spawn) {
+                let maskBuf = new PolusBuffer();
+                let doorBuf = new PolusBuffer();
+                let mask = 0;
+                for (let i = 0; i < obj.Doors.length; i++) {
+                    if (typeof obj.Doors[i] !== "undefined") {
+                        doorBuf.writeBoolean(obj.Doors[i]);
+                        mask |= 1 << i
+                    }
+                }
+                maskBuf.writeVarInt(BigInt(mask));
+                buf.writeBytes(maskBuf);
+                buf.writeBytes(doorBuf);
+            } else {
+                for (let i = 0; i < obj.Doors.length; i++) {
+                    buf.writeBoolean(obj.Doors[i]);
+                }
+            }
+        }
 	},
-	check: (curr:DoorSystem, old:DoorSystem) => {
+	check: (curr:DoorSystem | PolusDoorSystem, old:DoorSystem | PolusDoorSystem) => {
 		return !arraysEqual(curr.Doors, old.Doors);
 	}
 });
@@ -282,7 +325,26 @@ SYSTEM_HANDLER.set(SystemType.Sabotage, {
 	}
 });
 
+SYSTEM_HANDLER.set(SystemType.Decontamination, {
+    read: (buf, rm) => {
+        return {
+            Timer: buf.readU8(),
+            State: DeconStateByte.parse(buf.readU8())
+        }
+    },
+    write: (obj: DeconSystem, buf, rm) => {
+        buf.writeU8(obj.Timer);
+        buf.writeU8(DeconStateByte.serialize(<DeconStateByteInterface>(<DeconSystem>obj).State));
+    },
+    check: (curr: DeconSystem, old: DeconSystem) => {
+        if (curr.Timer != old.Timer) return true
+        if (curr.State != old.State) return true
+        return false
+    }
+});
+
 SYSTEM_HANDLER.set(SystemType.Laboratory, SYSTEM_HANDLER.get(SystemType.Reactor));
+SYSTEM_HANDLER.set(SystemType.Decontamination2, SYSTEM_HANDLER.get(SystemType.Decontamination));
 
 const MAP_SYSTEM_ORDER = [
 	[
@@ -296,21 +358,24 @@ const MAP_SYSTEM_ORDER = [
 		SystemType.Sabotage
 	],
 	[
-		SystemType.Reactor, 
-		SystemType.Electrical, 
+		SystemType.Reactor,
+		SystemType.Electrical,
 		SystemType.O2,
-		SystemType.Medbay, 
-		SystemType.Communications, 
-		SystemType.Sabotage
+		SystemType.Medbay,
+		SystemType.Communications,
+        SystemType.Sabotage,
+        SystemType.Decontamination
 	],
 	[
-		SystemType.Electrical, 
-		SystemType.Medbay, 
-		SystemType.Security, 
-		SystemType.Communications, 
-		SystemType.Doors, 
-		SystemType.Sabotage, 
-		SystemType.Laboratory
+		SystemType.Electrical,
+		SystemType.Medbay,
+		SystemType.Security,
+		SystemType.Communications,
+		SystemType.Doors,
+        SystemType.Sabotage,
+        SystemType.Decontamination,
+        SystemType.Laboratory,
+        SystemType.Decontamination2
 	]
 ]
 
@@ -323,7 +388,7 @@ export default class Component{
 	//if old, not spawn!
 
 	constructor (private spawnId: bigint, public index: number, public room: Room) {}
-	
+
 	private readData(pb: PolusBuffer) {
 		const spawn = !(this.old && this.old.Data);
 		switch (Number(this.spawnId)){
@@ -332,7 +397,7 @@ export default class Component{
 			case ObjectType.PlanetMap:
 			case ObjectType.ShipStatus:
 				const mapOrder = MAP_SYSTEM_ORDER[this.room.settings.Map === 7 ? 0 : this.room.settings.Map];
-				const systems = Object.keys(SystemType).length/2;
+                const systems = Object.keys(SystemType).length/2;
 				if(!(<ShipStatus>this.Data)) {
 					this.Data = {
 						systems: []
@@ -340,13 +405,18 @@ export default class Component{
 				}
 				if (spawn){
 					for (let k of mapOrder){
+                        if (k == SystemType.Decontamination || k == SystemType.Decontamination2) {
+                            continue;
+                        }
 						(<ShipStatus>this.Data).systems[k] = {
-							system: k, 
+							system: k,
 							data: SYSTEM_HANDLER.get(k).read(pb, this.room, true)
-						};
+                        };
+                        console.log(`read ship system ${k}`, JSON.stringify((<ShipStatus>this.Data).systems[k]))
 					}
 				}else {
-					const mask = Number(pb.readVarInt());
+                    const mask = Number(pb.readVarInt());
+                    (<ShipStatus>this.Data).mask = mask;
 					for (let k of mapOrder){
 						if ((mask & (1<<k)) != 0){
 							(<ShipStatus>this.Data).systems[k] = {
@@ -373,7 +443,7 @@ export default class Component{
 				}
 				break;
 			case ObjectType.GameData:
-				console.log(pb)
+				// console.log(pb)
 				if (this.index === 0) {
 					let PlayerCount = spawn ? pb.readVarInt() : pb.readU8();
 					let PlayerData: GameDataPlayerData;
@@ -402,7 +472,7 @@ export default class Component{
 								TaskCompleted: pb.readBoolean()
 							}
 						}
-						console.log(PlayerData)
+						// console.log(PlayerData)
 						gd.push(PlayerData);
 					}
 					(<GameData><unknown>(this.Data)) = {players: gd};
@@ -429,11 +499,11 @@ export default class Component{
 			case ObjectType.MeetingHud:
 				const mh: MeetingHud = {players: []};
 				let mask
-				
+
 				if (!spawn) {
 					mask = Number(pb.readVarInt())
 				}
-				
+
 				for (let i = 0; i < this.length; i++) {
 					if (spawn || (mask & (1 << i)) != 0) {
 						mh.players[i] = StateByte.parse(pb.readU8());
@@ -457,28 +527,27 @@ export default class Component{
 			case ObjectType.ShipStatus:
 				const mapOrder = MAP_SYSTEM_ORDER[this.room.settings.Map === 7 ? 0 : this.room.settings.Map];
 				if (spawn){
-					let i=0;
 					for (let k of mapOrder){
+                        if (k == SystemType.Decontamination || k == SystemType.Decontamination2) {
+                            continue;
+                        }
 						let data = (<ShipStatus>this.Data).systems[k];
 						SYSTEM_HANDLER.get(data.system).write(data.data, pb, this.room, true);
+                        console.log(`write ship system ${k}`, pb.buf.toString("hex"))
 					}
-				}else {
-					let i=0;
-					let mask = 0;
-					let buffers: PolusBuffer[] = [new PolusBuffer()];
-					for (let k of mapOrder){
-						console.log("IMPORTANT!!LMAO", k);
-						console.log(this.Data)
-						// console.trace((<ShipStatus>this.Data).systems[k].data, (<ShipStatus>this.old.Data).systems[k].data)
-						// console.log(SYSTEM_HANDLER.get(k).check((<ShipStatus>this.Data).systems[k].data, (<ShipStatus>this.old.Data).systems[k].data))
-						// if (SYSTEM_HANDLER.get(k).check((<ShipStatus>this.Data).systems[k].data, (<ShipStatus>this.old.Data).systems[k].data)){
-							let data = (<ShipStatus>this.Data).systems[k];
+				} else {
+                    let mask = (<ShipStatus>this.Data).mask;
+                    let buffers: PolusBuffer[] = [new PolusBuffer()];
+
+                    for (let k of mapOrder) {
+                        if ((Number(mask) & (1 << k)) != 0) {
+                            let data = (<ShipStatus>this.Data).systems[k];
 							let buf = new PolusBuffer();
 							SYSTEM_HANDLER.get(k).write(data.data, buf, this.room, false, (<ShipStatus>this.old.Data).systems[k].data)
 							buffers.push(buf);
-							mask |= 1 << k;
-						// }
-					}
+                        }
+                    }
+
 					buffers[0].writeVarInt(BigInt(mask));
 					pb.writeBytes(PolusBuffer.concat(...buffers));
 				}
@@ -519,7 +588,7 @@ export default class Component{
 							pb.writeVarInt(task.TaskID)
 							pb.writeBoolean(task.TaskCompleted)
 						}
-					})	
+					})
 				}
 				if(this.index == 1) {
 					//@ts-ignore
@@ -535,11 +604,11 @@ export default class Component{
 				break;
 			case ObjectType.MeetingHud:
 				let dirtyBits = this.calculateDirtyBits()
-				
+
 				if (!spawn) {
 					pb.writeVarInt(BigInt(dirtyBits))
 				}
-				
+
 				for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
 					if(spawn || (Number(dirtyBits) & (1 << i)) != 0) {
 						pb.writeU8(StateByte.serialize(<StateByteInterface>(<MeetingHud>this.Data).players[i]));
@@ -563,7 +632,6 @@ export default class Component{
 				case ObjectType.PlanetMap:
 				case ObjectType.ShipStatus:
 					throw new Error("calculateDirtyBits called while this.spawnID is typeof ObjectType.ShipStatus (or similar) this in unintended behavior, as for efficiency dirtybits are calculated inside the serializer")
-					break;
 				case ObjectType.Player:
 					throw new Error("calculateDirtyBits called while this.spawnID is typeof ObjectType.Player")
 				case ObjectType.GameData:
@@ -583,7 +651,7 @@ export default class Component{
 	parse(pb: PolusBuffer): Component{
 		let newcomp = new Component(this.spawnId, this.index, this.room);
 		if(this.old) {
-			console.log("WOWEE", this.old)
+			// console.log("WOWEE", this.old)
 			newcomp.netID = this.netID;
 			newcomp.length = this.length;
 			newcomp.flag = this.flag;
@@ -594,7 +662,7 @@ export default class Component{
 		}
 		newcomp.old = this;
 		newcomp.Data = this.Data;
-		newcomp.readData(pb.readBytes(Number(newcomp.length)));
+		newcomp.readData(pb);
 		return newcomp;
 	}
 

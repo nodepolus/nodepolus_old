@@ -1,3 +1,4 @@
+import { DeconStateByteInterface } from "./DeconStateByte";
 import { StateByteInterface } from "./StateByte";
 import SystemType from "./SystemType";
 import Vector2 from "./Vector2";
@@ -63,11 +64,21 @@ export interface DoorSystem {
     Doors: boolean[]
 }
 
+export interface PolusDoorSystem {
+    Timers: Map<number, number>,
+    Doors: boolean[]
+}
+
 export interface SabotageSystem {
 	Timer: number
 }
 
-export type System = DoorSystem | ElectricalSystem | UserListSystem | CommsSystem | ReactorSystem | DoorSystem | SabotageSystem | O2System;
+export interface DeconSystem {
+    Timer: number,
+    State: DeconStateByteInterface
+}
+
+export type System = DoorSystem | ElectricalSystem | UserListSystem | CommsSystem | ReactorSystem | DoorSystem | SabotageSystem | O2System | DeconSystem;
 
 export interface ShipStatus {
     systems: {

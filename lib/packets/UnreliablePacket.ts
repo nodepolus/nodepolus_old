@@ -18,8 +18,8 @@ import { GameSearchPacket, GameSearch } from "./Subpackets/GameSearch.js";
 import KickPlayer, { KickPlayerPacket } from "./Subpackets/KickPlayer.js";
 import WaitingForHost, { WaitingForHostPacket } from "./Subpackets/WaitingForHost.js";
 
-export type Packet = GameCreatePacket | 
-						SetGameCodePacket | 
+export type Packet = GameCreatePacket |
+						SetGameCodePacket |
 						JoinGamePacket |
 						JoinGameErrorPacket |
 						PlayerJoinedGamePacket |
@@ -131,7 +131,7 @@ export default class Unreliable {
 	}
 	serialize(packet: UnreliablePacket):PolusBuffer {
 		var buf = new PolusBuffer();
-		console.log(packet)
+		// console.log(packet)
 		packet.Packets.forEach(subpacket => {
 			// @ts-ignore
 			let serialized:PolusBuffer = this[subpacket.type + "PacketHandler"].serialize(subpacket)

@@ -29,7 +29,7 @@ export enum GameDataPacketType {
 export default class GameData {
 	constructor(private room: Room, private toServer: boolean){}
 	DataPacketHandler = new Data(this.room);
-	RPCPacketHandler = new RPC();
+	RPCPacketHandler = new RPC(this.room);
 	SpawnPacketHandler = new Spawn(this.room);
 	DespawnPacketHandler = new Despawn();
 	SceneChangePacketHandler = new SceneChange();
@@ -45,9 +45,9 @@ export default class GameData {
 			data.RecipientClientID = packet.readVarInt();
 		}
 		while(packet.dataRemaining().length != 0) {
-			const length = packet.readU16();
+            const length = packet.readU16();
 			const type = packet.readU8();
-			const rawdata = packet.readBytes(length);
+            const rawdata = packet.readBytes(length);
 			switch(type) {
 				case GameDataPacketType.Data:
 					// @ts-ignore
@@ -74,7 +74,7 @@ export default class GameData {
 					data.Packets.push({ type: GameDataPacketType.Ready, ...this.ReadyPacketHandler.parse(rawdata) })
 					break;
 			}
-			
+
 		}
 		return data;
 	}

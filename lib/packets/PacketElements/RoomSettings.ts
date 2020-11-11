@@ -115,7 +115,7 @@ export class RoomSettings {
 			this.TaskBarUpdates = buf.readU8();
 		}
 	}
-	public setMaxPlayers(maxPlayers: number) { 
+	public setMaxPlayers(maxPlayers: number) {
 		this.MaxPlayers = maxPlayers;
 		this.room.syncSettings();
 	}
@@ -142,7 +142,7 @@ export class RoomSettings {
 	public setImpostorLightModifier(impostorLightModifier: number) {
 		this.MaxPlayers = impostorLightModifier;
 		this.room.syncSettings();
-		
+
 	}
 	public setKillCooldown(killCooldown: number) {
 		this.KillCooldown = killCooldown;
