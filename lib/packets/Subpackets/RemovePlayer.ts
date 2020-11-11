@@ -2,7 +2,7 @@ import DisconnectReason from '../PacketElements/DisconnectReason'
 import PolusBuffer from '../../util/PolusBuffer'
 import RoomCode from '../PacketElements/RoomCode'
 import Room from '../../util/Room'
-import { SubpacketClass } from './subpacket'
+import { SubpacketClass } from '.'
 
 export interface RemovePlayerPacket {
   type: 'RemovePlayer',

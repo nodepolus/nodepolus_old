@@ -1,10 +1,11 @@
-import PolusBuffer from "../../../util/PolusBuffer.js";
-import Component from "../../PacketElements/Component.js";
-import Room from "../../../util/Room.js";
-import { IGameObject, SpawnFlags } from "../../../util/GameObject.js";
-import { GameDataPacketType } from "../GameData.js";
+import PolusBuffer from '../../../util/PolusBuffer'
+import Component from '../../PacketElements/Component'
+import Room from '../../../util/Room'
+import { IGameObject, SpawnFlags } from '../../../util/GameObject'
+import { GameDataPacketType } from '../GameData'
+import { SubpacketClass } from '..'
 
-export enum ObjectType{
+export enum ObjectType {
 	ShipStatus = 0,
 	MeetingHud = 1,
 	LobbyBehavior = 2,
@@ -15,8 +16,7 @@ export enum ObjectType{
 	AprilShipStatus = 7
 }
 
-export default class Spawn{
-	constructor(private room: Room){}
+export const Spawn: SubpacketClass<IGameObject> = {
 	parse(buffer: PolusBuffer): IGameObject {
 		const spawnPacket: IGameObject = {
       type: GameDataPacketType.Spawn,
@@ -32,7 +32,8 @@ export default class Spawn{
 			spawnPacket.Components.push(newComponent.parse(buffer));
 		}
 		return spawnPacket;
-	}
+  },
+
 	serialize(packet: IGameObject): PolusBuffer {
 		let PB = new PolusBuffer();
 		PB.writeVarInt(packet.SpawnID);
@@ -45,5 +46,5 @@ export default class Spawn{
 			PB.writeBytes(component.serialize())
 		}
 		return PB;
-	};
-};
+	}
+}

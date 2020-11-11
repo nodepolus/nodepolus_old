@@ -1,4 +1,4 @@
-import { SubpacketClass, SubPacketType } from './subpacket'
+import { SubpacketClass, SubPacketType } from '.'
 
 import PolusBuffer from '../../util/PolusBuffer'
 import RoomSettings from '../PacketElements/RoomSettings'

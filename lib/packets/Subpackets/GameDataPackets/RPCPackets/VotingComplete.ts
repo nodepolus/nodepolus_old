@@ -1,5 +1,7 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
-import StateByte, { StateByteInterface } from "../../../PacketElements/StateByte.js";	
+import { SubpacketClass } from '../..'
+import PolusBuffer from '../../../../util/PolusBuffer'
+
+import StateByte, { StateByteInterface } from '../../../PacketElements/StateByte'
 
 export interface VotingCompletePacket {
 	StatesLength?: bigint;
@@ -8,7 +10,7 @@ export interface VotingCompletePacket {
 	IsTie: boolean
 }
 
-export default class VotingComplete {
+export const VotingComplete: SubpacketClass<VotingCompletePacket> = {
 	parse(packet: PolusBuffer): VotingCompletePacket {
 		let data: VotingCompletePacket = {
 			StatesLength: packet.readVarInt(),
@@ -23,7 +25,8 @@ export default class VotingComplete {
 		data.ExiledPlayerPlayerID = packet.readU8();
 		data.IsTie = packet.readBoolean();
 		return data;
-	}
+  },
+
 	serialize(packet: VotingCompletePacket): PolusBuffer {
 		let buf = new PolusBuffer()
 		buf.writeVarInt(BigInt(packet.States.length));
@@ -33,6 +36,5 @@ export default class VotingComplete {
 		buf.writeU8(packet.ExiledPlayerPlayerID);
 		buf.writeBoolean(packet.IsTie)
 		return buf;
-	};
-};
-
+	}
+}

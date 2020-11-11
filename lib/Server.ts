@@ -3,7 +3,7 @@ import { EventEmitter } from "events";
 import Room from "./util/Room.js";
 import Connection from "./util/Connection.js";
 
-import { SubPacket } from './packets/Subpackets/subpacket'
+import { SubPacket } from './packets/Subpackets'
 import { addr2str } from "./util/misc.js";
 
 class Server extends EventEmitter {

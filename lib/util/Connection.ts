@@ -11,7 +11,7 @@ import Room from "./Room.js";
 
 import { UnreliablePacket } from "../packets/UnreliablePacket.js";
 
-import { SubPacket } from '../packets/Subpackets/subpacket'
+import { SubPacket } from '../packets/Subpackets'
 
 import { GameDataPacketType } from "../packets/Subpackets/GameData.js";
 
@@ -27,7 +27,7 @@ export default class Connection extends EventEmitter{
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
         super();
         this.once("message", (msg) => {
-            const parsed = new Packet(nullRoom, this.isToClient).parse(new PolusBuffer(msg));
+            const parsed = new Packet(nullRoom, this.isToClient).parse(new PolusBuffer(msg), nullRoom);
             if (parsed.Type != PacketType.HelloPacket) {
                 this.disconnect();
             }

@@ -1,6 +1,6 @@
 import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
-import { SubpacketClass } from './subpacket';
+import { SubpacketClass } from '.';
 
 export interface JoinGamePacket {
   type: 'JoinGame',

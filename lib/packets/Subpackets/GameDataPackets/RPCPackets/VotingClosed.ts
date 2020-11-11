@@ -1,14 +1,14 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
+import { SubpacketClass } from '../..'
+import PolusBuffer from '../../../../util/PolusBuffer'
 
 export interface VotingClosedPacket {}
 
-export default class VotingClosed {
-
+export const VotingClosed: SubpacketClass<VotingClosedPacket> = {
 	parse(packet: PolusBuffer) {
 		return {}
-	}
+  },
+
 	serialize(packet: VotingClosedPacket): PolusBuffer {
 		return new PolusBuffer(0)
-	};
-};
-
+	}
+}

@@ -4,7 +4,7 @@ import Publicity from "../data/enums/publicity.js";
 import { RoomSettings } from "../packets/PacketElements/RoomSettings.js";
 import { EventEmitter } from "events";
 import Player from "./Player.js";
-import { SubPacket } from '../packets/Subpackets/subpacket'
+import { SubPacket } from '../packets/Subpackets'
 import Server from "../Server.js";
 import { IGameObject } from "./GameObject.js";
 import { GameDataPacket, GameDataPacketType } from "../packets/Subpackets/GameData.js";

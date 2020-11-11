@@ -1,5 +1,5 @@
 import PolusBuffer from '../../util/PolusBuffer'
-import { SubpacketClass } from './subpacket';
+import { SubpacketClass } from '.';
 
 interface MasterServer {
 	Name: string,

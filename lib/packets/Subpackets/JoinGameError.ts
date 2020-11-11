@@ -1,7 +1,7 @@
 import PolusBuffer from '../../util/PolusBuffer'
 import Room from '../../util/Room'
 import DisconnectReason from '../PacketElements/DisconnectReason'
-import { SubpacketClass } from './subpacket'
+import { SubpacketClass } from '.'
 
 export interface JoinGameErrorPacket {
   type: 'JoinGameError',

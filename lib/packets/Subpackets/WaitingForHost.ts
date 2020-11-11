@@ -1,6 +1,6 @@
 import PolusBuffer from '../../util/PolusBuffer'
 import RoomCode from '../PacketElements/RoomCode'
-import { SubpacketClass } from './subpacket';
+import { SubpacketClass } from '.';
 
 export interface WaitingForHostPacket {
   type: 'WaitingForHost',

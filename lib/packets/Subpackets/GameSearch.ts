@@ -1,6 +1,6 @@
 import PolusBuffer from '../../util/PolusBuffer'
 import RoomSettings from '../PacketElements/RoomSettings'
-import { SubpacketClass } from './subpacket'
+import { SubpacketClass } from './'
 
 export interface GameSearchPacket {
   type: 'GameSearch',

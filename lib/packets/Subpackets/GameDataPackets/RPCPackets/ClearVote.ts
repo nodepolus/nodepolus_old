@@ -1,13 +1,14 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
+import { SubpacketClass } from '../..'
+import PolusBuffer from '../../../../util/PolusBuffer'
 
-export interface ClearVotePacket { }
+export interface ClearVotePacket {}
 
-export default class ClearVote {
+export const ClearVote: SubpacketClass<ClearVotePacket> = {
 	parse(packet: PolusBuffer): ClearVotePacket {
 		return {}
-	}
+  },
+
 	serialize(packet: ClearVotePacket): PolusBuffer {
 		return new PolusBuffer(0);
-	};
-};
-
+	}
+}

@@ -1,4 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
+import { SubpacketClass } from '../..'
+import PolusBuffer from '../../../../util/PolusBuffer'
 
 export interface SetTasksPacket {
 	PlayerID: number,
@@ -6,8 +7,7 @@ export interface SetTasksPacket {
 	Tasks: number[]
 }
 
-export default class SetTasks {
-
+export const SetTasks: SubpacketClass<SetTasksPacket> = {
 	parse(packet: PolusBuffer): SetTasksPacket {
 		let returnData: SetTasksPacket = {
 			PlayerID: packet.readU8(),
@@ -18,7 +18,8 @@ export default class SetTasks {
 			returnData.Tasks[i] = packet.readU8();
 		}
 		return returnData;
-	}
+  },
+
 	serialize(packet: SetTasksPacket): PolusBuffer {
 		let buf = new PolusBuffer();
 		buf.writeU8(packet.PlayerID);
@@ -27,5 +28,5 @@ export default class SetTasks {
 			buf.writeU8(packet.Tasks[i]);
 		}
 		return buf;
-	};
-};
+	}
+}

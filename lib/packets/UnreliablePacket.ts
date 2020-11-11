@@ -1,4 +1,4 @@
-import { SubPacket, packetHandlers } from './Subpackets/subpacket'
+import { SubPacket, packetHandlers } from './Subpackets'
 
 import Room from '../util/Room'
 import PolusBuffer from '../util/PolusBuffer'

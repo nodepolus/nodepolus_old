@@ -1,5 +1,7 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
-import SystemType from "../../../PacketElements/SystemType.js"
+import { SubpacketClass } from '../..'
+import PolusBuffer from '../../../../util/PolusBuffer'
+
+import SystemType from '../../../PacketElements/SystemType'
 
 export enum RepairAction {
 	Repaired = 0x01,
@@ -59,7 +61,7 @@ export interface RepairSystemPacket {
 	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | RepairCommunicationsAmount
 }
 
-export default class RepairSystem {
+export const RepairSystem: SubpacketClass<RepairSystemPacket> = {
 	parse(packet: PolusBuffer): RepairSystemPacket {
 		let systemType = packet.readU8();
 		let netID = packet.readVarInt();
@@ -135,7 +137,8 @@ export default class RepairSystem {
 				}
 		}
 		return data;
-	}
+  },
+
 	serialize(packet: RepairSystemPacket): PolusBuffer {
 		console.log("system: ", packet.System)
 		var buf = new PolusBuffer();
@@ -197,5 +200,5 @@ export default class RepairSystem {
 
 		}
 		return buf;
-	};
-};
+	}
+}

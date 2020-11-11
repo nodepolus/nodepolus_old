@@ -2,14 +2,13 @@ import RoomCode from "../PacketElements/RoomCode.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 import Room from "../../util/Room.js";
 
-import Data, { DataPacket } from "./GameDataPackets/Data.js";
-import RPC, { RPCPacket } from "./GameDataPackets/RPC.js";
-import Spawn from "./GameDataPackets/Spawn.js";
-import Ready, { ReadyPacket } from "./GameDataPackets/Ready.js";
-import SceneChange, { SceneChangePacket } from "./GameDataPackets/SceneChange.js";
-import Despawn, { DespawnPacket } from "./GameDataPackets/Despawn.js";
+import { Data, DataPacket } from "./GameDataPackets/Data.js";
+import { RPC, RPCPacket } from "./GameDataPackets/RPC.js";
+import { Ready, ReadyPacket } from "./GameDataPackets/Ready.js";
+import { SceneChange, SceneChangePacket } from "./GameDataPackets/SceneChange.js";
+import { Despawn, DespawnPacket } from "./GameDataPackets/Despawn.js";
 import { IGameObject } from "../../util/GameObject.js";
-import { ParseOpts } from "./subpacket.js";
+import { ParseOpts } from "./index.js";
 
 export interface GameDataPacket {
   type: 'GameData',

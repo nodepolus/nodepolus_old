@@ -1,7 +1,6 @@
 import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
-
-import { SubpacketClass } from './subpacket'
+import { SubpacketClass } from './'
 
 export enum EndReason {
 	HumansByVote = 0x00,
