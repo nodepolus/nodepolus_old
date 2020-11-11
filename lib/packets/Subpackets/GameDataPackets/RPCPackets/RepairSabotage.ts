@@ -1,4 +1,6 @@
+import AmongUsMap from "../../../../data/enums/AmongUsMap.js";
 import PolusBuffer from "../../../../util/PolusBuffer.js";
+import Room from "../../../../util/Room.js";
 import SystemType from "../../../PacketElements/SystemType.js"
 
 export enum RepairAction {
@@ -53,11 +55,16 @@ export interface SabotageSystemAmount {
 	systemID: SystemType
 }
 
-export interface RepairCommunicationsAmount {
-	consoleNum?: number,
-	isRepaired: boolean,
-	action?: RepairAction,
-	isOpen?: OpenAction,
+export interface NormalCommunicationsAmount {
+    repaired: boolean
+}
+
+export interface HqCommunicationsAmount {
+    repaired: boolean,
+    opened: boolean,
+    closed: boolean,
+    codeSuccessful: boolean,
+    consoleId: number
 }
 
 export interface DecontaminationAmount {
@@ -67,10 +74,11 @@ export interface DecontaminationAmount {
 export interface RepairSystemPacket {
 	System: SystemType,
 	RepairerNetID: bigint,
-	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | RepairCommunicationsAmount | DecontaminationAmount
+	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | NormalCommunicationsAmount | HqCommunicationsAmount | DecontaminationAmount
 }
 
 export default class RepairSystem {
+    constructor(private room: Room) {}
 	parse(packet: PolusBuffer): RepairSystemPacket {
 		let systemType = packet.readU8();
 		let netID = packet.readVarInt();
@@ -128,21 +136,18 @@ export default class RepairSystem {
 				}
 				break;
 			case SystemType.Communications:
-				let temp;
-				if((amount & 0x40) != 0) {
-					temp = 1;
-				} else {
-					if((amount & 0x20) != 0) {
-						temp = 0
-					} else {
-						temp = 2;
-					}
-				}
-				data.RepairAmount = {
-					consoleNum: (amount & 0b00000011),
-					isRepaired: (amount & 0b10000000) == 0,
-					action:    ((amount & 0b00010000) != 0)?1:0,
-					isOpen: temp,
+                if (this.room.settings.Map == AmongUsMap.MIRA_HQ) {
+                    data.RepairAmount = {
+                        repaired: (amount & 0x80) != 0,
+                        opened: (amount & 0x40) != 0,
+                        closed: (amount & 0x20) != 0,
+                        codeSuccessful: (amount & 0x10) != 0,
+                        consoleId: amount & 3
+                    }
+                } else {
+                    data.RepairAmount = {
+                        repaired: (amount & 0x80) != 0
+                    }
                 }
                 break;
             case SystemType.Decontamination:
@@ -155,12 +160,12 @@ export default class RepairSystem {
 		return data;
 	}
 	serialize(packet: RepairSystemPacket): PolusBuffer {
-		console.log("system: ", packet.System)
+		// console.log("system: ", packet.System)
 		var buf = new PolusBuffer();
 		buf.writeU8(packet.System);
 		buf.writeVarInt(packet.RepairerNetID);
 		let retInteger = 0;
-		console.log("system2: ", packet.System)
+		// console.log("system2: ", packet.System)
 		switch(packet.System) {
 			case SystemType.Electrical:
 				buf.writeU8((<RepairLightsAmount>packet.RepairAmount).switchFlipped);
@@ -197,17 +202,19 @@ export default class RepairSystem {
 				buf.writeU8((<SabotageSystemAmount>packet.RepairAmount).systemID);
 				break;
 			case SystemType.Communications:
-				retInteger = 0;
-				if ((<RepairCommunicationsAmount>packet.RepairAmount).isRepaired) retInteger += 0b00010000;
-				if ((<RepairCommunicationsAmount>packet.RepairAmount).action == RepairAction.Repaired) retInteger += 0b00010000;
-				if ((<RepairCommunicationsAmount>packet.RepairAmount).isOpen != OpenAction.Unchanged) {
-					if ((<RepairCommunicationsAmount>packet.RepairAmount).isOpen == OpenAction.Opened) {
-						retInteger += 0b01000000
-					} else {
-						retInteger += 0b00100000
-					}
-				}
-				retInteger += (<RepairReactorAmount>packet.RepairAmount).consoleNum & 0b00000011;
+                retInteger = 0;
+
+                if (this.room.settings.Map == AmongUsMap.MIRA_HQ) {
+                    retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).repaired ? 0x80 : 0;
+                    retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).opened ? 0x40 : 0;
+                    retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).closed ? 0x20 : 0;
+                    retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).codeSuccessful ? 0x10 : 0;
+                    retInteger += (<HqCommunicationsAmount>packet.RepairAmount).consoleId
+                } else {
+                    if ((<NormalCommunicationsAmount>packet.RepairAmount).repaired) {
+                        retInteger = 0x80;
+                    }
+                }
 				buf.writeU8(retInteger);
 				break;
             case SystemType.Decontamination:

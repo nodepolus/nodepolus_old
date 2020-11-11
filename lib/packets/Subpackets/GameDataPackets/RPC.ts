@@ -31,15 +31,16 @@ import RepairSabotage, { RepairSystemPacket as RepairSabotagePacket } from "./RP
 import SetTasks, { SetTasksPacket } from "./RPCPackets/SetTasks.js";
 import UpdateGameData, { UpdateGameDataPacket } from "./RPCPackets/UpdateGameData.js";
 import { GameDataPacketType } from "../GameData.js";
+import Room from "../../../util/Room.js";
 
 export interface RPCPacket {
   type: GameDataPacketType.RPC,
 	NetID: bigint,
 	RPCFlag: RPCPacketType,
-	Packet: PlayAnimationPacket | 
-			CompleteTaskPacket | 
-			SyncSettingsPacket | 
-			SetInfectedPacket | 
+	Packet: PlayAnimationPacket |
+			CompleteTaskPacket |
+			SyncSettingsPacket |
+			SetInfectedPacket |
 			CheckNamePacket |
 			SetNamePacket |
 			CheckColorPacket |
@@ -103,7 +104,7 @@ enum RPCPacketType {
 }
 
 export default class GameData {
-	constructor() { }
+	constructor(private room: Room) { }
 	PlayAnimationPacketHandler = new PlayAnimation();
 	CompleteTaskPacketHandler = new CompleteTask();
 	SyncSettingsPacketHandler = new SyncSettings();
@@ -131,7 +132,7 @@ export default class GameData {
 	ClearVotePacketHandler = new ClearVote();
 	CastVoteKickPacketHandler = new CastVoteKick();
 	CloseDoorsOfTypePacketHandler = new CloseDoorsOfType();
-	RepairSabotagePacketHandler = new RepairSabotage();
+	RepairSabotagePacketHandler = new RepairSabotage(this.room);
 	SetTasksPacketHandler = new SetTasks();
 	UpdateGameDataPacketHandler = new UpdateGameData();
 

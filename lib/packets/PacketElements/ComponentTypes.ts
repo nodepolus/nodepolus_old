@@ -64,6 +64,11 @@ export interface DoorSystem {
     Doors: boolean[]
 }
 
+export interface PolusDoorSystem {
+    Timers: Map<number, number>,
+    Doors: boolean[]
+}
+
 export interface SabotageSystem {
 	Timer: number
 }

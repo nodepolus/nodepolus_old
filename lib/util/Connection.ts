@@ -38,9 +38,9 @@ export default class Connection extends EventEmitter{
             this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
             this.player.room = nullRoom;
             this.on("message", (msg) => {
-                console.log(msg.toString('hex'))
+                // console.log(msg.toString('hex'))
                 const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
-                console.log("RawParsed", parsed)
+                // console.log("RawParsed", parsed)
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
                 try {
                     if (packet.Type != PacketType.UnreliablePacket)assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))

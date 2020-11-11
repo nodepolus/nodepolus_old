@@ -24,7 +24,7 @@ export default class Spawn{
 			ClientID: buffer.readVarInt(),
 			Flags: <SpawnFlags>buffer.readU8(),
 			Components: []
-		} 
+		}
 		let len = buffer.readVarInt();
 		for(let i=0;i<len;i++){
 			let newComponent = new Component(spawnPacket.SpawnID, i, this.room);
@@ -41,7 +41,7 @@ export default class Spawn{
 		PB.writeVarInt(BigInt(packet.Components.length));
 		for (let i = 0; i < packet.Components.length; i++) {
 			const component = packet.Components[i];
-			console.log(component)
+			// console.log(component)
 			PB.writeBytes(component.serialize())
 		}
 		return PB;
