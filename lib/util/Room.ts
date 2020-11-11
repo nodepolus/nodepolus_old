@@ -11,7 +11,7 @@ import { GameDataPacket, GameDataPacketType } from "../packets/Subpackets/GameDa
 // @ts-ignore
 import randomstring from "randomstring";
 import { addr2str } from "./misc.js";
-import {inspect} from 'util';
+import {inspect, isRegExp} from 'util';
 import { RPCPacket } from "../packets/Subpackets/GameDataPackets/RPC.js";
 import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
 import PolusBuffer from "./PolusBuffer.js";
@@ -132,6 +132,42 @@ class Room extends EventEmitter {
           })
         })
         this.connections.push(connection);
+        connection.on('close', () => {
+            this.connections.splice(this.connections.indexOf(connection), 1);
+            if(connection.player.isHost && this.connections.length > 0) {
+                this.connections[0].player.isHost = true;
+            }
+            this.connections.forEach(TSconnection => {
+                TSconnection.startPacketGroup();
+                TSconnection.send({
+                    type: "RemovePlayer",
+                    RoomCode: this.code,
+                    PlayerClientID: connection.ID,
+                    HostClientID: this.host.ID,
+                    DisconnectReason: new DisconnectReason(0)
+                })
+                TSconnection.endPacketGroup();
+            })
+            if(this.connections.length === 0) {
+                this.close()
+            }
+        })
+    }
+    public close(reason:string|number = 19) {
+        let pb = new PolusBuffer()
+        if(typeof reason == 'number') {
+            pb.writeU8(reason)
+        } else {
+            pb.writeU8(0x08)
+            pb.writeString(reason)
+        }
+        this.emit("close")
+        this.connections.forEach(TSconnection => {
+            TSconnection.send({
+                type: "RemoveRoom",
+                DisconnectReason: new DisconnectReason(pb)
+            })
+        })
     }
 }
 

@@ -6,36 +6,37 @@ import Room from "../../util/Room.js";
 export interface RemovePlayerPacket {
   type: 'RemovePlayer',
 	RoomCode: string,
-	PlayerClientID: bigint,
-	HostClientID?: number,
-	DisconnectReason: DisconnectReason
+	PlayerClientID: number,
+	HostClientID: number,
+	DisconnectReason?: DisconnectReason
 }
 
 class RemovePlayer {
 	constructor(public room: Room) {}
 	parse(packet: PolusBuffer): RemovePlayerPacket {
 		let roomCode = RoomCode.intToString(packet.read32())
-		let PlayerClientID = packet.readVarInt()
-		let HostClientID;
-		if(packet.dataRemaining().length != 1) {
-			HostClientID = packet.readU32();
+		let PlayerClientID = packet.readU32()
+		let HostClientID = packet.readU32();
+		let DisconnectReasonts;
+		if(packet.dataRemaining().length > 0) {
+			DisconnectReasonts = new DisconnectReason(packet, this.room)
 		}
 		return {
-      type: 'RemovePlayer',
+			type: 'RemovePlayer',
 			RoomCode: roomCode,
 			PlayerClientID,
 			HostClientID,
-			DisconnectReason: new DisconnectReason(packet, this.room)
+			DisconnectReason: DisconnectReasonts
 		};
 	}
 	serialize(packet: RemovePlayerPacket) {
 		var buf = new PolusBuffer(12);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
-		buf.writeVarInt(packet.PlayerClientID);
-		if(packet.HostClientID) {
-			buf.writeU32(packet.HostClientID);
+		buf.writeU32(packet.PlayerClientID);
+		buf.writeU32(packet.HostClientID);
+		if(packet.DisconnectReason) {
+			buf.writeBytes(packet.DisconnectReason.serialize());
 		}
-		buf.writeBytes(packet.DisconnectReason.serialize());
 		return buf;
 	}
 }

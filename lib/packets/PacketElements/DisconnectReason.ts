@@ -80,7 +80,7 @@ export default class DisconnectReason {
 	}
 	serialize() {
 		var buf = new PolusBuffer();
-		if(this.reasonInt) {
+		if(this.reasonInt || this.reasonInt === 0) {
 			buf.writeU8(this.reasonInt);
 			if(this.reasonInt == 0x08) {
 				buf.writeString(this.reason)

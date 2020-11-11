@@ -17,6 +17,7 @@ import PolusBuffer from "../util/PolusBuffer.js";
 import { GameSearchPacket, GameSearch } from "./Subpackets/GameSearch.js";
 import KickPlayer, { KickPlayerPacket } from "./Subpackets/KickPlayer.js";
 import WaitingForHost, { WaitingForHostPacket } from "./Subpackets/WaitingForHost.js";
+import RemoveRoom, { RemoveRoomPacket } from "./Subpackets/RemoveRoom.js";
 
 export type Packet = GameCreatePacket |
 						SetGameCodePacket |
@@ -34,7 +35,8 @@ export type Packet = GameCreatePacket |
 						GameSearchPacket |
 						GameSearchResultsPacket |
 						KickPlayerPacket |
-						WaitingForHostPacket
+						WaitingForHostPacket |
+						RemoveRoomPacket
 
 export interface UnreliablePacket {
 	Packets: Packet[]
@@ -59,6 +61,7 @@ export default class Unreliable {
 	GameSearchResultsPacketHandler = new GameSearchResults();
 	KickPlayerPacketHandler = new KickPlayer();
 	WaitingForHostPacketHandler = new WaitingForHost();
+	RemoveRoomPacketHandler = new RemoveRoom();
 	parse(packet: PolusBuffer): UnreliablePacket {
 		const packets = [];
 		while (packet.dataRemaining().length != 0) {
@@ -88,6 +91,8 @@ export default class Unreliable {
 				case 0x02:
 					packets.push({ type: "StartGame", ...this.StartGamePacketHandler.parse(data) });
 					break;
+				case 0x03:
+					packets.push({ type: "RemoveRoom", ...this.RemoveRoomPacketHandler.parse(data) })
 				case 0x04:
 					packets.push({ type: "RemovePlayer", ...this.RemovePlayerPacketHandler.parse(data) });
 					break;
@@ -149,6 +154,9 @@ export default class Unreliable {
 					break;
 				case 'StartGame':
 					type = 0x02;
+					break;
+				case 'RemoveRoom':
+					type = 0x03;
 					break;
 				case 'RemovePlayer':
 					type = 0x04;

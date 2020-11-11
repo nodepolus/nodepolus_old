@@ -42,6 +42,9 @@ class Server extends EventEmitter {
                   type: 'SetGameCode',
                   RoomCode: room.code
                 });
+                room.on('close', () => {
+                  this.rooms.delete(room.code);
+                })
                 break;
             }
             case 'JoinGame': {
@@ -73,7 +76,7 @@ class Server extends EventEmitter {
         conn.on("packet", (packet: Subpacket) => {
             this.handlePacket(packet, conn)
         });
-        conn.on("closed", () => {
+        conn.on("close", () => {
             this.clientConnectionMap.delete(addr2str(remote));
         })
         return conn

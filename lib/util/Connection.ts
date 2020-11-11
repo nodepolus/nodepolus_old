@@ -85,6 +85,7 @@ export default class Connection extends EventEmitter{
             o.Nonce = this.newNonce();
         }
         let pb = new Packet(this.player?(this.player.room?this.player.room:nullRoom):nullRoom, this.isToClient).serialize(o);
+        console.log(pb.buf)
         //console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
         this.socket.send(pb.buf, this.address.port, this.address.address)
         this.unacknowledgedPackets.set(o.Nonce, 0);
@@ -133,7 +134,7 @@ export default class Connection extends EventEmitter{
     public endPacketGroup() {
         this.inGroup = false;
         if(this.groupArr.length > 0) {
-            this.write(PacketType.ReliablePacket, {
+            this.write(this.packetGroupReliability, {
                 Packets: this.groupArr
             })
         }
@@ -141,7 +142,7 @@ export default class Connection extends EventEmitter{
     }
     public endUnreliablePacketGroup = this.endPacketGroup;
     disconnect() {
-        this.emit("closed")
+        this.emit("close")
         this.write(PacketType.DisconnectPacket, {DisconnectReason: new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {
