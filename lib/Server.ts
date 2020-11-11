@@ -11,17 +11,25 @@ class Server extends EventEmitter {
     rooms: Map<string, Room> = new Map();
     clientConnectionMap: Map<string, Connection>;
     private clientIDIncrementer = 256;
-    constructor(port:number = 22023) {
+    constructor() {
         super();
         this.clientConnectionMap = new Map();
-        this.port = port;
-        this.sock = createSocket("udp4");
-        this.sock.on("listening", () => this.emit("listening", this.port));
-        this.sock.on("message", (msg, remote) => {
-          const connection = this.getConnection(remote);
-          connection.emit("message", msg);
-        });
-        this.sock.bind(this.port);
+    }
+    public listen(port: number = 22023) {
+      this.port = port;
+      this.sock = createSocket("udp4");
+      this.sock.on("listening", () => this.emit("listening", this.port));
+      this.sock.on("message", (msg, remote) => {
+        const connection = this.getConnection(remote);
+        connection.emit("message", msg);
+      });
+      this.sock.bind(this.port);
+    }
+    public close() {
+      return new Promise((resolve) => {
+        this.clientConnectionMap = new Map();
+        this.sock.close(resolve);
+      })
     }
     private handlePacket(packet: Subpacket, connection: Connection){
         switch(packet.type) {
