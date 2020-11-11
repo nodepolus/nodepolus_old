@@ -13,7 +13,7 @@ export default class CastVoteKick {
 		}
 	}
 	serialize(packet: CastVoteKickPacket): PolusBuffer {
-		var buf = new PolusBuffer(2);
+		var buf = new PolusBuffer(8);
 		buf.writeU32(packet.PlayerClientID);
 		buf.writeU32(packet.SuspectClientID);
 		return buf;

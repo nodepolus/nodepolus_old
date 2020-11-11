@@ -12,7 +12,7 @@ import { GameDataPacket, GameDataPacketType } from "../packets/Subpackets/GameDa
 import randomstring from "randomstring";
 import { addr2str } from "./misc.js";
 import {inspect, isRegExp} from 'util';
-import { RPCPacket } from "../packets/Subpackets/GameDataPackets/RPC.js";
+import { RPCPacket, RPCPacketType } from "../packets/Subpackets/GameDataPackets/RPC.js";
 import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
 import PolusBuffer from "./PolusBuffer.js";
 import { DataPacket } from "../packets/Subpackets/GameDataPackets/Data.js";
@@ -54,7 +54,25 @@ class Room extends EventEmitter {
         //TODO: send AlterGame packet to clients
     }
     syncSettings() {
-        //TODO: send SyncSettings packet to clients
+        let NetID = 0n;
+        let go = this.GameObjects.find(go => Number(go.SpawnID) == ObjectType.Player)
+        NetID = go.Components[0].netID
+        this.connections.forEach(singleCon => {
+            singleCon.send({
+                type: "GameData",
+                RoomCode: this.code,
+                Packets: [
+                    {
+                        "type": GameDataPacketType.RPC,
+                        "RPCFlag": RPCPacketType.SyncSettings,
+                        NetID,
+                        "Packet": {
+                            RoomSettings: this.settings
+                        }
+                    }
+                ]
+            })
+        })
     }
     get host():Connection {
         return this.connections.find(con => con.player.isHost);
@@ -82,7 +100,7 @@ class Room extends EventEmitter {
                     connection.send({
                       type: 'RemovePlayer',
                       RoomCode: this.code,
-                      PlayerClientID: 2147483646n,
+                      PlayerClientID: 2147483646,
                       HostClientID: this.host.ID,
                       DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
                     })

@@ -69,7 +69,7 @@ export interface RPCPacket {
 			UpdateGameDataPacket
 }
 
-enum RPCPacketType {
+export enum RPCPacketType {
 	PlayAnimation = 0x00,
 	CompleteTask = 0x01,
 	SyncSettings = 0x02,
