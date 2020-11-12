@@ -1,5 +1,5 @@
-import PolusBuffer from '../../util/PolusBuffer";
-import { Room } from '../../util/Room";
+import PolusBuffer from '../../util/PolusBuffer'
+import { Room } from '../../util/Room'
 
 interface System{
     parse(pb: PolusBuffer, room: Room): void;

@@ -1,7 +1,7 @@
-import { DeconStateByteInterface } from './DeconStateByte";
-import { StateByteInterface } from './StateByte";
-import SystemType from './SystemType";
-import Vector2 from './Vector2";
+import { DeconStateByteInterface } from './DeconStateByte'
+import { StateByteInterface } from './StateByte'
+import SystemType from './SystemType'
+import Vector2 from './Vector2'
 
 export interface MeetingHud {
     players: StateByteInterface[]
