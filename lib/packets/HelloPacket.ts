@@ -1,5 +1,5 @@
-import PolusBuffer from "../util/PolusBuffer.js";
-import { ParsedPacket } from "./Packet.js";
+import PolusBuffer from '../util/PolusBuffer'
+import { ParsedPacket } from './Packet'
 
 export interface HelloPacketData {
 	HazelVersion: number,

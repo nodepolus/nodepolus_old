@@ -1,5 +1,5 @@
-import Component from "../packets/PacketElements/Component.js";
-import { GameDataPacketType } from "../packets/Subpackets/GameData.js";
+import Component from '../packets/PacketElements/Component'
+import { GameDataPacketType } from '../packets/Subpackets/GameData'
 
 export enum SpawnFlags {
 	None = 0,

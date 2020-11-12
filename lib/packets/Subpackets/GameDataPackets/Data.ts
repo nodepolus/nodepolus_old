@@ -1,7 +1,7 @@
-import PolusBuffer from "../../../util/PolusBuffer.js";
-import Component from "../../PacketElements/Component.js";
-import Room from "../../../util/Room.js";
-import { GameDataPacketType } from "../GameData.js";
+import PolusBuffer from '../../../util/PolusBuffer'
+import Component from '../../PacketElements/Component'
+import { Room } from '../../../util/Room'
+import { GameDataPacketType } from '../GameData'
 
 export interface DataPacket {
   type: GameDataPacketType.Data,

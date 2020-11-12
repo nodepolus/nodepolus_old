@@ -1,7 +1,7 @@
-import RoomCode from "../PacketElements/RoomCode.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
-import DisconnectReason from "../PacketElements/DisconnectReason.js";
-import Room from "../../util/Room.js";
+import RoomCode from '../PacketElements/RoomCode'
+import PolusBuffer from '../../util/PolusBuffer'
+import DisconnectReason from '../PacketElements/DisconnectReason'
+import { Room } from '../../util/Room'
 
 export enum EndReason {
 	HumansByVote = 0x00,

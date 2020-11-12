@@ -1,24 +1,27 @@
-import Connection from "./Connection.js";
-import Game from "./Game.js";
-import Publicity from "../data/enums/publicity.js";
-import { RoomSettings } from "../packets/PacketElements/RoomSettings.js";
-import { EventEmitter } from "events";
-import Player from "./Player.js";
-import { Packet as Subpacket } from "../packets/UnreliablePacket.js";
-import Server from "../Server.js";
-import { IGameObject } from "./GameObject.js";
-import { GameDataPacket, GameDataPacketType } from "../packets/Subpackets/GameData.js";
-// @ts-ignore
-import randomstring from "randomstring";
-import { addr2str } from "./misc.js";
-import {inspect, isRegExp} from 'util';
-import { RPCPacket, RPCPacketType } from "../packets/Subpackets/GameDataPackets/RPC.js";
-import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
-import PolusBuffer from "./PolusBuffer.js";
-import { DataPacket } from "../packets/Subpackets/GameDataPackets/Data.js";
-import { ObjectType } from "../packets/Subpackets/GameDataPackets/Spawn.js";
+import { EventEmitter } from 'events'
+import * as randomstring from 'randomstring'
 
-class Room extends EventEmitter {
+import Connection from './Connection'
+import Game from './Game'
+import Publicity from '../data/enums/publicity'
+import { RoomSettings } from '../packets/PacketElements/RoomSettings'
+import { Packet as Subpacket } from '../packets/UnreliablePacket'
+import Server from '../Server'
+import { IGameObject } from './GameObject'
+import { GameDataPacket, GameDataPacketType } from '../packets/Subpackets/GameData'
+
+import { addr2str } from './misc'
+import { RPCPacketType } from '../packets/Subpackets/GameDataPackets/RPC'
+import DisconnectReason from '../packets/PacketElements/DisconnectReason'
+import PolusBuffer from './PolusBuffer'
+import { DataPacket } from '../packets/Subpackets/GameDataPackets/Data'
+import { ObjectType } from '../packets/Subpackets/GameDataPackets/Spawn'
+
+export declare interface Room {
+  on(event: 'close', listener: Function): this
+}
+
+export class Room extends EventEmitter {
     constructor(public server: Server) {
         super();
         this.internalCode = randomstring.generate({
@@ -195,5 +198,3 @@ class Room extends EventEmitter {
         })
     }
 }
-
-export default Room;
