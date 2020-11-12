@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "buffer": "^5.7.0",
     "randomstring": "^1.1.5"
   },
   "devDependencies": {
