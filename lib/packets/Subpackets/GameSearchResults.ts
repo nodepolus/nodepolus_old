@@ -72,19 +72,21 @@ class GameSearchResults {
 		}
 		let GameBuffers = PolusBuffer.concat(...packet.RoomList.map((singleRoom) => {
 			const sizeBuffer = new PolusBuffer(3);
-			const roomBuffer = new PolusBuffer(10);
+			const roomBuffer = new PolusBuffer();
 			const roomIP = singleRoom.IP.split(".").map(e => parseInt(e));
 			roomIP.forEach(int => {
 				roomBuffer.writeU8(int)
 			});
 			roomBuffer.writeU16(singleRoom.Port);
-			roomBuffer.writeU32(RoomCode.stringToInt(singleRoom.RoomCode));
+			roomBuffer.write32(RoomCode.stringToInt(singleRoom.RoomCode));
 			roomBuffer.writeString(singleRoom.RoomName);
 			roomBuffer.writeU8(singleRoom.PlayerCount);
 			roomBuffer.writeVarInt(singleRoom.Age);
 			roomBuffer.writeU8(singleRoom.MapID);
+			roomBuffer.writeU8(singleRoom.ImpostorCount);
 			roomBuffer.writeU8(singleRoom.MaxPlayers);
 			sizeBuffer.writeU16(roomBuffer.length);
+			sizeBuffer.writeU8(0x00)
 			return PolusBuffer.concat(sizeBuffer, roomBuffer);
 		}));
 		const GlobalGameBuffersSize = new PolusBuffer(3);

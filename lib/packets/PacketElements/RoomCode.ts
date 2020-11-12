@@ -49,11 +49,9 @@ class RoomCode {
 	stringToInt(str: string): number {
 		let n:number;
 		if (str.length == 4) {
-			if (this.intToStringV1(this.stringToIntV1(str)) != str) console.log(this.intToStringV1(this.stringToIntV1(str)), str, this.stringToIntV1(str))
 			return this.stringToIntV1(str);
 		}
 		if (str.length == 6) {
-			if (this.intToStringV2(this.stringToIntV2(str)) != str) console.log(this.intToStringV2(this.stringToIntV2(str)), str, this.stringToIntV2(str))
 			return this.stringToIntV2(str);
 		}
 		throw new TypeError("Room Code (" + str + ") length not 4 or 6.");
@@ -61,11 +59,9 @@ class RoomCode {
 
 	intToString(int: number, ver: number = 2): string {
 		if (ver == 1) {
-			if (this.stringToIntV1(this.intToStringV1(int)) != int) console.log(this.stringToIntV1(this.intToStringV1(int)), int, this.intToStringV1(int))
 			return this.intToStringV1(int);
 		}
 		if (ver == 2) {
-			if (this.stringToIntV2(this.intToStringV2(int)) != int) console.log(this.stringToIntV2(this.intToStringV2(int)), int, this.intToStringV2(int))
 			return this.intToStringV2(int);
 		}
 		throw new TypeError("Integer Version (" + ver + ") length not 1 or 2.");

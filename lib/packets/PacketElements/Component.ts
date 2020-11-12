@@ -239,7 +239,7 @@ export const SYSTEM_DOOR_COUNT = [13, 0, 12];
 SYSTEM_HANDLER.set(SystemType.Doors, {
 	read: (buf, rm, spawn) => {
         if (rm.settings.Map == AmongUsMap.POLUS) {
-            console.log("FUCK READING POLUS DOORS", buf.buf.toString("hex"))
+            // console.log("FUCK READING POLUS DOORS", buf.buf.toString("hex"))
             let timerLength = buf.readU8();
             let timers: Map<number, number> = new Map();
             for (let i = 0; i < timerLength; i++) {
@@ -282,7 +282,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
                 buf.writeBoolean(door);
             }
 
-            console.log("FUCK WRITING POLUS DOORS", buf.buf.toString("hex"))
+            // console.log("FUCK WRITING POLUS DOORS", buf.buf.toString("hex"))
         } else {
             if (!spawn) {
                 let maskBuf = new PolusBuffer();
@@ -412,7 +412,7 @@ export default class Component{
 							system: k,
 							data: SYSTEM_HANDLER.get(k).read(pb, this.room, true)
                         };
-                        console.log(`read ship system ${k}`, JSON.stringify((<ShipStatus>this.Data).systems[k]))
+                        // console.log(`read ship system ${k}`, JSON.stringify((<ShipStatus>this.Data).systems[k]))
 					}
 				}else {
                     const mask = Number(pb.readVarInt());
@@ -533,7 +533,7 @@ export default class Component{
                         }
 						let data = (<ShipStatus>this.Data).systems[k];
 						SYSTEM_HANDLER.get(data.system).write(data.data, pb, this.room, true);
-                        console.log(`write ship system ${k}`, pb.buf.toString("hex"))
+                        // console.log(`write ship system ${k}`, pb.buf.toString("hex"))
 					}
 				} else {
                     let mask = (<ShipStatus>this.Data).mask;

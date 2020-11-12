@@ -1,3 +1,5 @@
+const publicIp = require('public-ip');
+
 import { Socket, createSocket, RemoteInfo } from 'dgram'
 import { EventEmitter } from 'events'
 
@@ -5,6 +7,12 @@ import { Room } from './util/Room'
 import Connection from './util/Connection'
 import { Packet as Subpacket } from './packets/UnreliablePacket'
 import { addr2str } from './util/misc'
+import { RoomListing } from './packets/Subpackets/GameSearchResults'
+
+export interface ServerConfig {
+  accessibleIP?: string,
+  accessiblePort?: number
+}
 
 class Server extends EventEmitter {
     port: number;
@@ -12,11 +20,22 @@ class Server extends EventEmitter {
     rooms: Map<string, Room> = new Map();
     clientConnectionMap: Map<string, Connection>;
     private clientIDIncrementer = 256;
-    constructor() {
+    constructor(public config:ServerConfig = {}) {
         super();
         this.clientConnectionMap = new Map();
     }
     public listen(port: number = 22023) {
+      if (!this.config.accessibleIP) {
+        let gthis = this;
+        publicIp.v4().then((result:string) => {
+          gthis.config.accessibleIP = result;
+        }).catch((err:Error) => {
+          throw err;
+        })
+      }
+      if (!this.config.accessiblePort) {
+        this.config.accessiblePort = port
+      }
       this.port = port;
       this.sock = createSocket("udp4");
       this.sock.on("listening", () => this.emit("listening", this.port));
@@ -33,9 +52,10 @@ class Server extends EventEmitter {
       })
     }
     private handlePacket(packet: Subpacket, connection: Connection){
+        let room:Room;
         switch(packet.type) {
-            case 'GameCreate': {
-                let room = new Room(this);
+            case 'GameCreate':
+                room = new Room(this);
                 room.settings = packet.RoomSettings;
                 this.emit("roomCreated", room);
                 this.rooms.set(room.code, room);
@@ -47,9 +67,8 @@ class Server extends EventEmitter {
                   this.rooms.delete(room.code);
                 })
                 break;
-            }
-            case 'JoinGame': {
-              const room = this.rooms.get(packet.RoomCode);
+            case 'JoinGame':
+              room = this.rooms.get(packet.RoomCode);
 
               if (room) {
                 connection.moveRoom(room);
@@ -58,10 +77,43 @@ class Server extends EventEmitter {
               }
 
               break;
-            }
-            default: {
-              connection.player?.room?.handlePacket(packet, connection);
-            }
+            case 'GameSearch':
+              let rooms = [...this.rooms.values()];
+              let MapCounts:number[] = [0,0,0];
+              let RoomList:RoomListing[] = [];
+              for (var i = 0; i < rooms.length; i++) {
+                let room = rooms[i]
+                MapCounts[room.settings.Map]++;
+                console.log(packet)
+                if (packet.RoomSettings.Language != 0 && room.settings.Language != packet.RoomSettings.Language) break
+                console.log("LANG OK")
+                if (packet.RoomSettings.ImpostorCount != 0 && room.settings.ImpostorCount != packet.RoomSettings.ImpostorCount) break
+                console.log("IC OK")
+                if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
+                console.log("MAP OK")
+
+                RoomList.push({
+                  IP: this.config.accessibleIP,
+                  Port: this.config.accessiblePort,
+                  RoomCode: room.code,
+                  RoomName: room.host.player.name,
+                  PlayerCount: room.connections.length,
+                  Age: 0n,
+                  MapID: room.settings.Map,
+                  ImpostorCount: room.settings.ImpostorCount,
+                  MaxPlayers: room.settings.MaxPlayers
+                })
+              }
+              connection.send({
+                type: "GameSearchResults",
+                SkeldGameCount: MapCounts[0],
+                MiraHQGameCount: MapCounts[1],
+                PolusGameCount: MapCounts[2],
+                RoomList
+              })
+            default:
+              connection.player.room.handlePacket(packet, connection);
+              break;
         }
     }
 

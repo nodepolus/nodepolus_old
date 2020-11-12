@@ -3,21 +3,28 @@ import RoomSettings from '../PacketElements/RoomSettings'
 
 export interface GameSearchPacket {
   type: 'GameSearch',
-	RoomSettings: RoomSettings;
+	RoomSettings: RoomSettings,
+	IncludePrivate: boolean
 }
 
 export class GameSearch {
 	parse(packet: PolusBuffer): GameSearchPacket {
 		var rs = new RoomSettings();
+		let IncludePrivate = packet.readBoolean()
 		rs.parse(packet)
 		const gameCreatePacket: GameSearchPacket = {
       type: 'GameSearch',
-			RoomSettings: rs
+			RoomSettings: rs,
+			IncludePrivate
 		}
 		return gameCreatePacket;
 	}
 
 	serialize(packet: GameSearchPacket): PolusBuffer {
-		return packet.RoomSettings.serialize();
+		let buf = new PolusBuffer();
+		buf.writeBoolean(packet.IncludePrivate)
+		let rs = packet.RoomSettings.serialize();
+		buf.writeBytes(rs)
+		return buf;
 	};
 }
