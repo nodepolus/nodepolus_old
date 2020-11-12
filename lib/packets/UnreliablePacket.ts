@@ -1,23 +1,23 @@
-import GameCreate, { GameCreatePacket } from "./Subpackets/GameCreate.js";
-import SetGameCode, { SetGameCodePacket } from "./Subpackets/SetGameCode.js";
-import JoinGame, { JoinGamePacket } from "./Subpackets/JoinGame.js";
-import JoinGameError, { JoinGameErrorPacket } from "./Subpackets/JoinGameError.js";
-import PlayerJoinedGame, { PlayerJoinedGamePacket } from "./Subpackets/PlayerJoinedGame.js";
-import StartGame, { StartGamePacket } from "./Subpackets/StartGame.js";
-import RemovePlayer, { RemovePlayerPacket } from "./Subpackets/RemovePlayer.js";
-import GameData, { GameDataPacket } from "./Subpackets/GameData.js";
-import JoinedGame, { JoinedGamePacket } from "./Subpackets/JoinedGame.js";
-import { EndGamePacket, EndGame } from "./Subpackets/EndGame.js";
-import AlterGame, { AlterGamePacket } from "./Subpackets/AlterGame.js";
-import MasterServers, { MasterServersPacket } from "./Subpackets/MasterServers.js";
-import Redirect, { RedirectPacket } from "./Subpackets/Redirect.js";
-import GameSearchResults, { GameSearchResultsPacket } from "./Subpackets/GameSearchResults.js";
-import Room from "../util/Room.js";
-import PolusBuffer from "../util/PolusBuffer.js";
-import { GameSearchPacket, GameSearch } from "./Subpackets/GameSearch.js";
-import KickPlayer, { KickPlayerPacket } from "./Subpackets/KickPlayer.js";
-import WaitingForHost, { WaitingForHostPacket } from "./Subpackets/WaitingForHost.js";
-import RemoveRoom, { RemoveRoomPacket } from "./Subpackets/RemoveRoom.js";
+import GameCreate, { GameCreatePacket } from './Subpackets/GameCreate'
+import SetGameCode, { SetGameCodePacket } from './Subpackets/SetGameCode'
+import JoinGame, { JoinGamePacket } from './Subpackets/JoinGame'
+import JoinGameError, { JoinGameErrorPacket } from './Subpackets/JoinGameError'
+import PlayerJoinedGame, { PlayerJoinedGamePacket } from './Subpackets/PlayerJoinedGame'
+import StartGame, { StartGamePacket } from './Subpackets/StartGame'
+import RemovePlayer, { RemovePlayerPacket } from './Subpackets/RemovePlayer'
+import GameData, { GameDataPacket } from './Subpackets/GameData'
+import JoinedGame, { JoinedGamePacket } from './Subpackets/JoinedGame'
+import { EndGamePacket, EndGame } from './Subpackets/EndGame'
+import AlterGame, { AlterGamePacket } from './Subpackets/AlterGame'
+import MasterServers, { MasterServersPacket } from './Subpackets/MasterServers'
+import Redirect, { RedirectPacket } from './Subpackets/Redirect'
+import GameSearchResults, { GameSearchResultsPacket } from './Subpackets/GameSearchResults'
+import { Room } from '../util/Room'
+import PolusBuffer from '../util/PolusBuffer'
+import { GameSearchPacket, GameSearch } from './Subpackets/GameSearch'
+import KickPlayer, { KickPlayerPacket } from './Subpackets/KickPlayer'
+import WaitingForHost, { WaitingForHostPacket } from './Subpackets/WaitingForHost'
+import RemoveRoom, { RemoveRoomPacket } from './Subpackets/RemoveRoom'
 
 export type Packet = GameCreatePacket |
 						SetGameCodePacket |

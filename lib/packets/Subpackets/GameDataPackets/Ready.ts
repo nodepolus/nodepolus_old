@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../util/PolusBuffer.js";
-import { GameDataPacketType } from "../GameData.js";
+import PolusBuffer from '../../../util/PolusBuffer'
+import { GameDataPacketType } from '../GameData'
 
 export interface ReadyPacket {
   type: GameDataPacketType.Ready,

@@ -1,5 +1,5 @@
-import PolusBuffer from "../../util/PolusBuffer.js";
-import RoomSettings from "../PacketElements/RoomSettings.js";
+import PolusBuffer from '../../util/PolusBuffer'
+import RoomSettings from '../PacketElements/RoomSettings'
 
 export interface GameSearchPacket {
   type: 'GameSearch',

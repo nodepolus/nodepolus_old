@@ -1,5 +1,5 @@
-import Room from "../../util/Room.js";
-import PolusBuffer from "../../util/PolusBuffer.js";
+import { Room } from '../../util/Room'
+import PolusBuffer from '../../util/PolusBuffer'
 
 export enum DisconnectReasons {
 	ExitGame = 0,
@@ -51,11 +51,11 @@ export default class DisconnectReason {
 				case DisconnectReasons.FocusLost:
 					return "You were disconnected because Among Us was suspended by another app.";
 				case DisconnectReasons.Banned:
-					return "You were banned from " + this.room.code.toString() + ".\r\n\r\nYou cannot rejoin that room.";
+					return `You were banned from ${this.room.code.toString()}.\r\n\r\nYou cannot rejoin that room.`
 				case DisconnectReasons.Hacking:
 					return "You were banned for hacking.\r\n\r\nPlease stop.";
 				case DisconnectReasons.Kicked:
-					return "You were kicked from " + this.room.code.toString() + ".\r\n\r\nYou can rejoin if the room hasn't started.";
+					return `You were kicked from ${this.room.code.toString()}.\r\n\r\nYou can rejoin if the room hasn't started.`
 				case DisconnectReasons.GameFull:
 					return "The game you tried to join is full.\r\n\r\nCheck with the host to see if you can join next round.";
 				case DisconnectReasons.GameStarted:

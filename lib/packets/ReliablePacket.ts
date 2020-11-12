@@ -1,7 +1,7 @@
-import Unreliable, { UnreliablePacket } from "./UnreliablePacket.js";
-import PolusBuffer from "../util/PolusBuffer.js";
-import { ParsedPacket } from "./Packet.js";
-import Room from "../util/Room.js";
+import Unreliable, { UnreliablePacket } from './UnreliablePacket'
+import PolusBuffer from '../util/PolusBuffer'
+import { ParsedPacket } from './Packet'
+import { Room } from '../util/Room'
 
 export interface ReliablePacket {
 	Nonce: number,

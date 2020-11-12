@@ -1,9 +1,10 @@
-import { Socket, createSocket, RemoteInfo } from "dgram";
-import { EventEmitter } from "events";
-import Room from "./util/Room.js";
-import Connection from "./util/Connection.js";
-import { Packet as Subpacket } from "./packets/UnreliablePacket.js";
-import { addr2str } from "./util/misc.js";
+import { Socket, createSocket, RemoteInfo } from 'dgram'
+import { EventEmitter } from 'events'
+
+import { Room } from './util/Room'
+import Connection from './util/Connection'
+import { Packet as Subpacket } from './packets/UnreliablePacket'
+import { addr2str } from './util/misc'
 
 class Server extends EventEmitter {
     port: number;
@@ -88,4 +89,4 @@ class Server extends EventEmitter {
     }
 }
 
-export default Server;
+export default Server

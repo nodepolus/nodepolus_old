@@ -1,11 +1,11 @@
-import Unreliable, { UnreliablePacket } from "./UnreliablePacket.js";
-import Reliable from "./ReliablePacket.js";
-import HelloPacket, { HelloPacketData } from "./HelloPacket.js";
-import Disconnect, {DisconnectPacket} from "./DisconnectPacket.js";
-import AcknowledgementPacket from "./AcknowledgementPacket.js";
-import Ping from "./PingPacket.js";
-import Room from "../util/Room.js";
-import PolusBuffer from "../util/PolusBuffer.js";
+import Unreliable, { UnreliablePacket } from './UnreliablePacket'
+import Reliable from './ReliablePacket'
+import HelloPacket, { HelloPacketData } from './HelloPacket'
+import Disconnect, {DisconnectPacket} from './DisconnectPacket'
+import AcknowledgementPacket from './AcknowledgementPacket'
+import Ping from './PingPacket'
+import { Room } from '../util/Room'
+import PolusBuffer from '../util/PolusBuffer'
 
 export enum PacketType {
     UnreliablePacket = 0x00,

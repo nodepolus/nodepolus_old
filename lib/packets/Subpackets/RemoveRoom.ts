@@ -1,5 +1,5 @@
-import PolusBuffer from "../../util/PolusBuffer.js";
-import DisconnectReason from "../PacketElements/DisconnectReason.js";
+import PolusBuffer from '../../util/PolusBuffer'
+import DisconnectReason from '../PacketElements/DisconnectReason'
 
 export interface RemoveRoomPacket {
 	type: 'RemoveRoom',

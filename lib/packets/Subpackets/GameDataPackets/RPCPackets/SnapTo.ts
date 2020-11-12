@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../../util/PolusBuffer.js";
-import Vector2 from "../../../PacketElements/Vector2.js";
+import PolusBuffer from '../../../../util/PolusBuffer'
+import Vector2 from '../../../PacketElements/Vector2'
 
 export interface SnapToPacket {
 	Position: Vector2

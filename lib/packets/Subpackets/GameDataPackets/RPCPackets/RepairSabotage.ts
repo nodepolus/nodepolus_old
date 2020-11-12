@@ -1,7 +1,7 @@
-import AmongUsMap from "../../../../data/enums/AmongUsMap.js";
-import PolusBuffer from "../../../../util/PolusBuffer.js";
-import Room from "../../../../util/Room.js";
-import SystemType from "../../../PacketElements/SystemType.js"
+import AmongUsMap from '../../../../data/enums/AmongUsMap'
+import PolusBuffer from '../../../../util/PolusBuffer'
+import { Room } from '../../../../util/Room'
+import SystemType from '../../../PacketElements/SystemType'
 
 export enum RepairAction {
 	Repaired = 0x01,
