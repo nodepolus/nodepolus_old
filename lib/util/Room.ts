@@ -104,14 +104,12 @@ export class Room extends EventEmitter {
             case "EndGame":
             case "StartGame":
                 this.connections.forEach(otherClient => {
-                    // @ts-ignore
                     otherClient.send(packet)
                 })
                 break;
             case "KickPlayer":
             case "RemovePlayer":
                 this.connections.forEach(otherClient => {
-                    // @ts-ignore
                     otherClient.send(packet)
                 })
                 //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
@@ -130,7 +128,6 @@ export class Room extends EventEmitter {
                 }
                 if (packet.RecipientClientID) {
                     this.connections.filter(conn => BigInt(conn.ID) == packet.RecipientClientID).forEach(recipient => {
-                        // @ts-ignore
                         recipient.send(packet)
                     })
 
@@ -138,11 +135,9 @@ export class Room extends EventEmitter {
                 }
                 packet.Packets.forEach(GDPacket => {
                     //console.log(GDPacket)
-                    // @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)
                     }
-                    // @ts-ignore
                     if(GDPacket.type == GameDataPacketType.Data) {
                         let gthis = this;
                         this.GameObjects.forEach((gameObject, idx) => {
@@ -155,7 +150,6 @@ export class Room extends EventEmitter {
                 })
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
-                    // @ts-ignore
                     otherClient.send(packet)
                 })
                 break;

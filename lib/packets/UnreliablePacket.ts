@@ -72,7 +72,6 @@ export default class Unreliable {
 			switch (type) {
 				case 0x00:
 					if (this.toServer) {
-						// @ts-ignore
 						packets.push({ type: "GameCreate", ...this.GameCreatePacketHandler.parse(data) });
 					} else {
 						packets.push({ type: "SetGameCode", ...this.SetGameCodePacketHandler.parse(data) });
@@ -142,7 +141,6 @@ export default class Unreliable {
 			// @ts-ignore
 			let serialized:PolusBuffer = this[subpacket.type + "PacketHandler"].serialize(subpacket)
 			let type: number;
-			// @ts-ignore
 			switch(subpacket.type) {
 				case 'GameCreate':
 				case 'SetGameCode':

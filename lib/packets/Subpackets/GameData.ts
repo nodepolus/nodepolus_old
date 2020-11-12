@@ -50,27 +50,21 @@ export default class GameData {
             const rawdata = packet.readBytes(length);
 			switch(type) {
 				case GameDataPacketType.Data:
-					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Data, ...this.DataPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.RPC:
-					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.RPC, ...this.RPCPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Spawn:
-					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Spawn, ...this.SpawnPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Despawn:
-					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Despawn, ...this.DespawnPacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.SceneChange:
-					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.SceneChange, ...this.SceneChangePacketHandler.parse(rawdata) })
 					break;
 				case GameDataPacketType.Ready:
-					// @ts-ignore
 					data.Packets.push({ type: GameDataPacketType.Ready, ...this.ReadyPacketHandler.parse(rawdata) })
 					break;
 			}
@@ -87,30 +81,23 @@ export default class GameData {
 		}
 		pb.writeBytes(PolusBuffer.concat(...packet.Packets.map(subpacket => {
 			let dataPB;
-			// @ts-ignore
 			switch(subpacket.type) {
 				case GameDataPacketType.Data:
-					// @ts-ignore
 					dataPB = this.DataPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.RPC:
-					// @ts-ignore
 					dataPB = this.RPCPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.Spawn:
-					// @ts-ignore
 					dataPB = this.SpawnPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.Despawn:
-					// @ts-ignore
 					dataPB = this.DespawnPacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.SceneChange:
-					// @ts-ignore
 					dataPB = this.SceneChangePacketHandler.serialize(subpacket)
 					break;
 				case GameDataPacketType.Ready:
-					// @ts-ignore
 					dataPB = this.ReadyPacketHandler.serialize(subpacket)
 					break;
 				default:
@@ -119,7 +106,6 @@ export default class GameData {
 			}
 			let dataPBlenPB = new PolusBuffer(3)
 			dataPBlenPB.writeU16(dataPB.length)
-			// @ts-ignore
 			dataPBlenPB.writeU8(subpacket.type)
 			return PolusBuffer.concat(dataPBlenPB, dataPB)
 		})))
