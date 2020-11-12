@@ -45,8 +45,11 @@ class Server extends EventEmitter {
       });
       this.sock.bind(this.port);
     }
-    public close() {
+    public close(reason:string|number = 19) {
       return new Promise((resolve) => {
+        [...this.rooms.values()].forEach((room:Room) => {
+          room.close(reason)
+        })
         this.clientConnectionMap = new Map();
         this.sock.close(resolve);
       })
@@ -84,13 +87,9 @@ class Server extends EventEmitter {
               for (var i = 0; i < rooms.length; i++) {
                 let room = rooms[i]
                 MapCounts[room.settings.Map]++;
-                console.log(packet)
                 if (packet.RoomSettings.Language != 0 && room.settings.Language != packet.RoomSettings.Language) break
-                console.log("LANG OK")
                 if (packet.RoomSettings.ImpostorCount != 0 && room.settings.ImpostorCount != packet.RoomSettings.ImpostorCount) break
-                console.log("IC OK")
                 if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
-                console.log("MAP OK")
 
                 RoomList.push({
                   IP: this.config.accessibleIP,

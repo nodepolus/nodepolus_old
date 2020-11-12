@@ -48,7 +48,7 @@ export class Room extends EventEmitter {
     };
     public GameObjects:IGameObject[] = [];
     game: Game;
-    publicity: Publicity;
+    publicity: Publicity = Publicity.Private;
     server: Server;
     setCode(code:string) {
         this.code = code;

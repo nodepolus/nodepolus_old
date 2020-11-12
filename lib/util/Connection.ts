@@ -35,7 +35,7 @@ export default class Connection extends EventEmitter{
             this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
             this.player.room = nullRoom;
             this.on("message", (msg) => {
-                // console.log(msg.toString('hex'))
+                console.log(this.ID, msg.toString('hex'))
                 const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
                 // console.log("RawParsed", parsed)
                 const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
@@ -137,9 +137,9 @@ export default class Connection extends EventEmitter{
         this.groupArr = [];
     }
     public endUnreliablePacketGroup = this.endPacketGroup;
-    disconnect() {
+    disconnect(reason?: DisconnectReason) {
         this.emit("close")
-        this.write(PacketType.DisconnectPacket, {DisconnectReason: new DisconnectReason()})
+        this.write(PacketType.DisconnectPacket, {DisconnectReason: reason?reason:new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {
         let pb = new Packet(this.player ? (this.player.room ? this.player.room : nullRoom) : nullRoom, this.isToClient).serialize({
