@@ -7,9 +7,8 @@ export interface DisconnectPacket {
 }
 
 class Disconnect {
-	constructor(public room: Room) {}
-	parse(packet: PolusBuffer): DisconnectPacket {
-		return {DisconnectReason: new DisconnectReason(packet, this.room)};
+	parse(packet: PolusBuffer, room: Room): DisconnectPacket {
+		return {DisconnectReason: new DisconnectReason(packet, room)};
 	}
 	serialize(packet: DisconnectPacket): PolusBuffer {
 		return packet.DisconnectReason.serialize()

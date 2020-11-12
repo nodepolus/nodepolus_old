@@ -27,15 +27,14 @@ export enum GameDataPacketType {
 }
 
 export default class GameData {
-	constructor(private room: Room, private toServer: boolean){}
-	DataPacketHandler = new Data(this.room);
-	RPCPacketHandler = new RPC(this.room);
-	SpawnPacketHandler = new Spawn(this.room);
+	DataPacketHandler = new Data();
+	RPCPacketHandler = new RPC();
+	SpawnPacketHandler = new Spawn();
 	DespawnPacketHandler = new Despawn();
 	SceneChangePacketHandler = new SceneChange();
 	ReadyPacketHandler = new Ready();
 
-	parse(packet: PolusBuffer, isGameDataTo: Boolean): GameDataPacket {
+	parse(packet: PolusBuffer, isGameDataTo: Boolean, room: Room): GameDataPacket {
 		let data: GameDataPacket = {
       		type: 'GameData',
 			RoomCode: RoomCode.intToString(packet.read32()),
@@ -50,22 +49,22 @@ export default class GameData {
             const rawdata = packet.readBytes(length);
 			switch(type) {
 				case GameDataPacketType.Data:
-					data.Packets.push({ type: GameDataPacketType.Data, ...this.DataPacketHandler.parse(rawdata) })
+					data.Packets.push(this.DataPacketHandler.parse(rawdata, room))
 					break;
 				case GameDataPacketType.RPC:
-					data.Packets.push({ type: GameDataPacketType.RPC, ...this.RPCPacketHandler.parse(rawdata) })
+					data.Packets.push(this.RPCPacketHandler.parse(rawdata, room))
 					break;
 				case GameDataPacketType.Spawn:
-					data.Packets.push({ type: GameDataPacketType.Spawn, ...this.SpawnPacketHandler.parse(rawdata) })
+					data.Packets.push(this.SpawnPacketHandler.parse(rawdata, room))
 					break;
 				case GameDataPacketType.Despawn:
-					data.Packets.push({ type: GameDataPacketType.Despawn, ...this.DespawnPacketHandler.parse(rawdata) })
+					data.Packets.push(this.DespawnPacketHandler.parse(rawdata))
 					break;
 				case GameDataPacketType.SceneChange:
-					data.Packets.push({ type: GameDataPacketType.SceneChange, ...this.SceneChangePacketHandler.parse(rawdata) })
+					data.Packets.push(this.SceneChangePacketHandler.parse(rawdata))
 					break;
 				case GameDataPacketType.Ready:
-					data.Packets.push({ type: GameDataPacketType.Ready, ...this.ReadyPacketHandler.parse(rawdata) })
+					data.Packets.push(this.ReadyPacketHandler.parse(rawdata))
 					break;
 			}
 
@@ -73,7 +72,7 @@ export default class GameData {
 		return data;
 	}
 
-	serialize(packet: GameDataPacket): PolusBuffer {
+	serialize(packet: GameDataPacket, room: Room): PolusBuffer {
 		var pb = new PolusBuffer();
 		pb.write32(RoomCode.stringToInt(packet.RoomCode))
 		if (packet.RecipientClientID || packet.RecipientClientID === 0n) {
@@ -83,13 +82,13 @@ export default class GameData {
 			let dataPB;
 			switch(subpacket.type) {
 				case GameDataPacketType.Data:
-					dataPB = this.DataPacketHandler.serialize(subpacket)
+					dataPB = this.DataPacketHandler.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.RPC:
-					dataPB = this.RPCPacketHandler.serialize(subpacket)
+					dataPB = this.RPCPacketHandler.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.Spawn:
-					dataPB = this.SpawnPacketHandler.serialize(subpacket)
+					dataPB = this.SpawnPacketHandler.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.Despawn:
 					dataPB = this.DespawnPacketHandler.serialize(subpacket)

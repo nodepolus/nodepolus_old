@@ -8,12 +8,10 @@ export interface JoinGameErrorPacket {
 }
 
 export default class JoinGameError {
-	constructor(private room: Room) {}
-
-	parse(packet: PolusBuffer): JoinGameErrorPacket {
+	parse(packet: PolusBuffer, room: Room): JoinGameErrorPacket {
 		return {
       type: 'JoinGameError',
-      DisconnectReason: new DisconnectReason(packet, this.room)
+      DisconnectReason: new DisconnectReason(packet, room)
     }
 	}
 

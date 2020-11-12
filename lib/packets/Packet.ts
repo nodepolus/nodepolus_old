@@ -26,11 +26,16 @@ export interface ParsedPacket {
 };
 
 export default class Packet {
-    constructor(private room: Room, private toServer: boolean){}
-    UnreliablePacketHandler = new Unreliable(this.room, this.toServer);
-    ReliablePacketHandler = new Reliable(this.room, this.toServer);
+  toServer: boolean
+
+    constructor(toServer: boolean) {
+      this.toServer = toServer
+    }
+
+    UnreliablePacketHandler = new Unreliable();
+    ReliablePacketHandler = new Reliable();
     HelloPacketHandler = new HelloPacket();
-    DisconnectPacketHandler = new Disconnect(this.room);
+    DisconnectPacketHandler = new Disconnect();
     AcknowledgementPacketHandler = new AcknowledgementPacket();
     PingPacketHandler = new Ping();
     /**
@@ -39,20 +44,20 @@ export default class Packet {
      * 
      * @param {PolusBuffer} packet
      */
-    parse(packet: PolusBuffer): ParsedPacket {
+    parse(packet: PolusBuffer, room: Room): ParsedPacket {
         const packetType = packet.readU8();
         switch (packetType) {
             case PacketType.ReliablePacket:
-                return { Reliable: true, Type: PacketType.ReliablePacket, ...this.ReliablePacketHandler.parse(packet) };
+                return { Reliable: true, Type: PacketType.ReliablePacket, ...this.ReliablePacketHandler.parse(packet, room, this.toServer) };
 
             case PacketType.UnreliablePacket:
-                return { Reliable: false, Type: PacketType.UnreliablePacket, Data: this.UnreliablePacketHandler.parse(packet) };
+                return { Reliable: false, Type: PacketType.UnreliablePacket, Data: this.UnreliablePacketHandler.parse(packet, room, this.toServer) };
 
             case PacketType.HelloPacket:
                 return { Reliable: true, Type: PacketType.HelloPacket, ...this.HelloPacketHandler.parse(packet) };
 
             case PacketType.DisconnectPacket:
-                return { Reliable: false, Type: PacketType.DisconnectPacket, Data: this.DisconnectPacketHandler.parse(packet) };
+                return { Reliable: false, Type: PacketType.DisconnectPacket, Data: this.DisconnectPacketHandler.parse(packet, room) };
 
             case PacketType.AcknowledgementPacket:
                 return { Reliable: false, Type: PacketType.AcknowledgementPacket, ...this.AcknowledgementPacketHandler.parse(packet) };

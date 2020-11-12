@@ -104,7 +104,6 @@ export enum RPCPacketType {
 }
 
 export default class GameData {
-	constructor(private room: Room) { }
 	PlayAnimationPacketHandler = new PlayAnimation();
 	CompleteTaskPacketHandler = new CompleteTask();
 	SyncSettingsPacketHandler = new SyncSettings();
@@ -132,11 +131,11 @@ export default class GameData {
 	ClearVotePacketHandler = new ClearVote();
 	CastVoteKickPacketHandler = new CastVoteKick();
 	CloseDoorsOfTypePacketHandler = new CloseDoorsOfType();
-	RepairSabotagePacketHandler = new RepairSabotage(this.room);
+	RepairSabotagePacketHandler = new RepairSabotage();
 	SetTasksPacketHandler = new SetTasks();
 	UpdateGameDataPacketHandler = new UpdateGameData();
 
-	parse(packet: PolusBuffer): RPCPacket {
+	parse(packet: PolusBuffer, room: Room): RPCPacket {
 		let data: RPCPacket = {
       type: GameDataPacketType.RPC,
 			NetID: -1n,
@@ -153,7 +152,7 @@ export default class GameData {
 				data.Packet = { RPCFlag: data.RPCFlag, ...this.CompleteTaskPacketHandler.parse(packet) }
 				return data;
 			case RPCPacketType.SyncSettings:
-				data.Packet = { RPCFlag: data.RPCFlag, ...this.SyncSettingsPacketHandler.parse(packet) }
+				data.Packet = { RPCFlag: data.RPCFlag, ...this.SyncSettingsPacketHandler.parse(packet, room) }
 				return data;
 			case RPCPacketType.SetInfected:
 				data.Packet = { RPCFlag: data.RPCFlag, ...this.SetInfectedPacketHandler.parse(packet) }
@@ -231,7 +230,7 @@ export default class GameData {
 				data.Packet = { RPCFlag: data.RPCFlag, ...this.CloseDoorsOfTypePacketHandler.parse(packet) }
 				return data;
 			case RPCPacketType.RepairSabotage:
-				data.Packet = { RPCFlag: data.RPCFlag, ...this.RepairSabotagePacketHandler.parse(packet) }
+				data.Packet = { RPCFlag: data.RPCFlag, ...this.RepairSabotagePacketHandler.parse(packet, room) }
 				return data;
 			case RPCPacketType.SetTasks:
 				data.Packet = { RPCFlag: data.RPCFlag, ...this.SetTasksPacketHandler.parse(packet) }
@@ -242,7 +241,7 @@ export default class GameData {
 		}
 	}
 
-	serialize(packet: RPCPacket): PolusBuffer {
+	serialize(packet: RPCPacket, room: Room): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.writeVarInt(packet.NetID);
 		buf.writeU8(packet.RPCFlag);
@@ -332,7 +331,7 @@ export default class GameData {
 				buf.writeBytes(this.CloseDoorsOfTypePacketHandler.serialize(<CloseDoorsOfTypePacket>packet.Packet))
 				break;
 			case RPCPacketType.RepairSabotage:
-				buf.writeBytes(this.RepairSabotagePacketHandler.serialize(<RepairSabotagePacket>packet.Packet))
+				buf.writeBytes(this.RepairSabotagePacketHandler.serialize(<RepairSabotagePacket>packet.Packet, room))
 				break;
 			case RPCPacketType.SetTasks:
 				buf.writeBytes(this.SetTasksPacketHandler.serialize(<SetTasksPacket>packet.Packet))

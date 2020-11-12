@@ -61,7 +61,7 @@ class GameSearchResults {
 	}
 
 	serialize(packet: GameSearchResultsPacket): PolusBuffer {
-		let GameCountBuffer: PolusBuffer;
+		let GameCountBuffer: PolusBuffer | null = null;
 		if (packet.SkeldGameCount != undefined && packet.MiraHQGameCount != undefined && packet.PolusGameCount != undefined) {
 			GameCountBuffer = new PolusBuffer(15);
 			GameCountBuffer.writeU16(12);

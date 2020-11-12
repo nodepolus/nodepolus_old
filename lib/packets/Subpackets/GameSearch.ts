@@ -1,4 +1,5 @@
 import PolusBuffer from '../../util/PolusBuffer'
+import { Room } from '../../util/Room'
 import RoomSettings from '../PacketElements/RoomSettings'
 
 export interface GameSearchPacket {
@@ -8,9 +9,9 @@ export interface GameSearchPacket {
 }
 
 export class GameSearch {
-	parse(packet: PolusBuffer): GameSearchPacket {
-		var rs = new RoomSettings();
-		let IncludePrivate = packet.readBoolean()
+	parse(packet: PolusBuffer, room: Room): GameSearchPacket {
+    var rs = new RoomSettings(room);
+    let IncludePrivate = packet.readBoolean()
 		rs.parse(packet)
 		const gameCreatePacket: GameSearchPacket = {
       type: 'GameSearch',

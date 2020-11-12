@@ -1,9 +1,8 @@
-import Server from '../lib/server'
+import { Server } from '../lib/Server'
 import AnnouncementServer from "../lib/announcements/Server";
 import { FreeWeekendState } from '../lib/announcements/packets/subpackets/FreeWeekend';
 import Text from '../lib/util/Text';
 
-const server = new Server();
 const annServer = new AnnouncementServer({
 	defaultMessage: new Text("Someone should create")
 		.append(" ")
@@ -12,12 +11,16 @@ const annServer = new AnnouncementServer({
 		.clearState()
 		.append("!"),
 	port: 22024,
-	freeWeekend: FreeWeekendState.NotFree
+  freeWeekend: FreeWeekendState.NotFree
+})
+
+const server = new Server({
+  port: 22023
 })
 
 process.stdin.on("data", () => {
   	process.exit(1);
 })
 
-server.listen(22023);
-annServer.listen();
+server.listen()
+annServer.listen()

@@ -9,12 +9,16 @@ export interface SetTasksPacket {
 export default class SetTasks {
 
 	parse(packet: PolusBuffer): SetTasksPacket {
+    const playerId = packet.readU8()
+    const taskCount = packet.readVarInt()
+
 		let returnData: SetTasksPacket = {
-			PlayerID: packet.readU8(),
-			TaskCount: packet.readVarInt(),
+			PlayerID: playerId,
+			TaskCount: taskCount,
 			Tasks: []
-		};
-		for (let i = 0; i < returnData.TaskCount; i++) {
+    };
+
+		for (let i = 0; i < taskCount; i++) {
 			returnData.Tasks[i] = packet.readU8();
 		}
 		return returnData;

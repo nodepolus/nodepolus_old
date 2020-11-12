@@ -19,15 +19,14 @@ export interface LateRejectionPacket {
 export type RemovePlayerPacket = RemovePlayerProperPacket|LateRejectionPacket
 
 class RemovePlayer {
-	constructor(public room: Room) {}
-	parse(packet: PolusBuffer): RemovePlayerPacket {
+	parse(packet: PolusBuffer, room: Room): RemovePlayerPacket {
 		if(packet.dataRemaining().length >= 8) {
 			let roomCode = RoomCode.intToString(packet.read32())
 			let PlayerClientID = packet.readU32()
 			let HostClientID = packet.readU32();
 			let DisconnectReasonts;
 			if(packet.dataRemaining().length > 0) {
-				DisconnectReasonts = new DisconnectReason(packet, this.room)
+				DisconnectReasonts = new DisconnectReason(packet, room)
 			}
 			return {
 				type: 'RemovePlayer',

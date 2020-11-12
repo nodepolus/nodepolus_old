@@ -6,7 +6,6 @@ import Game from './Game'
 import Publicity from '../data/enums/publicity'
 import { RoomSettings } from '../packets/PacketElements/RoomSettings'
 import { Packet as Subpacket } from '../packets/UnreliablePacket'
-import Server from '../Server'
 import { IGameObject } from './GameObject'
 import { GameDataPacket, GameDataPacketType } from '../packets/Subpackets/GameData'
 
@@ -22,7 +21,7 @@ export declare interface Room {
 }
 
 export class Room extends EventEmitter {
-    constructor(public server: Server) {
+    constructor() {
         super();
         this.internalCode = randomstring.generate({
             length: 6,
@@ -37,7 +36,7 @@ export class Room extends EventEmitter {
     public set code(input: string) {
         throw new Error("Use <Room>#setCode(<string>) to set the room code")
     }
-    private internalSettings:RoomSettings = new RoomSettings();
+    private internalSettings:RoomSettings = new RoomSettings(this);
     public get settings(): RoomSettings {
         return this.internalSettings
     };
@@ -47,9 +46,8 @@ export class Room extends EventEmitter {
         this.syncSettings();
     };
     public GameObjects:IGameObject[] = [];
-    game: Game;
-    publicity: Publicity = Publicity.Private;
-    server: Server;
+    game?: Game;
+    publicity?: Publicity = Publicity.Private;
     setCode(code:string) {
         this.code = code;
         this.connections.forEach(singleCon => {
@@ -96,8 +94,8 @@ export class Room extends EventEmitter {
             })
         })
     }
-    get host():Connection {
-        return this.connections.find(con => con.player.isHost);
+    get host(): Connection | undefined {
+      return this.connections.find(con => con?.player?.isHost);
     }
     handlePacket(packet: Subpacket, connection: Connection) {
         switch(packet.type) {
@@ -121,7 +119,7 @@ export class Room extends EventEmitter {
                       type: 'RemovePlayer',
                       RoomCode: this.code,
                       PlayerClientID: 2147483646,
-                      HostClientID: this.host.ID,
+                      HostClientID: this.host?.ID || -1,
                       DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
                     })
                     break;
@@ -156,20 +154,24 @@ export class Room extends EventEmitter {
         }
     }
     handleNewConnection(connection: Connection) {
+      if (!connection.player) throw new Error('Tried to handle new connection while missing player')
+
         if(!this.host) connection.player.isHost = true;
         this.connections.forEach(conn => {
           conn.send({
             type: 'PlayerJoinedGame',
             RoomCode: this.code,
             PlayerClientID: connection.ID,
-            HostClientID: this.host.ID
+            HostClientID: this.host?.ID || -1
           })
         })
         this.connections.push(connection);
         connection.on('close', () => {
             this.connections.splice(this.connections.indexOf(connection), 1);
-            if(connection.player.isHost && this.connections.length > 0) {
-                this.connections[0].player.isHost = true;
+            if(connection?.player?.isHost && this.connections.length > 0) {
+              const firstConnection = this.connections[0]
+              if (!firstConnection || !firstConnection.player) throw new Error('Missing more connections to set to host')
+              firstConnection.player.isHost = true
             }
             this.connections.forEach(TSconnection => {
                 TSconnection.startPacketGroup();
@@ -177,7 +179,7 @@ export class Room extends EventEmitter {
                     type: "RemovePlayer",
                     RoomCode: this.code,
                     PlayerClientID: connection.ID,
-                    HostClientID: this.host.ID,
+                    HostClientID: this.host?.ID || -1,
                     DisconnectReason: new DisconnectReason(0)
                 })
                 TSconnection.endPacketGroup();

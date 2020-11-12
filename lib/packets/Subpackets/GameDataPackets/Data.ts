@@ -9,21 +9,25 @@ export interface DataPacket {
 }
 
 export default class Data {
-	constructor(private room:Room) {}
-	parse(packet: PolusBuffer): DataPacket {
+	parse(packet: PolusBuffer, room: Room): DataPacket {
 		let ComponentNetID = packet.readVarInt();
-		let Component = this.room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
+    let component = room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
+
+    if (!component) {
+      throw new Error('Could not find matching GameObject for component: ' + ComponentNetID)
+    }
+    
 		return {
 			type: GameDataPacketType.Data,
-			Component: Component.parse(packet)
+			Component: component.parse(packet, room)
 		};
 	}
-	serialize(packet: DataPacket): PolusBuffer {
+	serialize(packet: DataPacket, room: Room): PolusBuffer {
 		let {Component} = packet;
 		let ComponentNetID = Component.netID;
 		let buf = new PolusBuffer();
 		buf.writeVarInt(ComponentNetID);
-		let serialized = Component.serialize();
+		let serialized = Component.serialize(room);
 		buf.writeBytes(serialized);
 		return buf;
 	};

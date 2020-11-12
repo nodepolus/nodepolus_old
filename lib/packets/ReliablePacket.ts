@@ -9,16 +9,17 @@ export interface ReliablePacket {
 }
 
 class Reliable {
-	constructor(private room: Room, private toServer: boolean) {}
-	UnreliablePacketHandler = new Unreliable(this.room, this.toServer)
-	parse(packet: PolusBuffer): ReliablePacket {
+	UnreliablePacketHandler = new Unreliable()
+	parse(packet: PolusBuffer, room: Room, toServer: boolean): ReliablePacket {
 		return {
 			Nonce: packet.readU16(true),
-			Data: this.UnreliablePacketHandler.parse(packet)
+			Data: this.UnreliablePacketHandler.parse(packet, room, toServer)
 		};
 	}
 	serialize(packet: ParsedPacket): PolusBuffer {
-		var buf = new PolusBuffer();
+    var buf = new PolusBuffer();
+    // if (!packet.Nonce) throw new Error('Tried to serialize a reliable packet that is missing a nonce')
+    // @ts-ignore
 		buf.writeU16(packet.Nonce, true);
 		//@ts-ignore
 		buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data))

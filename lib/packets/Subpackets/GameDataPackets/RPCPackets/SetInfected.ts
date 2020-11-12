@@ -8,11 +8,13 @@ export interface SetInfectedPacket {
 export default class SetInfected {
 
 	parse(packet: PolusBuffer): SetInfectedPacket {
+    const count = packet.readVarInt()
+
 		let returnData: SetInfectedPacket = {
-			InfectedCount: packet.readVarInt(),
+			InfectedCount: count,
 			InfectedPlayerIDs: []
 		};
-		for (let i = 0; i < returnData.InfectedCount; i++) {
+		for (let i = 0; i < count; i++) {
 			returnData.InfectedPlayerIDs[i] = packet.readVarInt();
 		}
 		return returnData;

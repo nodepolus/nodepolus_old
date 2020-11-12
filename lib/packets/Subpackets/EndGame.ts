@@ -1,7 +1,5 @@
 import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
-import DisconnectReason from '../PacketElements/DisconnectReason'
-import { Room } from '../../util/Room'
 
 export enum EndReason {
 	HumansByVote = 0x00,
@@ -21,7 +19,6 @@ export interface EndGamePacket {
 }
 
 export class EndGame {
-	constructor(private room: Room) {}
 	parse(packet: PolusBuffer): EndGamePacket {
 		return {
       type: 'EndGame',

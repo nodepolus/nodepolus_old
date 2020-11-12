@@ -9,11 +9,12 @@ import Connection from './Connection'
 
 export default class Player extends EventEmitter {
 	room?: Room;
-	playerID: number;
-	connection: Connection;
-	netID: number;
-	get components():Component[] {
-		return this.room.GameObjects.find(GO => GO.ClientID == BigInt(this.connection.ID)).Components
+	playerID: number = -1
+	connection?: Connection;
+	netID: number = -1
+	get components(): Component[] {
+    if (!this.room) return []
+		return this.room.GameObjects.find(GO => GO.ClientID == BigInt(this.connection?.ID))?.Components || []
 	}
 	get position():Vector2 {
 		// do pos handling
@@ -23,12 +24,12 @@ export default class Player extends EventEmitter {
 		// do accel handling
 		return new Vector2(0,0)
 	};
-	color: PlayerColor;
-	skin: PlayerSkin;
-	hat: PlayerHat;
-	pet: PlayerPet;
-	tasks: Task[];
-	isAlive: boolean;
+	color: PlayerColor = PlayerColor.BLACK
+	skin: PlayerSkin = PlayerSkin.None
+	hat: PlayerHat = PlayerHat.None
+	pet: PlayerPet = PlayerPet.None
+	tasks: Task[] = []
+	isAlive: boolean = false
 	get votedFor():Player|undefined {
 		return undefined;
 	}; 
@@ -38,15 +39,15 @@ export default class Player extends EventEmitter {
 	get calledMeeting():boolean {
 		return false
 	}
-	isScanning: boolean;
-	isImpostor: boolean;
-	isVenting: boolean;
+	isScanning: boolean = false
+	isImpostor: boolean = false
+	isVenting: boolean = false
 	vent?: Vent;
-	isExiled: boolean;
-	isKilled: boolean;
-	hasDisconnected: boolean;
-	scene: string;
-	isHost: boolean;
+	isExiled: boolean = false
+	isKilled: boolean = false
+	hasDisconnected: boolean = false
+	scene: string = 'unknown'
+	isHost: boolean = false
 
 	constructor(public name?: string, private ClientVersion?: number, public HazelVersion?: number) {
 		super();

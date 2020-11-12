@@ -11,19 +11,19 @@ import { Room } from './Room'
 import { UnreliablePacket, Packet as UnreliablePacketPacket } from '../packets/UnreliablePacket'
 import { GameDataPacketType } from '../packets/Subpackets/GameData'
 
-let nullRoom = new Room(null);
+let nullRoom = new Room()
 
 export default class Connection extends EventEmitter{
-    player: Player;
+    player?: Player;
     nonce: number = 1;
-    private inGroup:boolean;
+    private inGroup?: boolean;
     private groupArr: UnreliablePacketPacket[] = [];
-    private packetGroupReliability: PacketType;
+    private packetGroupReliability: PacketType = PacketType.ReliablePacket
     unacknowledgedPackets: Map<number, number> = new Map();
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
         super();
         this.once("message", (msg) => {
-            const parsed = new Packet(nullRoom, this.isToClient).parse(new PolusBuffer(msg));
+            const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), nullRoom);
             if (parsed.Type != PacketType.HelloPacket) {
                 this.disconnect();
             }
@@ -35,12 +35,16 @@ export default class Connection extends EventEmitter{
             this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
             this.player.room = nullRoom;
             this.on("message", (msg) => {
-                console.log(this.ID, msg.toString('hex'))
-                const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
+              if (!this.player?.room) {
+                throw new Error('Tried to parse packet for a player without a room')
+              }
+                // console.log(msg.toString('hex'))
+                const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), this.player.room)
                 // console.log("RawParsed", parsed)
-                const serialized = new Packet(this.player.room, this.isToClient).serialize(parsed);
+                const serialized = new Packet(this.isToClient).serialize(parsed);
                 try {
-                    if (packet.Type != PacketType.UnreliablePacket)assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
+                    if (packet.Type != PacketType.UnreliablePacket)
+                      assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
                 } catch(err) {
                     console.log("actual  ", serialized.buf.toString('hex'))
                     console.log("expected", msg.toString('hex'))
@@ -60,6 +64,8 @@ export default class Connection extends EventEmitter{
                 this.disconnect();
                 break;
             case PacketType.AcknowledgementPacket:
+              // if (!packet.Nonce) throw new Error('Error: AcknowledgePackage missing nonce')
+              // @ts-ignore
                 this.unacknowledgedPackets.delete(packet.Nonce)
                 break;
             case PacketType.PingPacket:
@@ -73,34 +79,44 @@ export default class Connection extends EventEmitter{
         }
     }
     private write(type: PacketType, data: ParsedPacketData){
-        let o:ParsedPacket = {
-            Type: type,
-            Reliable: Packet.isReliable(type),
-            Data: data
-        }
-        if(o.Reliable) {
-            o.Nonce = this.newNonce();
-        }
-        let pb = new Packet(this.player?(this.player.room?this.player.room:nullRoom):nullRoom, this.isToClient).serialize(o);
-        // console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
-        this.socket.send(pb.buf, this.address.port, this.address.address)
-        this.unacknowledgedPackets.set(o.Nonce, 0);
-        if(o.Reliable) {
-            let interval = setInterval(() => {
-                if(this.unacknowledgedPackets.has(o.Nonce)) {
-                    this.unacknowledgedPackets.set(o.Nonce, this.unacknowledgedPackets.get(o.Nonce) + 1);
-                    if(this.unacknowledgedPackets.get(o.Nonce) == 10) {
-                        this.disconnect()
-                        clearInterval(interval)
-                    } else {
-                        this.socket.send(pb.buf, this.address.port, this.address.address)
-                    }
-                } else {
-                    clearInterval(interval)
-                }
-            }, 1000)
-        }
-    }
+      let o: ParsedPacket = {
+          Type: type,
+          Reliable: Packet.isReliable(type),
+          Data: data
+      }
+      if(o.Reliable) {
+          o.Nonce = this.newNonce();
+      }
+      let pb = new Packet(this.isToClient).serialize(o);
+      //console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
+      this.socket.send(pb.buf, this.address.port, this.address.address)
+
+      const nonce = o.Nonce
+
+      if (nonce === undefined) {
+        throw new Error('Got undefined nonce in packet')
+      }
+
+      this.unacknowledgedPackets.set(nonce, 0);
+      if(o.Reliable) {
+          let interval = setInterval(() => {
+            const unackedPackets = this.unacknowledgedPackets.get(nonce) || 0
+
+            if (!unackedPackets) {
+              clearInterval(interval)
+            } else {
+              this.unacknowledgedPackets.set(nonce, unackedPackets + 1)
+
+              if(this.unacknowledgedPackets.get(nonce) == 10) {
+                  this.disconnect()
+                  clearInterval(interval)
+              } else {
+                  this.socket.send(pb.buf, this.address.port, this.address.address)
+              }
+            }
+          }, 1000)
+      }
+  }
     public send(packet: UnreliablePacketPacket) {
         if(!this.inGroup) {
             this.startPacketGroup();
@@ -142,7 +158,7 @@ export default class Connection extends EventEmitter{
         this.write(PacketType.DisconnectPacket, {DisconnectReason: reason?reason:new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {
-        let pb = new Packet(this.player ? (this.player.room ? this.player.room : nullRoom) : nullRoom, this.isToClient).serialize({
+        let pb = new Packet(this.isToClient).serialize({
             Type: PacketType.AcknowledgementPacket,
             Reliable: false,
             Nonce: packet.Nonce
@@ -155,6 +171,8 @@ export default class Connection extends EventEmitter{
         return i;
     }
     public moveRoom(room: Room) {
+      if (!this.player) throw new Error('Tried to move room while missing a player')
+
         this.player.room = room;
         room.handleNewConnection(this);
         this.startPacketGroup();
@@ -162,7 +180,7 @@ export default class Connection extends EventEmitter{
           type: 'JoinedGame',
           RoomCode: room.code,
           PlayerClientID: this.ID,
-          HostClientID: room.host.ID,
+          HostClientID: room.host?.ID || -1,
           OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID)),
         })
 
