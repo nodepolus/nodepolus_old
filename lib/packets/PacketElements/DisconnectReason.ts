@@ -2,7 +2,6 @@ import { Room } from '../../util/Room'
 import PolusBuffer from '../../util/PolusBuffer'
 
 export enum DisconnectReasons {
-  ServerError = -1,
 	ExitGame = 0,
 	GameFull = 1,
 	GameStarted = 2,
@@ -25,7 +24,7 @@ export enum DisconnectReasons {
 };
 
 export default class DisconnectReason {
-	reasonInt: number = DisconnectReasons.ServerError
+	reasonInt: number = DisconnectReasons.Error
   reason: string = 'Default disconnect reason, you should not see this'
 
   room?: Room
@@ -52,8 +51,6 @@ export default class DisconnectReason {
 	toString() {
 		if(this.room) {
 			switch (this.reasonInt) {
-        case DisconnectReasons.ServerError:
-          return "There was a server error, please join discord and report."
 				case DisconnectReasons.ServerFull:
 					return "The Among Us servers are overloaded.\r\n\r\nSorry! Please try again later!";
 				case DisconnectReasons.FocusLost:
