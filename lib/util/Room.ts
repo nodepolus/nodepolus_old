@@ -7,7 +7,7 @@ import Publicity from '../data/enums/publicity'
 import { RoomSettings } from '../packets/PacketElements/RoomSettings'
 import { Packet as Subpacket } from '../packets/UnreliablePacket'
 import { IGameObject } from './GameObject'
-import { GameDataPacket, GameDataPacketType } from '../packets/Subpackets/GameData'
+import { GameDataPacketType } from '../packets/Subpackets/GameData'
 
 import { addr2str } from './misc'
 import { RPCPacketType } from '../packets/Subpackets/GameDataPackets/RPC'
@@ -33,9 +33,6 @@ export class Room extends EventEmitter {
     public get code():string {
         return this.internalCode
     }
-    public set code(input: string) {
-        throw new Error("Use <Room>#setCode(<string>) to set the room code")
-    }
     private internalSettings:RoomSettings = new RoomSettings(this);
     public get settings(): RoomSettings {
         return this.internalSettings
@@ -49,7 +46,7 @@ export class Room extends EventEmitter {
     game?: Game;
     publicity?: Publicity = Publicity.Private;
     setCode(code:string) {
-        this.code = code;
+        this.internalCode = code;
         this.connections.forEach(singleCon => {
             singleCon.send({
                 type: "SetGameCode",

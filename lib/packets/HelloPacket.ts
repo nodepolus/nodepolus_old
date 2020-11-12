@@ -1,5 +1,4 @@
 import PolusBuffer from '../util/PolusBuffer'
-import { ParsedPacket } from './Packet'
 
 export interface HelloPacketData {
 	HazelVersion: number,

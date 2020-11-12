@@ -7,7 +7,12 @@ interface System{
 }
 
 export class DoorSystem implements System{
-    public Doors: []
+  public doors: []
+
+  constructor () {
+    this.doors = []
+  }
+
 	parse(pb: PolusBuffer, room: Room): void {
 		throw new Error("Method not implemented.");
 	}

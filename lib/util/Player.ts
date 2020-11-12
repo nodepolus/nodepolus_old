@@ -8,6 +8,10 @@ import Task from './Task'
 import Connection from './Connection'
 
 export default class Player extends EventEmitter {
+  name: string
+  clientVersion: number
+  hazelVersion: number
+
 	room?: Room;
 	playerID: number = -1
 	connection?: Connection;
@@ -47,11 +51,15 @@ export default class Player extends EventEmitter {
 	isKilled: boolean = false
 	hasDisconnected: boolean = false
 	scene: string = 'unknown'
-	isHost: boolean = false
+  isHost: boolean = false
+  
+  constructor(name: string, clientVersion: number, hazelVersion: number) {
+    super()
 
-	constructor(public name?: string, private ClientVersion?: number, public HazelVersion?: number) {
-		super();
-	}
+    this.name = name
+    this.clientVersion = clientVersion
+    this.hazelVersion = hazelVersion
+  }
 
 	enterVent() {
 		

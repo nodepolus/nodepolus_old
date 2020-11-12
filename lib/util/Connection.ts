@@ -9,7 +9,6 @@ import PolusBuffer from './PolusBuffer'
 import { HelloPacket } from '../packets/HelloPacket'
 import { Room } from './Room'
 import { UnreliablePacket, Packet as UnreliablePacketPacket } from '../packets/UnreliablePacket'
-import { GameDataPacketType } from '../packets/Subpackets/GameData'
 
 let nullRoom = new Room()
 
@@ -126,7 +125,7 @@ export default class Connection extends EventEmitter{
             this.groupArr.push(packet)
         }
     }
-    public sendUnreliable(type: string, packet: UnreliablePacketPacket) {
+    public sendUnreliable(packet: UnreliablePacketPacket) {
         if (!this.inGroup) {
             this.startUnreliablePacketGroup();
             this.groupArr.push(packet)

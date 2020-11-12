@@ -5,25 +5,8 @@ import AmongUsMap from '../../data/enums/AmongUsMap'
 import { ObjectType } from '../Subpackets/GameDataPackets/Spawn'
 import StateByte, { StateByteInterface } from './StateByte'
 import DeconStateByte, { DeconStateByteInterface } from './DeconStateByte'
-import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, System, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, DeconSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData, PolusDoorSystem } from './ComponentTypes'
+import { ComponentData, MeetingHud, GameDataPlayerData, GameData, PlayerVoteBanSystem, ElectricalSystem, UserListSystem, CommsSystem, MiraCommsSystem, SimpleCommsSystem, O2System, DoorSystem, SabotageSystem, DeconSystem, ReactorSystem, ShipStatus, PlayerControl, CustomTransformData, PolusDoorSystem } from './ComponentTypes'
 import Vector2 from './Vector2'
-
-function shallowEqual(object1: any, object2: any) {
-	const keys1 = Object.keys(object1);
-	const keys2 = Object.keys(object2);
-
-	if (keys1.length !== keys2.length) {
-		return false;
-	}
-
-	for (let key of keys1) {
-		if (object1[key] !== object2[key]) {
-			return false;
-		}
-	}
-
-	return true;
-}
 
 //stolen from SO
 function arraysEqual(a: any[], b: any[]) {
@@ -412,7 +395,6 @@ export default class Component{
 			case ObjectType.PlanetMap:
 			case ObjectType.ShipStatus:
 				const mapOrder = MAP_SYSTEM_ORDER[room.settings.Map === 7 ? 0 : room.settings.Map];
-                const systems = Object.keys(SystemType).length/2;
 				if(!(<ShipStatus>this.Data)) {
 					this.Data = {
 						systems: []
