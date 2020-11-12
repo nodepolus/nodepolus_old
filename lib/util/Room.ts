@@ -52,11 +52,23 @@ export class Room extends EventEmitter {
     server: Server;
     setCode(code:string) {
         this.code = code;
-        //TODO: send update game code packet to clients
+        this.connections.forEach(singleCon => {
+            singleCon.send({
+                type: "SetGameCode",
+                RoomCode: this.code
+            })
+        })
     }
     setPublicity(publicity:Publicity) {
         this.publicity = publicity;
-        //TODO: send AlterGame packet to clients
+        this.connections.forEach(singleCon => {
+            singleCon.send({
+                type: "AlterGame",
+                AlterGameTag: 1,
+                IsPublic: publicity === Publicity.Public,
+                RoomCode: this.code
+            })
+        })
     }
     syncSettings(NetIDIn?:bigint) {
         let NetID = 0n;
