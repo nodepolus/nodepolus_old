@@ -26,7 +26,7 @@ export class RoomSettings {
 	VisualTasks?: boolean;
 	AnonymousVoting?: boolean;
 	TaskBarUpdates?: number;
-	constructor(private room?:Room) {}
+	constructor(public room?:Room) {}
 	serialize(): PolusBuffer {
 		let buf;
 		if(!this.Version) {

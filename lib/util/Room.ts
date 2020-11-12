@@ -16,14 +16,15 @@ import { RPCPacket, RPCPacketType } from "../packets/Subpackets/GameDataPackets/
 import DisconnectReason from "../packets/PacketElements/DisconnectReason.js";
 import PolusBuffer from "./PolusBuffer.js";
 import { DataPacket } from "../packets/Subpackets/GameDataPackets/Data.js";
+import { ObjectType } from "../packets/Subpackets/GameDataPackets/Spawn.js";
 
 class Room extends EventEmitter {
     constructor(public server: Server) {
         super();
-        this.internalCode = "KEKPOG"/*randomstring.generate({
+        this.internalCode = randomstring.generate({
             length: 6,
             charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        })*/
+        })
     }
     public connections: Connection[] = [];
     private internalCode: string;
@@ -39,6 +40,7 @@ class Room extends EventEmitter {
     };
     public set settings(input: RoomSettings) {
         this.internalSettings = <RoomSettings>input;
+        this.internalSettings.room = this;
         this.syncSettings();
     };
     public GameObjects:IGameObject[] = [];
@@ -53,10 +55,15 @@ class Room extends EventEmitter {
         this.publicity = publicity;
         //TODO: send AlterGame packet to clients
     }
-    syncSettings() {
+    syncSettings(NetIDIn?:bigint) {
         let NetID = 0n;
         let go = this.GameObjects.find(go => Number(go.SpawnID) == ObjectType.Player)
-        NetID = go.Components[0].netID
+        if(go) {
+            NetID = go.Components[0].netID
+        }
+        if (NetIDIn) {
+            NetID = NetIDIn
+        }
         this.connections.forEach(singleCon => {
             singleCon.send({
                 type: "GameData",

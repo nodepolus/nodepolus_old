@@ -51,6 +51,7 @@ export default class Unreliable {
 	PlayerJoinedGamePacketHandler = new PlayerJoinedGame();
 	StartGamePacketHandler = new StartGame();
 	RemovePlayerPacketHandler = new RemovePlayer(this.room);
+	LateRejectionPacketHandler = this.RemovePlayerPacketHandler // fucking forte
 	GameDataPacketHandler = new GameData(this.room, this.toServer);
 	JoinedGamePacketHandler = new JoinedGame();
 	EndGamePacketHandler = new EndGame(this.room);

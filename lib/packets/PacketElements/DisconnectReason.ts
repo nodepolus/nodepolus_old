@@ -1,7 +1,7 @@
 import Room from "../../util/Room.js";
 import PolusBuffer from "../../util/PolusBuffer.js";
 
-enum DisconnectReasons {
+export enum DisconnectReasons {
 	ExitGame = 0,
 	GameFull = 1,
 	GameStarted = 2,
