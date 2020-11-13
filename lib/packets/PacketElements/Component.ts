@@ -496,18 +496,22 @@ export default class Component{
 				}
 				break;
 			case ObjectType.MeetingHud:
-				const mh: MeetingHud = {players: []};
+        const mh: MeetingHud = {players: []};
+				let mask
+
+				if (!spawn) {
+					mask = Number(pb.readVarInt())
+        }
 
 				for (let i = 0; i < this.length; i++) {
-          if (spawn) {
-            mh.players[i] = StateByte.parse(pb.readU8());
-          } else {
-            // Not spawn, check mask and calc
-            const mask = Number(pb.readVarInt())
-            if ((mask & (1 << i)) !== 0) {
-              mh.players[i] = StateByte.parse(pb.readU8());
-            }
-          }
+          // TODO: mask is sometimes also undefined
+          //       even in non-spawn messages.
+          // @ts-ignore
+          const masked = mask & (1 << i)
+
+					if (spawn || masked) {
+						mh.players[i] = StateByte.parse(pb.readU8());
+					}
 				}
 				this.Data = mh;
 				break;
