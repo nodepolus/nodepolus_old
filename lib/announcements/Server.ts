@@ -40,7 +40,6 @@ export default class AnnouncementServer extends EventEmitter{
             port: 22024,
             freeWeekend: FreeWeekendState.NotFree
         }, config);
-        console.log(config.defaultMessage)
     }
 
     listen(){
