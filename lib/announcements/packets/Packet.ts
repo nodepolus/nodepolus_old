@@ -1,11 +1,10 @@
 import Unreliable, { UnreliablePacket } from './UnreliablePacket'
 import Reliable from './ReliablePacket'
 import HelloPacket, { HelloPacketData } from './HelloPacket'
-import Disconnect, {DisconnectPacket} from './DisconnectPacket'
-import AcknowledgementPacket from './AcknowledgementPacket'
-import Ping from './PingPacket'
-import { Room } from '../util/Room'
-import PolusBuffer from '../util/PolusBuffer'
+import Disconnect, { DisconnectPacket } from './DisconnectPacket'
+import AcknowledgementPacket from '../../packets/AcknowledgementPacket'
+import Ping from '../../packets/PingPacket'
+import PolusBuffer from '../../util/PolusBuffer'
 
 export enum PacketType {
     UnreliablePacket = 0x00,
@@ -26,11 +25,11 @@ export interface ParsedPacket {
 };
 
 export default class Packet {
-    constructor(private room: Room, private toServer: boolean){}
-    UnreliablePacketHandler = new Unreliable(this.room, this.toServer);
-    ReliablePacketHandler = new Reliable(this.room, this.toServer);
+    constructor(){}
+    UnreliablePacketHandler = new Unreliable();
+    ReliablePacketHandler = new Reliable();
     HelloPacketHandler = new HelloPacket();
-    DisconnectPacketHandler = new Disconnect(this.room);
+    DisconnectPacketHandler = new Disconnect();
     AcknowledgementPacketHandler = new AcknowledgementPacket();
     PingPacketHandler = new Ping();
     /**
