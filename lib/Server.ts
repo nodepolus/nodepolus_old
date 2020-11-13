@@ -14,7 +14,7 @@ export interface ServerConfig {
   accessiblePort?: number
 }
 
-class Server extends EventEmitter {
+export default class Server extends EventEmitter {
     port: number;
     sock: Socket;
     rooms: Map<string, Room> = new Map();
@@ -134,10 +134,6 @@ class Server extends EventEmitter {
         return conn
     }
     private requestClientID() {
-        let i = this.clientIDIncrementer;
-        this.clientIDIncrementer++;
-        return i;
+        return this.clientIDIncrementer++;
     }
 }
-
-export default Server
