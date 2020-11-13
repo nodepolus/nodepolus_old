@@ -1,12 +1,12 @@
 import PolusBuffer from '../../../../util/PolusBuffer'
+import { PacketHandler } from '../../../Packet';
 
 export interface SetInfectedPacket {
 	InfectedCount?: bigint,
 	InfectedPlayerIDs: bigint[]
 }
 
-export default class SetInfected {
-
+export const SetInfected: PacketHandler<SetInfectedPacket> = {
 	parse(packet: PolusBuffer): SetInfectedPacket {
     const count = packet.readVarInt()
 
@@ -18,7 +18,8 @@ export default class SetInfected {
 			returnData.InfectedPlayerIDs[i] = packet.readVarInt();
 		}
 		return returnData;
-	}
+  },
+
 	serialize(packet: SetInfectedPacket): PolusBuffer {
 		let buf = new PolusBuffer();
 		buf.writeVarInt(BigInt(packet.InfectedPlayerIDs.length));
@@ -26,5 +27,5 @@ export default class SetInfected {
 			buf.writeVarInt(packet.InfectedPlayerIDs[i]);
 		}
 		return buf;
-	};
-};
+	}
+}

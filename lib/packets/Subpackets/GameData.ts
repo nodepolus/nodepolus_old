@@ -2,13 +2,14 @@ import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
 import { Room } from '../../util/Room'
 
-import Data, { DataPacket } from './GameDataPackets/Data'
-import RPC, { RPCPacket } from './GameDataPackets/RPC'
-import Spawn from './GameDataPackets/Spawn'
-import Ready, { ReadyPacket } from './GameDataPackets/Ready'
-import SceneChange, { SceneChangePacket } from './GameDataPackets/SceneChange'
-import Despawn, { DespawnPacket } from './GameDataPackets/Despawn'
+import { Data, DataPacket } from './GameDataPackets/Data'
+import { RPC, RPCPacket } from './GameDataPackets/RPC'
+import { Spawn } from './GameDataPackets/Spawn'
+import { Ready, ReadyPacket } from './GameDataPackets/Ready'
+import { SceneChange, SceneChangePacket } from './GameDataPackets/SceneChange'
+import { Despawn, DespawnPacket } from './GameDataPackets/Despawn'
 import { IGameObject } from '../../util/GameObject'
+import { PacketHandler, PacketHandlerOpts } from '../Packet'
 
 export interface GameDataPacket {
   type: 'GameData',
@@ -26,21 +27,14 @@ export enum GameDataPacketType {
 	Ready = 0x07
 }
 
-export default class GameData {
-	DataPacketHandler = new Data();
-	RPCPacketHandler = new RPC();
-	SpawnPacketHandler = new Spawn();
-	DespawnPacketHandler = new Despawn();
-	SceneChangePacketHandler = new SceneChange();
-	ReadyPacketHandler = new Ready();
-
-	parse(packet: PolusBuffer, isGameDataTo: Boolean, room: Room): GameDataPacket {
+export const GameData: PacketHandler<GameDataPacket> = {
+  parse(packet: PolusBuffer, room: Room, opts: PacketHandlerOpts): GameDataPacket {
 		let data: GameDataPacket = {
       		type: 'GameData',
 			RoomCode: RoomCode.intToString(packet.read32()),
 			Packets: new Array()
 		};
-		if (isGameDataTo) {
+		if (opts?.isGameDataTo) {
 			data.RecipientClientID = packet.readVarInt();
 		}
 		while(packet.dataRemaining().length != 0) {
@@ -49,28 +43,28 @@ export default class GameData {
             const rawdata = packet.readBytes(length);
 			switch(type) {
 				case GameDataPacketType.Data:
-					data.Packets.push(this.DataPacketHandler.parse(rawdata, room))
+					data.Packets.push(Data.parse(rawdata, room))
 					break;
 				case GameDataPacketType.RPC:
-					data.Packets.push(this.RPCPacketHandler.parse(rawdata, room))
+					data.Packets.push(RPC.parse(rawdata, room))
 					break;
 				case GameDataPacketType.Spawn:
-					data.Packets.push(this.SpawnPacketHandler.parse(rawdata, room))
+					data.Packets.push(Spawn.parse(rawdata, room))
 					break;
 				case GameDataPacketType.Despawn:
-					data.Packets.push(this.DespawnPacketHandler.parse(rawdata))
+					data.Packets.push(Despawn.parse(rawdata, room))
 					break;
 				case GameDataPacketType.SceneChange:
-					data.Packets.push(this.SceneChangePacketHandler.parse(rawdata))
+					data.Packets.push(SceneChange.parse(rawdata, room))
 					break;
 				case GameDataPacketType.Ready:
-					data.Packets.push(this.ReadyPacketHandler.parse(rawdata))
+					data.Packets.push(Ready.parse(rawdata, room))
 					break;
 			}
 
 		}
 		return data;
-	}
+	},
 
 	serialize(packet: GameDataPacket, room: Room): PolusBuffer {
 		var pb = new PolusBuffer();
@@ -82,22 +76,22 @@ export default class GameData {
 			let dataPB;
 			switch(subpacket.type) {
 				case GameDataPacketType.Data:
-					dataPB = this.DataPacketHandler.serialize(subpacket, room)
+					dataPB = Data.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.RPC:
-					dataPB = this.RPCPacketHandler.serialize(subpacket, room)
+					dataPB = RPC.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.Spawn:
-					dataPB = this.SpawnPacketHandler.serialize(subpacket, room)
+					dataPB = Spawn.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.Despawn:
-					dataPB = this.DespawnPacketHandler.serialize(subpacket)
+					dataPB = Despawn.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.SceneChange:
-					dataPB = this.SceneChangePacketHandler.serialize(subpacket)
+					dataPB = SceneChange.serialize(subpacket, room)
 					break;
 				case GameDataPacketType.Ready:
-					dataPB = this.ReadyPacketHandler.serialize(subpacket)
+					dataPB = Ready.serialize(subpacket, room)
 					break;
 				default:
 					console.error("AA?A??A?A?A??A??A?AAAAA GAME DATA SERIALIZATION FAILED. UNK PACKET TYPE", packet)
@@ -110,4 +104,4 @@ export default class GameData {
 		})))
 		return pb;
 	}
-};
+}

@@ -3,6 +3,7 @@ import Component from '../../PacketElements/Component'
 import { Room } from '../../../util/Room'
 import { IGameObject, SpawnFlags } from '../../../util/GameObject'
 import { GameDataPacketType } from '../GameData'
+import { PacketHandler } from '../../Packet'
 
 export enum ObjectType{
 	ShipStatus = 0,
@@ -15,7 +16,7 @@ export enum ObjectType{
 	AprilShipStatus = 7
 }
 
-export default class Spawn{
+export const Spawn: PacketHandler<IGameObject> = {
 	parse(buffer: PolusBuffer, room: Room): IGameObject {
 		const spawnPacket: IGameObject = {
       type: GameDataPacketType.Spawn,
@@ -31,7 +32,8 @@ export default class Spawn{
 			spawnPacket.Components.push(newComponent.parse(buffer, room));
 		}
 		return spawnPacket;
-	}
+  },
+
 	serialize(packet: IGameObject, room: Room): PolusBuffer {
 		let PB = new PolusBuffer();
 		PB.writeVarInt(packet.SpawnID);
@@ -44,5 +46,5 @@ export default class Spawn{
 			PB.writeBytes(component.serialize(room))
 		}
 		return PB;
-	};
-};
+	}
+}

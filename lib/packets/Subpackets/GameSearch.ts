@@ -1,5 +1,6 @@
 import PolusBuffer from '../../util/PolusBuffer'
 import { Room } from '../../util/Room'
+import { PacketHandler } from '../Packet';
 import RoomSettings from '../PacketElements/RoomSettings'
 
 export interface GameSearchPacket {
@@ -8,7 +9,7 @@ export interface GameSearchPacket {
 	IncludePrivate: boolean
 }
 
-export class GameSearch {
+export const GameSearch: PacketHandler<GameSearchPacket> = {
 	parse(packet: PolusBuffer, room: Room): GameSearchPacket {
     var rs = new RoomSettings(room);
     let IncludePrivate = packet.readBoolean()
@@ -19,7 +20,7 @@ export class GameSearch {
 			IncludePrivate
 		}
 		return gameCreatePacket;
-	}
+	},
 
 	serialize(packet: GameSearchPacket): PolusBuffer {
 		let buf = new PolusBuffer();
@@ -27,5 +28,5 @@ export class GameSearch {
 		let rs = packet.RoomSettings.serialize();
 		buf.writeBytes(rs)
 		return buf;
-	};
+	}
 }

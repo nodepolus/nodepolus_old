@@ -1,5 +1,6 @@
 import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
+import { PacketHandler } from '../Packet';
 
 export enum EndReason {
 	HumansByVote = 0x00,
@@ -18,7 +19,7 @@ export interface EndGamePacket {
 	ShowAdvert: boolean
 }
 
-export class EndGame {
+export const EndGame: PacketHandler<EndGamePacket> = {
 	parse(packet: PolusBuffer): EndGamePacket {
 		return {
       type: 'EndGame',
@@ -26,12 +27,13 @@ export class EndGame {
 			EndReason: packet.readU8(),
 			ShowAdvert: packet.readBoolean()
 		};
-	}
+  },
+
 	serialize(packet: EndGamePacket): PolusBuffer {
 		const buf = new PolusBuffer(6);
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
 		buf.writeU8(packet.EndReason);
 		buf.writeBoolean(packet.ShowAdvert);
 		return buf;
-	};
+	}
 }

@@ -1,5 +1,6 @@
 import PolusBuffer from '../../util/PolusBuffer'
 import { Room } from '../../util/Room'
+import { PacketHandler } from '../Packet';
 import RoomSettings from '../PacketElements/RoomSettings'
 
 export interface GameCreatePacket {
@@ -7,7 +8,7 @@ export interface GameCreatePacket {
 	RoomSettings: RoomSettings;
 }
 
-export default class GameCreate {
+export const GameCreate: PacketHandler<GameCreatePacket> = {
 	parse(packet: PolusBuffer, room: Room): GameCreatePacket {
 		var rs = new RoomSettings(room);
 		rs.parse(packet)
@@ -16,9 +17,9 @@ export default class GameCreate {
 			RoomSettings: rs
 		}
 		return gameCreatePacket;
-	}
+	},
 
 	serialize(packet: GameCreatePacket): PolusBuffer {
 		return packet.RoomSettings.serialize();
-	};
+	}
 }

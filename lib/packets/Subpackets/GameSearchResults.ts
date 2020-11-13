@@ -1,5 +1,6 @@
 import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
+import { PacketHandler } from '../Packet';
 
 export interface RoomListing {
 	IP: string,
@@ -21,7 +22,7 @@ export interface GameSearchResultsPacket {
 	PolusGameCount?: number
 }
 
-class GameSearchResults {
+export const GameSearchResults: PacketHandler<GameSearchResultsPacket> = {
 	parse(packet: PolusBuffer): GameSearchResultsPacket {
 		let searchPacket: GameSearchResultsPacket = {
       type: 'GameSearchResults',
@@ -58,7 +59,7 @@ class GameSearchResults {
 			}
 		}
 		return searchPacket;
-	}
+	},
 
 	serialize(packet: GameSearchResultsPacket): PolusBuffer {
 		let GameCountBuffer: PolusBuffer | null = null;
@@ -100,5 +101,3 @@ class GameSearchResults {
 		}
 	}
 }
-
-export default GameSearchResults;

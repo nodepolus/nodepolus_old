@@ -1,6 +1,7 @@
 import AmongUsMap from '../../../../data/enums/AmongUsMap'
 import PolusBuffer from '../../../../util/PolusBuffer'
 import { Room } from '../../../../util/Room'
+import { PacketHandler } from '../../../Packet'
 import SystemType from '../../../PacketElements/SystemType'
 
 export enum RepairAction {
@@ -77,7 +78,7 @@ export interface RepairSystemPacket {
 	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | NormalCommunicationsAmount | HqCommunicationsAmount | DecontaminationAmount
 }
 
-export default class RepairSystem {
+export const RepairSabotage: PacketHandler<RepairSystemPacket> = {
 	parse(packet: PolusBuffer, room: Room): RepairSystemPacket {
 		let systemType = packet.readU8();
 		let netID = packet.readVarInt();
@@ -157,7 +158,8 @@ export default class RepairSystem {
                 break;
 		}
 		return data;
-	}
+  },
+
 	serialize(packet: RepairSystemPacket, room: Room): PolusBuffer {
 		// console.log("system: ", packet.System)
 		var buf = new PolusBuffer();
@@ -225,5 +227,5 @@ export default class RepairSystem {
 
 		}
 		return buf;
-	};
-};
+	}
+}

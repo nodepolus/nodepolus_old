@@ -1,4 +1,5 @@
 import PolusBuffer from '../../util/PolusBuffer'
+import { PacketHandler } from '../Packet';
 
 interface MasterServer {
 	Name: string,
@@ -12,7 +13,7 @@ export interface MasterServersPacket {
 	MasterServers: MasterServer[]
 }
 
-class MasterServers {
+export const MasterServers: PacketHandler<MasterServersPacket> = {
 	parse(packet: PolusBuffer): MasterServersPacket {
 		packet.readU8(); // always 1
 		const MasterServerCount = packet.readVarInt();
@@ -30,7 +31,8 @@ class MasterServers {
       type: 'MasterServers',
       MasterServers
     };
-	}
+  },
+
 	serialize(packet: MasterServersPacket): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.writeU8(1);
@@ -51,5 +53,3 @@ class MasterServers {
 		return PolusBuffer.concat(buf, MSBufs) ;
 	}
 }
-
-export default MasterServers;
