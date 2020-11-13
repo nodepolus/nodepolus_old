@@ -133,12 +133,12 @@ export default class Unreliable {
 		}
 		return { Packets: packets };
 	}
-	serialize(packet: UnreliablePacket):PolusBuffer {
+	serialize(packet: UnreliablePacket, room: Room):PolusBuffer {
 		var buf = new PolusBuffer();
 		// console.log(packet)
 		packet.Packets.forEach(subpacket => {
 			// @ts-ignore
-			let serialized:PolusBuffer = this[subpacket.type + "PacketHandler"].serialize(subpacket)
+			let serialized:PolusBuffer = this[subpacket.type + "PacketHandler"].serialize(subpacket, room)
 			let type: number | null = null;
 			switch(subpacket.type) {
 				case 'GameCreate':

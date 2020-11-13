@@ -40,7 +40,7 @@ export default class Connection extends EventEmitter{
                 // console.log(msg.toString('hex'))
                 const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), this.player.room)
                 // console.log("RawParsed", parsed)
-                const serialized = new Packet(this.isToClient).serialize(parsed);
+                const serialized = new Packet(this.isToClient).serialize(parsed, this.player.room);
                 try {
                     if (packet.Type != PacketType.UnreliablePacket)
                       assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
@@ -78,6 +78,10 @@ export default class Connection extends EventEmitter{
         }
     }
     private write(type: PacketType, data: ParsedPacketData){
+      if (!this.player?.room) {
+        throw new Error('tried to write to player without a room')
+      }
+
       let o: ParsedPacket = {
           Type: type,
           Reliable: Packet.isReliable(type),
@@ -86,7 +90,7 @@ export default class Connection extends EventEmitter{
       if(o.Reliable) {
           o.Nonce = this.newNonce();
       }
-      let pb = new Packet(this.isToClient).serialize(o);
+      let pb = new Packet(this.isToClient).serialize(o, this.player.room);
       //console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
       this.socket.send(pb.buf, this.address.port, this.address.address)
 
@@ -157,11 +161,14 @@ export default class Connection extends EventEmitter{
         this.write(PacketType.DisconnectPacket, {DisconnectReason: reason?reason:new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {
-        let pb = new Packet(this.isToClient).serialize({
+      if (!this.player?.room) throw new Error('Tried to ack packet while missing a room')
+
+      let pb = new Packet(this.isToClient).serialize({
             Type: PacketType.AcknowledgementPacket,
             Reliable: false,
             Nonce: packet.Nonce
-        })
+        }, this.player.room)
+
         this.socket.send(pb.buf, this.address.port, this.address.address)
     }
     private newNonce() {

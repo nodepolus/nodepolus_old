@@ -16,13 +16,13 @@ class Reliable {
 			Data: this.UnreliablePacketHandler.parse(packet, room, toServer)
 		};
 	}
-	serialize(packet: ParsedPacket): PolusBuffer {
+	serialize(packet: ParsedPacket, room: Room): PolusBuffer {
     var buf = new PolusBuffer();
     // if (!packet.Nonce) throw new Error('Tried to serialize a reliable packet that is missing a nonce')
     // @ts-ignore
 		buf.writeU16(packet.Nonce, true);
 		//@ts-ignore
-		buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data))
+		buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data, room))
 		return buf;
 	}
 }

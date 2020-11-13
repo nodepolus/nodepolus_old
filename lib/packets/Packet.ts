@@ -70,18 +70,17 @@ export default class Packet {
         }
     };
     
-    serialize(packet: ParsedPacket): PolusBuffer {
+    serialize(packet: ParsedPacket, room: Room): PolusBuffer {
         var buf = new PolusBuffer();
         buf.writeU8(packet.Type);
         switch(packet.Type) {
             case PacketType.ReliablePacket:
-                //@ts-ignore
-                buf.writeBytes(this.ReliablePacketHandler.serialize(packet));
+                buf.writeBytes(this.ReliablePacketHandler.serialize(packet, room));
                 break;
 
             case PacketType.UnreliablePacket:
                 //@ts-ignore
-                buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data));
+                buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data, room));
                 break;
 
             case PacketType.HelloPacket:

@@ -677,6 +677,9 @@ export default class Component{
 	}
 
 	serialize(room: Room): PolusBuffer{
+    if (!room) {
+      console.log('Component serialize missing room:', room)
+    }
 		if(this.old && this.old.Data) {
 			return this.writeData(room);
 		} else {
