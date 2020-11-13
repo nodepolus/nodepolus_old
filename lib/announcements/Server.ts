@@ -88,11 +88,18 @@ export default class AnnouncementServer extends EventEmitter{
             {
                 type: "AnnouncementData",
                 Id: this.generateId(),
-                Text: this.config.defaultMessage.text
+                Text: announcement.message.text
             },
             {
                 type: "FreeWeekend",
-                FreeState: this.config.freeWeekend
+                FreeState: announcement.freeWeekend
+            }
+        ], client);
+    }
+    public sendShouldCache(client: ClientData){
+        this.send([
+            {
+                type: "CacheAnnouncement"
             }
         ], client);
     }
