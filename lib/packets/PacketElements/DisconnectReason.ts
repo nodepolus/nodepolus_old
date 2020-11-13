@@ -24,7 +24,7 @@ export enum DisconnectReasons {
 };
 
 export default class DisconnectReason {
-	reasonInt: number = DisconnectReasons.Error
+	reasonInt?: number
   reason: string = 'Default disconnect reason, you should not see this'
 
   room?: Room
