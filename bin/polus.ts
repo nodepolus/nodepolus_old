@@ -1,4 +1,4 @@
-import { Server } from '../lib/Server'
+import { Server } from '../lib/server'
 import AnnouncementServer from "../lib/announcements/Server";
 import { FreeWeekendState } from '../lib/announcements/packets/subpackets/FreeWeekend';
 import Text from '../lib/util/Text';
