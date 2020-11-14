@@ -1,3 +1,4 @@
+import { PacketHandler } from '../../../packets/Packet';
 import PolusBuffer from '../../../util/PolusBuffer'
 
 export enum FreeWeekendState{
@@ -8,20 +9,21 @@ export enum FreeWeekendState{
 
 export interface FreeWeekendPacket{
     type: "FreeWeekend",
-    FreeState: FreeWeekendState
+    FreeState?: FreeWeekendState
 }
 
-export default class FreeWeekend {
+export const FreeWeekend: PacketHandler<FreeWeekendPacket> = {
 	parse(packet: PolusBuffer): FreeWeekendPacket {
 		return {
             type: "FreeWeekend",
             FreeState: packet.readU8()
 		};
-	}
+	},
 
 	serialize(packet: FreeWeekendPacket): PolusBuffer {
         let buf = new PolusBuffer(0);
-        buf.writeU8(packet.FreeState);
+        if (packet.FreeState)
+          buf.writeU8(packet.FreeState);
         return buf;
 	}
 }

@@ -1,4 +1,5 @@
 import PolusBuffer from '../../util/PolusBuffer'
+import { PacketHandler } from '../Packet'
 import RoomCode from '../PacketElements/RoomCode'
 
 export interface AlterGamePacket {
@@ -8,7 +9,7 @@ export interface AlterGamePacket {
     IsPublic: boolean
 }
 
-export default class AlterGame {
+export const AlterGame: PacketHandler<AlterGamePacket> = {
 	parse(packet: PolusBuffer): AlterGamePacket {
 		return {
       type: 'AlterGame',
@@ -16,7 +17,7 @@ export default class AlterGame {
 			AlterGameTag: packet.readU8(),
 			IsPublic: packet.readBoolean()
 		};
-	}
+	},
 
 	serialize(packet: AlterGamePacket): PolusBuffer {
 		const buf = new PolusBuffer(5);
@@ -25,4 +26,4 @@ export default class AlterGame {
 		buf.writeBoolean(packet.IsPublic);
 		return buf;
 	}
-};
+}

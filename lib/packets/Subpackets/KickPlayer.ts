@@ -1,4 +1,5 @@
 import PolusBuffer from '../../util/PolusBuffer'
+import { PacketHandler } from '../Packet';
 import RoomCode from '../PacketElements/RoomCode'
 
 export interface KickPlayerPacket {
@@ -8,8 +9,7 @@ export interface KickPlayerPacket {
 	isBanned: boolean
 }
 
-export default class KickPlayer {
-
+export const KickPlayer: PacketHandler<KickPlayerPacket> = {
 	parse(packet: PolusBuffer): KickPlayerPacket {
 		return {
 			type: 'KickPlayer',
@@ -17,12 +17,13 @@ export default class KickPlayer {
 			ClientID: packet.readVarInt(),
 			isBanned: packet.readBoolean()
 		};
-	}
+  },
+
 	serialize(packet: KickPlayerPacket): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.write32(RoomCode.stringToInt(packet.RoomCode));
 		buf.writeVarInt(packet.ClientID);
 		buf.writeBoolean(packet.isBanned);
 		return buf;
-	};
-};
+	}
+}

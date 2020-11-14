@@ -1,4 +1,5 @@
 import PolusBuffer from '../../../util/PolusBuffer'
+import { PacketHandler } from '../../Packet';
 import { GameDataPacketType } from '../GameData'
 
 export interface ReadyPacket {
@@ -6,17 +7,17 @@ export interface ReadyPacket {
 	ClientID: bigint
 }
 
-export default class Ready {
-
+export const Ready: PacketHandler<ReadyPacket> = {
 	parse(packet: PolusBuffer): ReadyPacket {
 		return {
       type: GameDataPacketType.Ready,
 			ClientID: packet.readVarInt()
 		}
-	}
+  },
+
 	serialize(packet: ReadyPacket): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.writeVarInt(packet.ClientID);
 		return buf;
-	};
-};
+	}
+}
