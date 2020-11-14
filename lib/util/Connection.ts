@@ -17,7 +17,7 @@ let nullRoom = new Room(null);
 export default class Connection extends AsyncEventEmitter {
     player: Player;
     nonce: number = 1;
-    private inGroup:boolean;
+    private inGroup:boolean = false;
     private groupArr: UnreliablePacketPacket[] = [];
     private packetGroupReliability: PacketType;
     unacknowledgedPackets: Map<number, number> = new Map();

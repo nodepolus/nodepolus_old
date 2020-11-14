@@ -34,7 +34,7 @@ export default class AsyncEventEmitter {
 		let gthis = this;
 		let newfun = (...params:any) => {
 			gthis.off(evt, newfun)
-			fun()
+			fun(...params)
 		}
 		this.on(evt, newfun)
 	}
