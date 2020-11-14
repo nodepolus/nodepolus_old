@@ -180,9 +180,7 @@ class Server extends AsyncEventEmitter {
 		return conn
 	}
 	private requestClientID() {
-		let i = this.clientIDIncrementer;
-		this.clientIDIncrementer++;
-		return i;
+    return this.clientIDIncrementer++;
 	}
 }
 

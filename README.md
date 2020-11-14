@@ -10,4 +10,10 @@ NodePolus is a JavaScript library containing Implementations for working with Am
 
 # Usage
 
-Currently, NodePolus is not usable. Check [our discord](https://discord.gg/Jpg4sWqeYH) for status updates.
+Currently, the **client** and **packet inspector** parts of NodePolus are not usable. Check [our discord](https://discord.gg/Jpg4sWqeYH) for status updates.
+
+the **Region Server** is usable, however **Plugin Support** is still in development
+You can install the server by:
+1. Install NodeJS 15.0.1 (or newer)
+2. Download NodePolus
+3. `npm start`
