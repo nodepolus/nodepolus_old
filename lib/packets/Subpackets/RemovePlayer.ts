@@ -2,7 +2,6 @@ import DisconnectReason, { DisconnectReasons } from '../PacketElements/Disconnec
 import PolusBuffer from '../../util/PolusBuffer'
 import RoomCode from '../PacketElements/RoomCode'
 import { Room } from '../../util/Room'
-import { PacketHandler } from '../Packet'
 
 export interface RemovePlayerProperPacket {
  	type: 'RemovePlayer',
@@ -11,25 +10,24 @@ export interface RemovePlayerProperPacket {
 	HostClientID: number,
 	DisconnectReason?: DisconnectReason
 }
-
 export interface LateRejectionPacket {
 	type: 'LateRejection',
 	RoomCode: string,
 	PlayerClientID: bigint,
 	DisconnectReason: DisconnectReasons.GameFull
 } 
+export type RemovePlayerPacket = RemovePlayerProperPacket|LateRejectionPacket
 
-export type RemovePlayerPacket = RemovePlayerProperPacket | LateRejectionPacket
-
-export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
-	parse(packet: PolusBuffer, room: Room): RemovePlayerPacket {
+class RemovePlayer {
+	constructor(public room: Room) {}
+	parse(packet: PolusBuffer): RemovePlayerPacket {
 		if(packet.dataRemaining().length >= 8) {
 			let roomCode = RoomCode.intToString(packet.read32())
 			let PlayerClientID = packet.readU32()
 			let HostClientID = packet.readU32();
 			let DisconnectReasonts;
 			if(packet.dataRemaining().length > 0) {
-				DisconnectReasonts = new DisconnectReason(packet, room)
+				DisconnectReasonts = new DisconnectReason(packet, this.room)
 			}
 			return {
 				type: 'RemovePlayer',
@@ -49,8 +47,7 @@ export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
 				DisconnectReason: DisconnectReasons.GameFull
 			}
 		}
-  },
-
+	}
 	serialize(packet: RemovePlayerPacket) {
 		if(packet.type == "RemovePlayer") {
 			var buf = new PolusBuffer(12);
@@ -68,8 +65,8 @@ export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
 			buf.writeVarInt(packet.PlayerClientID);
 			buf.writeU8(DisconnectReasons.GameFull);
 			return buf;
-    }
-    
-    throw new Error('Unknown packet type for RemovePlayer: ' + packet)
+		}
 	}
 }
+
+export default RemovePlayer;

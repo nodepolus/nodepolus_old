@@ -1,5 +1,4 @@
 import PolusBuffer from '../../../../util/PolusBuffer'
-import { PacketHandler } from '../../../Packet';
 
 export interface TaskState {
 	TaskID: bigint,
@@ -28,7 +27,7 @@ export interface UpdateGameDataPacket {
 	PlayerData: PlayerData[]
 }
 
-export const UpdateGameData: PacketHandler<UpdateGameDataPacket> = {
+export default class UpdateGameData {
 	parse(packet: PolusBuffer): UpdateGameDataPacket {
 		let retData: UpdateGameDataPacket = {
 			PlayerData: [],
@@ -70,8 +69,7 @@ export const UpdateGameData: PacketHandler<UpdateGameDataPacket> = {
 			i++;
 		}
 		return retData
-  },
-
+	}
 	serialize(packet: UpdateGameDataPacket): PolusBuffer {
 		let buf = new PolusBuffer();
 		for (let i = 0; i < packet.PlayerData.length; i++) {
@@ -99,5 +97,5 @@ export const UpdateGameData: PacketHandler<UpdateGameDataPacket> = {
 			buf.writeBytes(PolusBuffer.concat(lenbuf, tmpbuf))
 		}
 		return buf;
-	}
-}
+	};
+};

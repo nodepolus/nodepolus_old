@@ -1,5 +1,4 @@
 import PolusBuffer from '../../../util/PolusBuffer'
-import { PacketHandler } from '../../Packet';
 import { GameDataPacketType } from '../GameData'
 
 export interface DespawnPacket {
@@ -7,17 +6,17 @@ export interface DespawnPacket {
 	NetID: bigint
 }
 
-export const Despawn: PacketHandler<DespawnPacket> = {
+export default class Despawn {
+	constructor() { }
 	parse(buffer: PolusBuffer): DespawnPacket {
 		return {
       type: GameDataPacketType.Despawn,
 			NetID: buffer.readVarInt()
 		}
-  },
-
+	}
 	serialize(packet: DespawnPacket): PolusBuffer {
 		var pb = new PolusBuffer();
 		pb.writeVarInt(packet.NetID);
 		return pb;
-	}
-}
+	};
+};
