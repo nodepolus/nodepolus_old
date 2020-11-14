@@ -63,7 +63,6 @@ export default class Connection extends EventEmitter{
                 this.disconnect();
                 break;
             case PacketType.AcknowledgementPacket:
-              // if (!packet.Nonce) throw new Error('Error: AcknowledgePackage missing nonce')
               // @ts-ignore
                 this.unacknowledgedPackets.delete(packet.Nonce)
                 break;
@@ -88,29 +87,35 @@ export default class Connection extends EventEmitter{
           Data: data
       }
       if(o.Reliable) {
-          o.Nonce = this.newNonce();
+        o.Nonce = this.newNonce();
       }
+
       let pb = new Packet(this.isToClient).serialize(o, this.player.room);
       //console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
       this.socket.send(pb.buf, this.address.port, this.address.address)
 
-      const nonce = o.Nonce
+      // TODO: Ideally our packet types would be separated
+      //       and reliable packets would have Nonce marked as required.
+      // @ts-ignore
+      this.unacknowledgedPackets.set(o.Nonce, 0);
 
-      if (nonce === undefined) {
-        throw new Error('Got undefined nonce in packet')
-      }
-
-      this.unacknowledgedPackets.set(nonce, 0);
       if(o.Reliable) {
           let interval = setInterval(() => {
-            const unackedPackets = this.unacknowledgedPackets.get(nonce) || 0
+            if (!o.Nonce) {
+              // We should never actually get here, as we set
+              // a nonce for reliable packets above, but we need
+              // to appease typescript :)
+              throw new Error('Reliable packet missing new nonce, this should not happen.')
+            }
+
+            const unackedPackets = this.unacknowledgedPackets.get(o.Nonce) || 0
 
             if (!unackedPackets) {
               clearInterval(interval)
             } else {
-              this.unacknowledgedPackets.set(nonce, unackedPackets + 1)
+              this.unacknowledgedPackets.set(o.Nonce, unackedPackets + 1)
 
-              if(this.unacknowledgedPackets.get(nonce) == 10) {
+              if(this.unacknowledgedPackets.get(o.Nonce) == 10) {
                   this.disconnect()
                   clearInterval(interval)
               } else {
