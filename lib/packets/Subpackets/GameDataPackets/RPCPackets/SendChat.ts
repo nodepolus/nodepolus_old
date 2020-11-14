@@ -1,18 +1,17 @@
 import PolusBuffer from '../../../../util/PolusBuffer'
-import { PacketHandler } from '../../../Packet';
 
 export interface SendChatPacket {
 	ChatText: string
 }
 
-export const SendChat: PacketHandler<SendChatPacket> = {
+export default class SendChat {
+
 	parse(packet: PolusBuffer): SendChatPacket {
 		return {ChatText: packet.readString()}
-  },
-
+	}
 	serialize(packet: SendChatPacket): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.writeString(packet.ChatText);
 		return buf;
-	}
-}
+	};
+};

@@ -1,5 +1,4 @@
 import PolusBuffer from '../../util/PolusBuffer'
-import { PacketHandler } from '../Packet';
 
 export interface RedirectPacket {
   type: 'Redirect',
@@ -7,14 +6,14 @@ export interface RedirectPacket {
 	Port: number
 }
 
-export const Redirect: PacketHandler<RedirectPacket> = {
+export default class Redirect {
 	parse(packet: PolusBuffer): RedirectPacket {
 		return {
       type: 'Redirect',
 			IP: ([packet.readU8(), packet.readU8(), packet.readU8(), packet.readU8()]).join("."),
 			Port: packet.readU16()
 		};
-	},
+	}
 
 	serialize(packet: RedirectPacket): PolusBuffer {
 		var buf = new PolusBuffer(12);

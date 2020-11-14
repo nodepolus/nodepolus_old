@@ -1,9 +1,9 @@
-import { Unreliable, UnreliablePacket } from './UnreliablePacket'
-import { Reliable } from './ReliablePacket'
-import { Hello, HelloPacket, HelloPacketData } from './HelloPacket'
-import { Disconnect, DisconnectPacket } from './DisconnectPacket'
-import { Acknowledgement, AcknowledgementPacket } from './AcknowledgementPacket'
-import { Ping, PingPacket } from './PingPacket'
+import Unreliable, { UnreliablePacket } from './UnreliablePacket'
+import Reliable from './ReliablePacket'
+import HelloPacket, { HelloPacketData } from './HelloPacket'
+import Disconnect, {DisconnectPacket} from './DisconnectPacket'
+import AcknowledgementPacket from './AcknowledgementPacket'
+import Ping from './PingPacket'
 import { Room } from '../util/Room'
 import PolusBuffer from '../util/PolusBuffer'
 
@@ -25,93 +25,78 @@ export interface ParsedPacket {
     Data?: ParsedPacketData
 };
 
-export interface PacketHandlerOpts {
-  toServer?: boolean,
-  isGameDataTo?: boolean
-}
-
-export interface PacketHandler<T> {
-  parse (packet: PolusBuffer, room: Room, opts?: PacketHandlerOpts): T,
-  serialize (packet: T, room: Room): PolusBuffer
-}
-
 export default class Packet {
-  toServer: boolean
-
-    constructor(toServer: boolean) {
-      this.toServer = toServer
-    }
-
+    constructor(private room: Room, private toServer: boolean){}
+    UnreliablePacketHandler = new Unreliable(this.room, this.toServer);
+    ReliablePacketHandler = new Reliable(this.room, this.toServer);
+    HelloPacketHandler = new HelloPacket();
+    DisconnectPacketHandler = new Disconnect(this.room);
+    AcknowledgementPacketHandler = new AcknowledgementPacket();
+    PingPacketHandler = new Ping();
     /**
      * 
      * Parses a raw PolusBuffer packet
      * 
      * @param {PolusBuffer} packet
      */
-    parse(packet: PolusBuffer, room: Room): ParsedPacket {
+    parse(packet: PolusBuffer): ParsedPacket {
         const packetType = packet.readU8();
         switch (packetType) {
             case PacketType.ReliablePacket:
-                return {
-                  Reliable: true,
-                  Type: PacketType.ReliablePacket,
-                  ...Reliable.parse(packet, room, {
-                    toServer: this.toServer
-                  })
-                }
+                return { Reliable: true, Type: PacketType.ReliablePacket, ...this.ReliablePacketHandler.parse(packet) };
 
             case PacketType.UnreliablePacket:
-                return {
-                  Reliable: false,
-                  Type: PacketType.UnreliablePacket,
-                  Data: Unreliable.parse(packet, room, {
-                    toServer: this.toServer
-                  })
-                };
+                return { Reliable: false, Type: PacketType.UnreliablePacket, Data: this.UnreliablePacketHandler.parse(packet) };
 
             case PacketType.HelloPacket:
-                return { Reliable: true, Type: PacketType.HelloPacket, ...Hello.parse(packet, room) };
+                return { Reliable: true, Type: PacketType.HelloPacket, ...this.HelloPacketHandler.parse(packet) };
 
             case PacketType.DisconnectPacket:
-                return { Reliable: false, Type: PacketType.DisconnectPacket, Data: Disconnect.parse(packet, room) };
+                return { Reliable: false, Type: PacketType.DisconnectPacket, Data: this.DisconnectPacketHandler.parse(packet) };
 
             case PacketType.AcknowledgementPacket:
-                return { Reliable: false, Type: PacketType.AcknowledgementPacket, ...Acknowledgement.parse(packet, room) };
+                return { Reliable: false, Type: PacketType.AcknowledgementPacket, ...this.AcknowledgementPacketHandler.parse(packet) };
 
             case PacketType.PingPacket:
-                return { Reliable: true, Type: PacketType.PingPacket, ...Ping.parse(packet, room) };
+                return { Reliable: true, Type: PacketType.PingPacket, ...this.PingPacketHandler.parse(packet) };
 
             default:
                 throw new TypeError("Unknown Hazel Packet Type: " + PacketType[packetType]);
         }
     };
     
-    serialize(packet: ParsedPacket, room: Room): PolusBuffer {
+    serialize(packet: ParsedPacket): PolusBuffer {
         var buf = new PolusBuffer();
         buf.writeU8(packet.Type);
         switch(packet.Type) {
             case PacketType.ReliablePacket:
-                buf.writeBytes(Reliable.serialize(packet, room));
+                //@ts-ignore
+                buf.writeBytes(this.ReliablePacketHandler.serialize(packet));
                 break;
 
             case PacketType.UnreliablePacket:
-                buf.writeBytes(Unreliable.serialize(packet.Data as UnreliablePacket, room));
+                //@ts-ignore
+                buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data));
                 break;
 
             case PacketType.HelloPacket:
-                buf.writeBytes(Hello.serialize(packet as HelloPacket, room));
+                //@ts-ignore
+                buf.writeBytes(this.HelloPacketHandler.serialize(packet));
                 break;
 
             case PacketType.DisconnectPacket:
-                buf.writeBytes(Disconnect.serialize(packet.Data as DisconnectPacket, room));
+                //@ts-ignore
+                buf.writeBytes(this.DisconnectPacketHandler.serialize(packet.Data));
                 break;
 
             case PacketType.AcknowledgementPacket:
-                buf.writeBytes(Acknowledgement.serialize(packet as AcknowledgementPacket, room));
+                //@ts-ignore
+                buf.writeBytes(this.AcknowledgementPacketHandler.serialize(packet));
                 break;
 
             case PacketType.PingPacket:
-                buf.writeBytes(Ping.serialize(packet as PingPacket, room));
+                //@ts-ignore
+                buf.writeBytes(this.PingPacketHandler.serialize(packet));
                 break;
         }
         return buf;

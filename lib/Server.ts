@@ -16,21 +16,18 @@ import RoomListingRequestEvent from './events/RoomListingRequestEvent';
 import DisconnectionEvent from './events/DisconnectionEvent';
 
 export interface ServerConfig {
-  port: number,
   accessibleIP?: string,
   accessiblePort?: number
 }
 
-export class Server extends AsyncEventEmitter {
-  config: ServerConfig
+class Server extends AsyncEventEmitter {
+	port: number;
 	sock: Socket;
 	rooms: Map<string, Room> = new Map();
 	connections: Map<string, Connection>;
 	private clientIDIncrementer = 256;
-	constructor(config: ServerConfig) {
-    super();
-    this.config = config
-    this.sock = createSocket('udp4')
+	constructor(public config:ServerConfig = {}) {
+		super();
     this.connections = new Map();
 	}
 	public listen(port: number = 22023) {
@@ -45,14 +42,16 @@ export class Server extends AsyncEventEmitter {
 	  if (!this.config.accessiblePort) {
 	  	this.config.accessiblePort = port
 	  }
-	  this.sock.on("listening", () => this.emit("listening", this.config.port));
+	  this.port = port;
+    this.sock = createSocket("udp4");
+	  this.sock.on("listening", () => this.emit("listening", this.port));
 	  this.sock.on("message", async (msg, remote) => {
 		const connection = await this.getConnection(remote);
 		if(connection) {
 			await connection.emit("message", msg);
 		}
 	  });
-	  this.sock.bind(this.config.port);
+	  this.sock.bind(this.port);
 	}
 	public close(reason:string|number = 19) {
 	  return new Promise((resolve) => {
@@ -64,9 +63,10 @@ export class Server extends AsyncEventEmitter {
 	  })
 	}
   private async handlePacket(packet: Subpacket, connection: Connection){
+		let room:Room;
 		switch(packet.type) {
-			case 'GameCreate': {
-				let room = new Room();
+			case 'GameCreate':
+				room = new Room(this);
 				room.settings = packet.RoomSettings;
 				let roomEvent = new RoomCreationEvent(room)
 				await this.emit("roomCreated", roomEvent);
@@ -83,9 +83,8 @@ export class Server extends AsyncEventEmitter {
 				room.on('close', () => {
 					this.rooms.delete(room.code);
 				})
-        break;
-      }
-			case 'JoinGame': {
+			break;
+			case 'JoinGame':
 				let joinRoomRequestEvent = new JoinRoomRequestEvent(packet.RoomCode, connection);
 				await this.emit("joinRoomRequest", joinRoomRequestEvent)
 				await connection.emit("joinRoomRequest", joinRoomRequestEvent)
@@ -96,7 +95,7 @@ export class Server extends AsyncEventEmitter {
 						room.close()
 					}
 				}
-				let room = this.rooms.get(packet.RoomCode);
+				room = this.rooms.get(packet.RoomCode);
 
 				if (room) {
 					connection.moveRoom(room);
@@ -104,9 +103,8 @@ export class Server extends AsyncEventEmitter {
 					connection.disconnect(new DisconnectReason(DisconnectReasons.GameNotFound));
 				}
 
-        break;
-      }
-			case 'GameSearch': {
+				break;
+			case 'GameSearch':
 			  let rooms = [...this.rooms.values()];
 			  let MapCounts:number[] = [0,0,0];
 			  let RoomList:RoomListing[] = [];
@@ -117,15 +115,11 @@ export class Server extends AsyncEventEmitter {
 				if (packet.RoomSettings.ImpostorCount != 0 && room.settings.ImpostorCount != packet.RoomSettings.ImpostorCount) break
 				if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
 
-        if (!this.config.accessibleIP || !this.config.accessiblePort) {
-          throw new Error('accessibleIP or accessiblePort missing in config')
-        }
-
 				RoomList.push({
 				  IP: this.config.accessibleIP,
 				  Port: this.config.accessiblePort,
 				  RoomCode: room.code,
-				  RoomName: room.host?.player?.name || 'unknown',
+				  RoomName: room.host.name,
 				  PlayerCount: room.connections.length,
 				  Age: 0n,
 				  MapID: room.settings.Map,
@@ -141,12 +135,12 @@ export class Server extends AsyncEventEmitter {
           MiraHQRoomCount: MapCounts[1],
           PolusRoomCount: MapCounts[2],
           Rooms: RoomList
-        })
-        this.emit("roomListingRequest", roomListingRequestEvent)
+		})
+		this.emit("roomListingRequest", roomListingRequestEvent)
         if(roomListingRequestEvent.isCanceled) {
-          roomListingRequestEvent.response.SkeldRoomCount = 0
-          roomListingRequestEvent.response.MiraHQRoomCount = 0
-          roomListingRequestEvent.response.PolusRoomCount = 0
+          delete roomListingRequestEvent.response.SkeldRoomCount
+          delete roomListingRequestEvent.response.MiraHQRoomCount
+          delete roomListingRequestEvent.response.PolusRoomCount
           roomListingRequestEvent.response.Rooms = [];
         }
         connection.send({
@@ -156,11 +150,9 @@ export class Server extends AsyncEventEmitter {
           PolusGameCount: roomListingRequestEvent.response.PolusRoomCount,
           RoomList: roomListingRequestEvent.response.Rooms
         })
-      }
-			default: {
+			default:
 			  connection.room.handlePacket(packet, connection);
-        break;
-      }
+			  break;
 		}
 	}
 
@@ -198,3 +190,5 @@ export class Server extends AsyncEventEmitter {
     return this.clientIDIncrementer++;
 	}
 }
+
+export default Server
