@@ -13,6 +13,7 @@ import RoomCreationEvent from './events/RoomCreationEvent';
 import JoinRoomRequestEvent from './events/JoinRoomRequestEvent';
 import DisconnectReason, { DisconnectReasons } from './packets/PacketElements/DisconnectReason';
 import RoomListingRequestEvent from './events/RoomListingRequestEvent';
+import DisconnectionEvent from './events/DisconnectionEvent';
 
 export interface ServerConfig {
   accessibleIP?: string,
@@ -118,7 +119,7 @@ class Server extends AsyncEventEmitter {
 				  IP: this.config.accessibleIP,
 				  Port: this.config.accessiblePort,
 				  RoomCode: room.code,
-				  RoomName: room.host.player.name,
+				  RoomName: room.host.name,
 				  PlayerCount: room.connections.length,
 				  Age: 0n,
 				  MapID: room.settings.Map,
@@ -134,7 +135,8 @@ class Server extends AsyncEventEmitter {
           MiraHQRoomCount: MapCounts[1],
           PolusRoomCount: MapCounts[2],
           Rooms: RoomList
-        })
+		})
+		this.emit("roomListingRequest", roomListingRequestEvent)
         if(roomListingRequestEvent.isCanceled) {
           delete roomListingRequestEvent.response.SkeldRoomCount
           delete roomListingRequestEvent.response.MiraHQRoomCount
@@ -149,7 +151,7 @@ class Server extends AsyncEventEmitter {
           RoomList: roomListingRequestEvent.response.Rooms
         })
 			default:
-			  connection.player.room.handlePacket(packet, connection);
+			  connection.room.handlePacket(packet, connection);
 			  break;
 		}
 	}
@@ -177,7 +179,10 @@ class Server extends AsyncEventEmitter {
 			this.handlePacket(packet, conn)
 		});
 		conn.on("close", () => {
-      this.connections.delete(addr2str(remote));
+			this.connections.delete(addr2str(remote));
+			let de = new DisconnectionEvent(conn)
+			this.emit("disconnection", de)
+			conn.emit("disconnection", de)
 		})
 		return conn
 	}

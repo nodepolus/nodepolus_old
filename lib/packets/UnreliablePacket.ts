@@ -85,7 +85,7 @@ export default class Unreliable {
 						if (data.length <= 4) {
 							packets.push({ type: "JoinGameError", ...this.JoinGameErrorPacketHandler.parse(data) });
 						} else {
-							packets.push({ type: "", ...this.PlayerJoinedGamePacketHandler.parse(data) });
+							packets.push({ type: "PlayerJoinedGame", ...this.PlayerJoinedGamePacketHandler.parse(data) });
 						}
 					}
 					break;

@@ -51,6 +51,7 @@ SYSTEM_HANDLER.set(SystemType.Electrical, {
 		let expected = buf.readU8().toString(2).padStart(5, "0").split('').map(c => c == "1")
 		let actual = buf.readU8().toString(2).padStart(5, "0").split('').map(c => c == "1")
 		return {
+			type: "ElectricalSystem",
 			ExpectedSwitches: expected,
 			ActualSwitches: actual,
 			Value: buf.readU8()
@@ -77,6 +78,7 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
 		const users = [];
 		for (let i = 0; i < length; i++)users.push(buf.readU8());
 		return {
+			type: "MedbaySystem",
 			Users: users
 		}
 	},
@@ -110,11 +112,13 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
                 completed[i] = buf.readU8();
             }
 			return {
+				type: "MiraCommsSystem",
 				ActiveConsoles: userConsolePairs,
 				CompletedConsoles: completed
 			}
 		} else {
 			return {
+				type: "SimpleCommsSystem",
 				IsSabotaged: buf.readBoolean()
 			};
 		}
@@ -157,6 +161,7 @@ SYSTEM_HANDLER.set(SystemType.Security, {
 		const users = [];
 		for (let i = 0; i < length; i++)users.push(buf.readU8());
 		return {
+			type: "SecuritySystem",
 			Users: users
 		}
 	},
@@ -182,6 +187,7 @@ SYSTEM_HANDLER.set(SystemType.Reactor, {
 			pairs.set(buf.readU8(), buf.readU8());
 		}
 		return {
+			type: "ReactorSystem",
 			Countdown,
 			UserConsolePairs: pairs
 		}
@@ -216,6 +222,7 @@ SYSTEM_HANDLER.set(SystemType.O2, {
 			consoles.push(buf.readVarInt());
 		}
 		return {
+			type: "O2System",
 			Countdown,
 			Consoles: consoles
 		};
@@ -253,6 +260,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
             }
 
             return {
+				type: "DoorSystem",
                 Timers: timers,
                 Doors: doors
             }
@@ -267,6 +275,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
                 if (spawn || (mask & (1 << i)) !== 0) doors[i] = buf.readBoolean();
             }
             return {
+				type: "DoorSystem",
                 Doors: doors
             }
         }
@@ -314,6 +323,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
 SYSTEM_HANDLER.set(SystemType.Sabotage, {
 	read: (buf, rm) => {
 		return {
+			type: "SabotageSystem",
 			Timer: buf.readFloat32()
 		}
 	},
@@ -328,6 +338,7 @@ SYSTEM_HANDLER.set(SystemType.Sabotage, {
 SYSTEM_HANDLER.set(SystemType.Decontamination, {
     read: (buf, rm) => {
         return {
+			type: "DeconSystem",
             Timer: buf.readU8(),
             State: DeconStateByte.parse(buf.readU8())
         }
@@ -400,6 +411,7 @@ export default class Component{
                 const systems = Object.keys(SystemType).length/2;
 				if(!(<ShipStatus>this.Data)) {
 					this.Data = {
+						type: "ShipStatus",
 						systems: []
 					}
 				}
@@ -430,12 +442,14 @@ export default class Component{
 			case ObjectType.Player:
 				if(this.index == 0) {
 					this.Data = {
+						type: "PlayerControl",
 						new: spawn ? pb.readBoolean() : false,
 						id: pb.readU8()
 					}
 				}
 				if(this.index == 2) {
 					this.Data = {
+						type: "CustomTransformData",
 						lastSequenceID: pb.readU16(),
 						targetPosition: new Vector2().parse(pb),
 						targetVelocity: new Vector2().parse(pb)
@@ -450,6 +464,7 @@ export default class Component{
 					const gd: GameDataPlayerData[] = [];
 					for (let i = 0; i < PlayerCount; i++) {
 						PlayerData = {
+							type: "GameDataPlayerData",
 							PlayerID: pb.readU8(),
 							PlayerName: pb.readString(),
 							Color: pb.readVarInt(),
@@ -475,10 +490,14 @@ export default class Component{
 						// console.log(PlayerData)
 						gd.push(PlayerData);
 					}
-					(<GameData><unknown>(this.Data)) = {players: gd};
+					this.Data = {
+						type: "GameData",
+						players: gd
+					};
 				}
 				if (this.index === 1) {
 					let o: PlayerVoteBanSystem = {
+						type: "PlayerVoteBanSystem",
 						Players: new Map()
 					};
 					let ArrLen = pb.readU8()
@@ -497,7 +516,10 @@ export default class Component{
 				}
 				break;
 			case ObjectType.MeetingHud:
-				const mh: MeetingHud = {players: []};
+				const mh: MeetingHud = {
+					type: "MeetingHud",
+					players: []
+				};
 				let mask
 
 				if (!spawn) {
