@@ -1,28 +1,40 @@
-import { EventEmitter } from 'events'
 import { RemoteInfo, Socket } from 'dgram'
-import * as assert from 'assert'
 
 import Packet, { ParsedPacket, PacketType, ParsedPacketData } from '../packets/Packet'
-import Player from './Player'
+import { Player } from './Player'
 import DisconnectReason from '../packets/PacketElements/DisconnectReason'
 import PolusBuffer from './PolusBuffer'
 import { HelloPacket } from '../packets/HelloPacket'
 import { Room } from './Room'
 import { UnreliablePacket, Packet as UnreliablePacketPacket } from '../packets/UnreliablePacket'
+import { GameDataPacketType } from '../packets/Subpackets/GameData'
+import AsyncEventEmitter from './AsyncEventEmitter'
 
 let nullRoom = new Room()
 
-export default class Connection extends EventEmitter{
+export default class Connection extends AsyncEventEmitter {
     player?: Player;
     nonce: number = 1;
-    private inGroup?: boolean;
+    clientVersion?: number;
+    hazelVersion?: number;
+    name?: string;
+    room: Room;
+    isHost?: boolean;
+    private inGroup:boolean = false;
+    private helloRecieved:boolean = false;
     private groupArr: UnreliablePacketPacket[] = [];
     private packetGroupReliability: PacketType = PacketType.ReliablePacket
     unacknowledgedPackets: Map<number, number> = new Map();
+    private TEMPDONTUSE: boolean = false;
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
         super();
-        this.once("message", (msg) => {
-            const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), nullRoom);
+
+        this.room = nullRoom
+
+        this.on("message", async (msg:Buffer) => {
+            if (this.TEMPDONTUSE) return
+            this.TEMPDONTUSE = true;
+            const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), this.room);
             if (parsed.Type != PacketType.HelloPacket) {
                 this.disconnect();
             }
@@ -30,26 +42,23 @@ export default class Connection extends EventEmitter{
         })
     }
     handlePacket(packet: ParsedPacket){
-        if (!this.player && packet.Type == PacketType.HelloPacket){
-            this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
-            this.player.room = nullRoom;
-            this.on("message", (msg) => {
-              if (!this.player?.room) {
-                throw new Error('Tried to parse packet for a player without a room')
-              }
-                // console.log(msg.toString('hex'))
-                const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), this.player.room)
+        if (!this.helloRecieved && packet.Type == PacketType.HelloPacket){
+            this.helloRecieved = true;
+            this.name = (<HelloPacket>packet).Data.Name
+            this.clientVersion = (<HelloPacket>packet).Data.ClientVersion
+            this.hazelVersion = (<HelloPacket>packet).Data.HazelVersion
+            this.on("message", async (msg:Buffer) => {
+                // console.log(this.ID, msg.toString('hex'))
+                const parsed = new Packet(this.isToClient).parse(new PolusBuffer(msg), this.room);
                 // console.log("RawParsed", parsed)
-                const serialized = new Packet(this.isToClient).serialize(parsed, this.player.room);
-                try {
-                    if (packet.Type != PacketType.UnreliablePacket)
-                      assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
-                } catch(err) {
-                    console.log("actual  ", serialized.buf.toString('hex'))
-                    console.log("expected", msg.toString('hex'))
-                    console.log(err)
-                }
-                // console.log(util.inspect(parsed, {depth: Infinity}))
+                // const serialized = new Packet(this.room, this.isToClient).serialize(parsed);
+                // try {
+                //     if (packet.Type != PacketType.UnreliablePacket)assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
+                // } catch(err) {
+                //     console.log("actual  ", serialized.buf.toString('hex'))
+                //     console.log("expected", msg.toString('hex'))
+                //     console.log(err)
+                // }
                 this.handlePacket(parsed);
             })
         }
@@ -71,16 +80,12 @@ export default class Connection extends EventEmitter{
                 break;
             case PacketType.UnreliablePacket:
             case PacketType.ReliablePacket:
-                (<UnreliablePacket>packet.Data).Packets.forEach(subpacket => {
-                    this.emit("packet", subpacket)
+                (<UnreliablePacket>packet.Data).Packets.forEach(async subpacket => {
+                    await this.emit("packet", subpacket)
                 })
         }
     }
     private write(type: PacketType, data: ParsedPacketData){
-      if (!this.player?.room) {
-        throw new Error('tried to write to player without a room')
-      }
-
       let o: ParsedPacket = {
           Type: type,
           Reliable: Packet.isReliable(type),
@@ -90,7 +95,7 @@ export default class Connection extends EventEmitter{
         o.Nonce = this.newNonce();
       }
 
-      let pb = new Packet(this.isToClient).serialize(o, this.player.room);
+      let pb = new Packet(this.isToClient).serialize(o, this.room);
       //console.log(this.address.address + ":" + this.address.port, "<== S", pb.buf.toString('hex'))
       this.socket.send(pb.buf, this.address.port, this.address.address)
 
@@ -161,18 +166,16 @@ export default class Connection extends EventEmitter{
         this.groupArr = [];
     }
     public endUnreliablePacketGroup = this.endPacketGroup;
-    disconnect(reason?: DisconnectReason) {
-        this.emit("close")
+    async disconnect(reason?: DisconnectReason) {
+        await this.emit("close")
         this.write(PacketType.DisconnectPacket, {DisconnectReason: reason?reason:new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {
-      if (!this.player?.room) throw new Error('Tried to ack packet while missing a room')
-
       let pb = new Packet(this.isToClient).serialize({
             Type: PacketType.AcknowledgementPacket,
             Reliable: false,
             Nonce: packet.Nonce
-        }, this.player.room)
+        }, this.room)
 
         this.socket.send(pb.buf, this.address.port, this.address.address)
     }
@@ -184,7 +187,7 @@ export default class Connection extends EventEmitter{
     public moveRoom(room: Room) {
       if (!this.player) throw new Error('Tried to move room while missing a player')
 
-        this.player.room = room;
+        this.room = room;
         room.handleNewConnection(this);
         this.startPacketGroup();
         this.send({
@@ -200,27 +203,29 @@ export default class Connection extends EventEmitter{
           RoomCode: room.code
         })
 
+        if(room.host?.ID == this.ID) {
+            this.startPacketGroup();
+            this.send({
+                type: "PlayerJoinedGame",
+                RoomCode: room.code,
+                PlayerClientID: 2147483646,
+                HostClientID: room.host.ID
+            })
+            this.send({
+                type: "GameData",
+                RoomCode: room.code,
+                Packets: [
+                    {
+                        type: GameDataPacketType.SceneChange,
+                        ClientID: 2147483646n,
+                        Scene: "OnlineGame"
+                    }
+                ]
+            })
+            this.endPacketGroup();
+        }
+
         this.endPacketGroup();
-        // if(room.host.ID == this.ID) {
-        //     this.startPacketGroup();
-        //     this.send("PlayerJoinedGame", {
-        //         RoomCode: room.code,
-        //         PlayerClientID: 2147483646,
-        //         HostClientID: room.host.ID
-        //     })
-        //     this.send("GameData", {
-        //         RoomCode: room.code,
-        //         Packets: [
-        //             {
-        //                 //@ts-ignore
-        //                 type: GameDataPacketType.SceneChange,
-        //                 ClientID: 2147483646n,
-        //                 Scene: "OnlineGame"
-        //             }
-        //         ]
-        //     })
-        //     this.endPacketGroup();
-        // }
         // this.startPacketGroup();
         // this.send("JoinedGame", {
         //     RoomCode: room.code,

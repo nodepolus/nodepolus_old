@@ -15,6 +15,7 @@ import DisconnectReason from '../packets/PacketElements/DisconnectReason'
 import PolusBuffer from './PolusBuffer'
 import { DataPacket } from '../packets/Subpackets/GameDataPackets/Data'
 import { ObjectType } from '../packets/Subpackets/GameDataPackets/Spawn'
+import { Player } from './Player'
 
 export declare interface Room {
   on(event: 'close', listener: Function): this
@@ -92,7 +93,7 @@ export class Room extends EventEmitter {
         })
     }
     get host(): Connection | undefined {
-      return this.connections.find(con => con?.player?.isHost);
+      return this.connections.find(con => con?.isHost);
     }
     handlePacket(packet: Subpacket, connection: Connection) {
         switch(packet.type) {
@@ -119,6 +120,13 @@ export class Room extends EventEmitter {
                       HostClientID: this.host?.ID || -1,
                       DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
                     })
+                    packet.Packets.forEach(packet => {
+                        if(packet.type == GameDataPacketType.Spawn && Number(packet.SpawnID) == ObjectType.GameData && packet.Components[0].Data?.type === 'GameData') {
+                          let playerData = packet.Components[0].Data.players[0]
+                          if (this.host) this.host.player = new Player(playerData)
+                        }
+                    })
+                    // this.host.emit("joinRoom", )
                     break;
                 }
                 if (packet.RecipientClientID) {
@@ -129,7 +137,6 @@ export class Room extends EventEmitter {
                     break;
                 }
                 packet.Packets.forEach(GDPacket => {
-                    //console.log(GDPacket)
                     if(GDPacket.type == GameDataPacketType.Spawn) {
                         this.GameObjects.push(<IGameObject>GDPacket)
                     }
@@ -142,6 +149,15 @@ export class Room extends EventEmitter {
                             }
                         })
                     }
+                    if(GDPacket.type == GameDataPacketType.Despawn) {
+                        let gthis = this;
+                        this.GameObjects.forEach((gameObject, idx) => {
+                            let cIdx = gameObject.Components.map(c => c.netID).indexOf(GDPacket.NetID)
+                            if(cIdx != -1) {
+                                gthis.GameObjects[idx].Components.splice(cIdx, 1)
+                            }
+                        })
+                    }
                 })
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
@@ -151,9 +167,7 @@ export class Room extends EventEmitter {
         }
     }
     handleNewConnection(connection: Connection) {
-      if (!connection.player) throw new Error('Tried to handle new connection while missing player')
-
-        if(!this.host) connection.player.isHost = true;
+        if(!this.host) connection.isHost = true;
         this.connections.forEach(conn => {
           conn.send({
             type: 'PlayerJoinedGame',
@@ -165,10 +179,8 @@ export class Room extends EventEmitter {
         this.connections.push(connection);
         connection.on('close', () => {
             this.connections.splice(this.connections.indexOf(connection), 1);
-            if(connection?.player?.isHost && this.connections.length > 0) {
-              const firstConnection = this.connections[0]
-              if (!firstConnection || !firstConnection.player) throw new Error('Missing more connections to set to host')
-              firstConnection.player.isHost = true
+            if(connection.isHost && this.connections.length > 0) {
+                this.connections[0].isHost = true;
             }
             this.connections.forEach(TSconnection => {
                 TSconnection.startPacketGroup();
