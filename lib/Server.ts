@@ -31,24 +31,24 @@ class Server extends AsyncEventEmitter {
 	}
 	public listen(port: number = 22023) {
 	  if (!this.config.accessibleIP) {
-		let gthis = this;
-		publicIp.v4().then((result:string) => {
-		  gthis.config.accessibleIP = result;
-		}).catch((err:Error) => {
-		  throw err;
-		})
+      let gthis = this;
+      publicIp.v4().then((result:string) => {
+        gthis.config.accessibleIP = result;
+      }).catch((err:Error) => {
+        throw err;
+      })
 	  }
 	  if (!this.config.accessiblePort) {
-		this.config.accessiblePort = port
+	  	this.config.accessiblePort = port
 	  }
 	  this.port = port;
-	  this.sock = createSocket("udp4");
+    this.sock = createSocket("udp4");
 	  this.sock.on("listening", () => this.emit("listening", this.port));
 	  this.sock.on("message", async (msg, remote) => {
-      const connection = await this.getConnection(remote);
-      if(connection) {
-        connection.emit("message", msg);
-      }
+		const connection = await this.getConnection(remote);
+		if(connection) {
+			await connection.emit("message", msg);
+		}
 	  });
 	  this.sock.bind(this.port);
 	}
@@ -66,43 +66,43 @@ class Server extends AsyncEventEmitter {
 		switch(packet.type) {
 			case 'GameCreate':
 				room = new Room(this);
-        room.settings = packet.RoomSettings;
-        let roomEvent = new RoomCreationEvent(room)
-        await this.emit("roomCreated", roomEvent);
-        if(roomEvent.isCanceled) {
-          room.close()
-          connection.disconnect(roomEvent.cancelReason)
-          return
-        }
-        this.rooms.set(room.code, room);
+				room.settings = packet.RoomSettings;
+				let roomEvent = new RoomCreationEvent(room)
+				await this.emit("roomCreated", roomEvent);
+				if(roomEvent.isCanceled) {
+					room.close()
+					connection.disconnect(roomEvent.cancelReason)
+					return
+				}
+				this.rooms.set(room.code, room);
 				connection.send({
-				  type: 'SetGameCode',
-				  RoomCode: room.code
+					type: 'SetGameCode',
+					RoomCode: room.code
 				});
 				room.on('close', () => {
-				  this.rooms.delete(room.code);
+					this.rooms.delete(room.code);
 				})
-				break;
+			break;
 			case 'JoinGame':
-        let joinRoomRequestEvent = new JoinRoomRequestEvent(packet.RoomCode, connection);
-        await this.emit("joinRoomRequest", joinRoomRequestEvent)
-        await connection.emit("joinRoomRequest", joinRoomRequestEvent)
-        if(joinRoomRequestEvent.isCanceled) {
-          connection.disconnect();
-          let room = this.rooms.get(packet.RoomCode)
-          if(room && room.connections.length == 0) {
-            room.close()
-          }
-        }
-			  room = this.rooms.get(packet.RoomCode);
+				let joinRoomRequestEvent = new JoinRoomRequestEvent(packet.RoomCode, connection);
+				await this.emit("joinRoomRequest", joinRoomRequestEvent)
+				await connection.emit("joinRoomRequest", joinRoomRequestEvent)
+				if(joinRoomRequestEvent.isCanceled) {
+					connection.disconnect();
+					let room = this.rooms.get(packet.RoomCode)
+					if(room && room.connections.length == 0) {
+						room.close()
+					}
+				}
+				room = this.rooms.get(packet.RoomCode);
 
-			  if (room) {
-			  	connection.moveRoom(room);
-			  } else {
-			  	connection.disconnect(new DisconnectReason(DisconnectReasons.GameNotFound));
-			  }
+				if (room) {
+					connection.moveRoom(room);
+				} else {
+					connection.disconnect(new DisconnectReason(DisconnectReasons.GameNotFound));
+				}
 
-			  break;
+				break;
 			case 'GameSearch':
 			  let rooms = [...this.rooms.values()];
 			  let MapCounts:number[] = [0,0,0];
@@ -155,19 +155,21 @@ class Server extends AsyncEventEmitter {
 	}
 
 	private async getConnection (remote: RemoteInfo): Promise<Connection|undefined> {
-    let connection = this.connections.get(addr2str(remote));
-	  if (!connection) {
-      connection = this.buildConnection(remote);
-      let conEvt = new ConnectionEvent(connection)
-      await this.emit("connection", conEvt)
-      if(conEvt.isCanceled) {
-        connection.disconnect(conEvt.cancelReason)
-      } else {
-        return connection
-      }
-    }
-	}
-
+		let connection = this.connections.get(addr2str(remote));
+		if (!connection) {
+			connection = this.buildConnection(remote);
+			let conEvt = new ConnectionEvent(connection)
+			await this.emit("connection", conEvt)
+			if(conEvt.isCanceled) {
+				connection.disconnect(conEvt.cancelReason)
+			} else {
+				return connection
+			}
+		} else {
+			return connection
+		}
+  	}
+  
 	private buildConnection(remote:RemoteInfo): Connection {
 		let conn = new Connection(remote, this.sock, true, this.requestClientID())
     this.connections.set(addr2str(remote), conn);

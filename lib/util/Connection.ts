@@ -21,9 +21,12 @@ export default class Connection extends AsyncEventEmitter {
     private groupArr: UnreliablePacketPacket[] = [];
     private packetGroupReliability: PacketType;
     unacknowledgedPackets: Map<number, number> = new Map();
+    private TEMPDONTUSE: boolean = false;
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
         super();
-        this.once("message", async (msg:Buffer) => {
+        this.on("message", async (msg:Buffer) => {
+            if (this.TEMPDONTUSE) return
+            this.TEMPDONTUSE = true;
             const parsed = new Packet(nullRoom, this.isToClient).parse(new PolusBuffer(msg));
             if (parsed.Type != PacketType.HelloPacket) {
                 this.disconnect();
@@ -47,7 +50,6 @@ export default class Connection extends AsyncEventEmitter {
                     console.log("expected", msg.toString('hex'))
                     console.log(err)
                 }
-                // console.log(util.inspect(parsed, {depth: Infinity}))
                 this.handlePacket(parsed);
             })
         }

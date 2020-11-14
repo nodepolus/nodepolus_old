@@ -9,14 +9,13 @@ export default class AsyncEventEmitter {
 			this.emitterMap.set(evt, [fun])
 		}
 	}
-	emit(evt:string, ...data:any) {
-		return new Promise((resolve, reject) => {
-			if (this.emitterMap.has(evt)){
-				Promise.allSettled(this.emitterMap.get(evt).map(fn => fn(...data))).then(resolve).catch(reject)
-			} else {
-				resolve()
-			}
-		})
+	public async emit(evt:string, ...data:any) {
+		let functions = (this.emitterMap.get(evt)||[])
+		for (let i = 0; i < functions.length; i++) {
+			const fn = functions[i];
+			await fn(...data);
+		}
+		// console.log("Done", evt)
 	}
 	off(evt:string, fun:Function) {
 		if (this.emitterMap.has(evt)) {
@@ -32,9 +31,9 @@ export default class AsyncEventEmitter {
 	}
 	once(evt:string, fun:Function) {
 		let gthis = this;
-		let newfun = (...params:any) => {
+		let newfun = async (...params:any) => {
 			gthis.off(evt, newfun)
-			fun(...params)
+			await fun(...params)
 		}
 		this.on(evt, newfun)
 	}
