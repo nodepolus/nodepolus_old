@@ -10,10 +10,11 @@ import { HelloPacket } from '../packets/HelloPacket'
 import { Room } from './Room'
 import { UnreliablePacket, Packet as UnreliablePacketPacket } from '../packets/UnreliablePacket'
 import { GameDataPacketType } from '../packets/Subpackets/GameData'
+import AsyncEventEmitter from './AsyncEventEmitter'
 
 let nullRoom = new Room(null);
 
-export default class Connection extends EventEmitter{
+export default class Connection extends AsyncEventEmitter {
     player: Player;
     nonce: number = 1;
     private inGroup:boolean;
@@ -22,7 +23,7 @@ export default class Connection extends EventEmitter{
     unacknowledgedPackets: Map<number, number> = new Map();
     constructor(public address: RemoteInfo, private socket: Socket, public isToClient: boolean, public ID:number){
         super();
-        this.once("message", (msg) => {
+        this.once("message", async (msg:Buffer) => {
             const parsed = new Packet(nullRoom, this.isToClient).parse(new PolusBuffer(msg));
             if (parsed.Type != PacketType.HelloPacket) {
                 this.disconnect();
@@ -34,7 +35,7 @@ export default class Connection extends EventEmitter{
         if (!this.player && packet.Type == PacketType.HelloPacket){
             this.player = new Player((<HelloPacket>packet).Data.Name, (<HelloPacket>packet).Data.ClientVersion, (<HelloPacket>packet).Data.HazelVersion);
             this.player.room = nullRoom;
-            this.on("message", (msg) => {
+            this.on("message", async (msg:Buffer) => {
                 console.log(this.ID, msg.toString('hex'))
                 const parsed = new Packet(this.player.room, this.isToClient).parse(new PolusBuffer(msg));
                 // console.log("RawParsed", parsed)
@@ -67,8 +68,8 @@ export default class Connection extends EventEmitter{
                 break;
             case PacketType.UnreliablePacket:
             case PacketType.ReliablePacket:
-                (<UnreliablePacket>packet.Data).Packets.forEach(subpacket => {
-                    this.emit("packet", subpacket)
+                (<UnreliablePacket>packet.Data).Packets.forEach(async subpacket => {
+                    await this.emit("packet", subpacket)
                 })
         }
     }
@@ -137,8 +138,8 @@ export default class Connection extends EventEmitter{
         this.groupArr = [];
     }
     public endUnreliablePacketGroup = this.endPacketGroup;
-    disconnect(reason?: DisconnectReason) {
-        this.emit("close")
+    async disconnect(reason?: DisconnectReason) {
+        await this.emit("close")
         this.write(PacketType.DisconnectPacket, {DisconnectReason: reason?reason:new DisconnectReason()})
     }
     acknowledgePacket(packet: ParsedPacket) {

@@ -25,7 +25,10 @@ requestRoomListing is emitted just before sending the room listing to the client
 }
 ``` 
 canceling a RoomListingEvent will set Rooms to an empty array and delete the three Count properties `SkeldRoomCount`, `MiraHQRoomCount`, and `PolusRoomCount`
-## roomJoined(RoomJoinEvent) MOVE TO CONNECTION SCOPE
+## joinRoomRequest(joinRoomRequestEvent)
+requestJoinRoom is emitted when a client requests to join a room, before the server checks if the room exists. joinRoomRequestEvent has a string RoomCode with a 4 or 6 letter room code.
+
+cancelling a joinRoomRequestEvent will disconnect the client
 
 # Properties
 ## rooms
