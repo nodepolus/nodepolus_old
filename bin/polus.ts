@@ -1,9 +1,9 @@
 import { Server } from '../lib/server'
-import RoomCreationEvent from '../lib/events/RoomCreationEvent';
-import JoinRoomRequestEvent from '../lib/events/JoinRoomRequestEvent';
-import ConnectionEvent from '../lib/events/ConnectionEvent';
-import RoomListingRequestEvent from '../lib/events/RoomListingRequestEvent';
-import DisconnectionEvent from '../lib/events/DisconnectionEvent';
+import RoomCreationEvent from '../lib/events/roomCreationEvent';
+import JoinRoomRequestEvent from '../lib/events/joinRoomRequestEvent';
+import ConnectionEvent from '../lib/events/connectionEvent';
+import RoomListingRequestEvent from '../lib/events/roomListingRequestEvent';
+import DisconnectionEvent from '../lib/events/disconnectionEvent';
 // import AnnouncementServer from "../lib/announcements/Server";
 // import { FreeWeekendState } from '../lib/announcements/packets/subpackets/FreeWeekend';
 // import Text from '../lib/util/Text';

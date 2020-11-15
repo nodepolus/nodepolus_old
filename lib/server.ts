@@ -2,18 +2,18 @@ const publicIp = require('public-ip');
 
 import { Socket, createSocket, RemoteInfo } from 'dgram'
 
-import { Room } from './util/Room'
-import Connection from './util/Connection'
-import { Packet as Subpacket } from './packets/UnreliablePacket'
+import { Room } from './util/room'
+import Connection from './util/connection'
+import { Packet as Subpacket } from './packets/unreliablePacket'
 import { addr2str } from './util/misc'
-import { RoomListing } from './packets/Subpackets/GameSearchResults'
-import ConnectionEvent from './events/ConnectionEvent';
-import AsyncEventEmitter from './util/AsyncEventEmitter';
-import RoomCreationEvent from './events/RoomCreationEvent';
-import JoinRoomRequestEvent from './events/JoinRoomRequestEvent';
-import DisconnectReason, { DisconnectReasons } from './packets/PacketElements/DisconnectReason';
-import RoomListingRequestEvent from './events/RoomListingRequestEvent';
-import DisconnectionEvent from './events/DisconnectionEvent';
+import { RoomListing } from './packets/subpackets/gameSearchResults'
+import ConnectionEvent from './events/connectionEvent';
+import AsyncEventEmitter from './util/asyncEventEmitter';
+import RoomCreationEvent from './events/roomCreationEvent';
+import JoinRoomRequestEvent from './events/joinRoomRequestEvent';
+import DisconnectReason, { DisconnectReasons } from './packets/packetElements/disconnectReason'
+import RoomListingRequestEvent from './events/roomListingRequestEvent';
+import DisconnectionEvent from './events/disconnectionEvent';
 
 export interface ServerConfig {
   port?: number

@@ -1,6 +1,6 @@
 import udp from 'udp-proxy'
 
-import { PacketType } from '../lib/packets/Packet'
+import { PacketType } from '../lib/packets/packet'
 
 const options = {
 	address: '0.0.0.0',
