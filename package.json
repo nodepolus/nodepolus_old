@@ -5,10 +5,11 @@
   "main": "bin/polus.ts",
   "type": "module",
   "scripts": {
+    "postinstall": "husky install",
     "start": "ts-node-dev bin/polus",
     "proxy": "ts-node-dev bin/proxy",
-    "lint": "eslint . --ext .ts",
-    "lint-and-fix": "eslint . --ext .ts --fix"
+    "lint": "prettier --check .",
+    "lint-and-fix": "npx prettier --write ."
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,8 @@
     "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.12.1",
     "eslint-config-recommended": "4.1.0",
+    "husky": "^5.0.0-beta.0",
+    "prettier": "2.1.2",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.5",
     "udp-proxy": "1.2.0"
