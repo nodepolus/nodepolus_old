@@ -16,12 +16,12 @@ import RoomListingRequestEvent from './events/RoomListingRequestEvent';
 import DisconnectionEvent from './events/DisconnectionEvent';
 
 export interface ServerConfig {
-  port?: number,
+  port?: number
   accessibleIP?: string,
   accessiblePort?: number
 }
 
-class Server extends AsyncEventEmitter {
+export class Server extends AsyncEventEmitter {
 	config: ServerConfig
 	sock: Socket;
 	rooms: Map<string, Room> = new Map();
@@ -47,6 +47,7 @@ class Server extends AsyncEventEmitter {
 	  if (!this.config.accessiblePort) {
 	  	this.config.accessiblePort = this.config.port
 	  }
+    this.sock = createSocket("udp4");
 	  this.sock.on("listening", () => this.emit("listening", this.config.port));
 	  this.sock.on("message", async (msg, remote) => {
 		const connection = await this.getConnection(remote);
@@ -117,22 +118,13 @@ class Server extends AsyncEventEmitter {
 				MapCounts[room.settings.Map]++;
 				if (packet.RoomSettings.Language != 0 && room.settings.Language != packet.RoomSettings.Language) break
 				if (packet.RoomSettings.ImpostorCount != 0 && room.settings.ImpostorCount != packet.RoomSettings.ImpostorCount) break
-        if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
-        
-        if (!this.config.accessibleIP || !this.config.accessiblePort) {
-          console.warn('Room List will return on results without an accessibleIP and accessiblePort set')
-          return
-        }
-
-        if (!room.host) {
-          throw new Error('Could not find host for game search result')
-        }
+				if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
 
 				RoomList.push({
 				  IP: this.config.accessibleIP,
 				  Port: this.config.accessiblePort,
 				  RoomCode: room.code,
-				  RoomName: room.host.name || 'unknown name',
+				  RoomName: room.host.name,
 				  PlayerCount: room.connections.length,
 				  Age: 0n,
 				  MapID: room.settings.Map,
@@ -151,9 +143,9 @@ class Server extends AsyncEventEmitter {
 		})
 		this.emit("roomListingRequest", roomListingRequestEvent)
         if(roomListingRequestEvent.isCanceled) {
-          delete roomListingRequestEvent.response.SkeldRoomCount
-          delete roomListingRequestEvent.response.MiraHQRoomCount
-          delete roomListingRequestEvent.response.PolusRoomCount
+          roomListingRequestEvent.response.SkeldRoomCount = 0
+          roomListingRequestEvent.response.MiraHQRoomCount = 0
+          roomListingRequestEvent.response.PolusRoomCount = 0
           roomListingRequestEvent.response.Rooms = [];
         }
         connection.send({

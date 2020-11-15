@@ -6,8 +6,15 @@ export interface Position {
 }
 
 export default class Vector2 {
-	constructor(public X?: number, public Y?: number) {}
-    parse(buffer: PolusBuffer): Vector2 {
+  X: number
+  Y: number
+
+	constructor(X: number = -1, Y: number = -1) {
+    this.X = X
+    this.Y = Y
+  }
+
+  parse(buffer: PolusBuffer): Vector2 {
 		this.X = this.lerp(-40, 40, (buffer.readU16() / 65535));
 		this.Y = this.lerp(-40, 40, (buffer.readU16() / 65535));
 		return this;

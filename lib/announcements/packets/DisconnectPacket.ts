@@ -1,17 +1,18 @@
+import { PacketHandler } from '../../packets/Packet';
 import PolusBuffer from '../../util/PolusBuffer'
 
 export interface DisconnectPacket{
 
 }
 
-export default class Disconnect {
+export const Disconnect: PacketHandler<DisconnectPacket> = {
 	parse(packet: PolusBuffer): DisconnectPacket {
 		return {
 			
 		};
-	}
+  },
+
 	serialize(packet: DisconnectPacket): PolusBuffer {
 		return new PolusBuffer();
 	}
 }
-

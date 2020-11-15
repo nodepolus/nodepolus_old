@@ -1,14 +1,13 @@
 import { EventEmitter } from "events";
 import { createSocket, RemoteInfo, Socket } from "dgram";
 import { addr2str } from "../util/misc";
-import Packet, { PacketType } from "./packets/Packet";
+import { Packet, PacketType } from "./packets/Packet";
 import PolusBuffer from "../util/PolusBuffer";
 import { HelloPacketData } from "./packets/HelloPacket";
-import { UnreliablePacket, UnreliablePacketData } from "./packets/UnreliablePacket";
-import Acknowledgement from "../packets/AcknowledgementPacket";
-import AnnouncementData from "./packets/subpackets/AnnouncementData";
+import { UnreliablePacketData } from "./packets/UnreliablePacket";
 import { FreeWeekendState } from "./packets/subpackets/FreeWeekend";
 import Text from "../util/Text";
+import { Room } from '../../lib/util/Room'
 
 export interface ClientData {
     nonce: number,
@@ -29,9 +28,9 @@ export interface Announce {
 }
 
 export default class AnnouncementServer extends EventEmitter{
+  room: Room
     sock: Socket;
     private clientMap: Map<string, ClientData> = new Map();
-    private packet = new Packet();
     constructor(public config: AnnouncementConfig){
         super();
         config = Object.assign({
@@ -40,18 +39,22 @@ export default class AnnouncementServer extends EventEmitter{
             port: 22024,
             freeWeekend: FreeWeekendState.NotFree
         }, config);
+
+        this.sock = createSocket('udp4')
+        this.room = new Room()
     }
 
     listen(){
         return new Promise((res, rej)=>{
-            this.sock = createSocket("udp4");
             this.sock.bind(this.config.port, this.config.address, () => {
                 res();
                 this.sock.off("error", rej);
                 this.sock.on("message", (buf, info)=>{
                     let client = this.getClient(info);
-                    let packet = this.packet.parse(new PolusBuffer(buf));
+                    if (!client) throw new Error('Could not get client')
+                    let packet = Packet.parse(new PolusBuffer(buf), this.room);
                     if (packet.Reliable){
+                      // @ts-ignore
                         this.ack(info, packet.Nonce);
                     }
                     switch(packet.Type){
@@ -60,17 +63,20 @@ export default class AnnouncementServer extends EventEmitter{
                             client.announceId = data.LastAnnouncement;
                             client.language = data.Language;
                             if (this.listenerCount("connect") == 0){
-                                this.send([
-                                    {
-                                        type: "AnnouncementData",
-                                        Id: this.generateId(),
-                                        Text: this.config.defaultMessage.text
-                                    },
-                                    {
-                                        type: "FreeWeekend",
-                                        FreeState: this.config.freeWeekend
-                                    }
-                                ], client);
+                              const packets: UnreliablePacketData[] = [ {
+                                type: "AnnouncementData",
+                                Id: this.generateId(),
+                                Text: this.config.defaultMessage.text
+                              } ]
+
+                              if (this.config.freeWeekend) {
+                                packets.push({
+                                  type: 'FreeWeekend',
+                                  FreeState: this.config.freeWeekend
+                                })
+                              }
+
+                              this.send(packets, client)
                             }else{
                                 this.emit("connect", client);
                             }
@@ -108,14 +114,14 @@ export default class AnnouncementServer extends EventEmitter{
         let Nonce = this.incrementNonce(client);
         let i = 0;
         let interval: NodeJS.Timeout;
-        let data = new Packet().serialize({
+        let data = Packet.serialize({
             Type: PacketType.ReliablePacket,
             Reliable: true,
             Nonce,
             Data: {
                 Packets: packets
             }
-        }).buf;
+        }, this.room).buf;
         let reliableSend = ()=>{
             if (i++ > 6) {
                 clearInterval(interval);
@@ -129,10 +135,10 @@ export default class AnnouncementServer extends EventEmitter{
         }
         interval = setInterval(reliableSend, 1000);
     }
-    private getClient(info: RemoteInfo): ClientData{
+    private getClient(info: RemoteInfo): ClientData | null{
         let addr = addr2str(info)
         if (!this.clientMap.has(addr)) this.clientMap.set(addr, {nonce: 0, announceId: BigInt(0), language: BigInt(0), info});
-        return this.clientMap.get(addr);
+        return this.clientMap.get(addr) || null
     }
     private incrementNonce(client: ClientData): number{
         return client.nonce++;
@@ -145,10 +151,10 @@ export default class AnnouncementServer extends EventEmitter{
         return id;
     }
     private ack(info: RemoteInfo, nonce: number){
-        this.sock.send(new Packet().serialize({
+        this.sock.send(Packet.serialize({
             Type: PacketType.AcknowledgementPacket,
             Reliable: false,
             Nonce: nonce,
-        }).buf, info.port, info.address);
+        }, this.room).buf, info.port, info.address);
     }
 }

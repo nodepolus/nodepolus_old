@@ -1,5 +1,4 @@
 import { BaseCancelableEvent } from "./BaseEvents";
-import { Room } from "../util/Room";
 import RoomSettings from "../packets/PacketElements/RoomSettings";
 import { RoomListing } from "../packets/Subpackets/GameSearchResults";
 

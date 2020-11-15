@@ -1,23 +1,25 @@
-import GameCreate, { GameCreatePacket } from './Subpackets/GameCreate'
-import SetGameCode, { SetGameCodePacket } from './Subpackets/SetGameCode'
-import JoinGame, { JoinGamePacket } from './Subpackets/JoinGame'
-import JoinGameError, { JoinGameErrorPacket } from './Subpackets/JoinGameError'
-import PlayerJoinedGame, { PlayerJoinedGamePacket } from './Subpackets/PlayerJoinedGame'
-import StartGame, { StartGamePacket } from './Subpackets/StartGame'
-import RemovePlayer, { RemovePlayerPacket } from './Subpackets/RemovePlayer'
-import GameData, { GameDataPacket } from './Subpackets/GameData'
-import JoinedGame, { JoinedGamePacket } from './Subpackets/JoinedGame'
-import { EndGamePacket, EndGame } from './Subpackets/EndGame'
-import AlterGame, { AlterGamePacket } from './Subpackets/AlterGame'
-import MasterServers, { MasterServersPacket } from './Subpackets/MasterServers'
-import Redirect, { RedirectPacket } from './Subpackets/Redirect'
-import GameSearchResults, { GameSearchResultsPacket } from './Subpackets/GameSearchResults'
 import { Room } from '../util/Room'
 import PolusBuffer from '../util/PolusBuffer'
+import { PacketHandler, PacketHandlerOpts } from './Packet'
+
+import { GameCreate, GameCreatePacket } from './Subpackets/GameCreate'
+import { SetGameCode, SetGameCodePacket } from './Subpackets/SetGameCode'
+import { JoinGame, JoinGamePacket } from './Subpackets/JoinGame'
+import { JoinGameError, JoinGameErrorPacket } from './Subpackets/JoinGameError'
+import { PlayerJoinedGame, PlayerJoinedGamePacket } from './Subpackets/PlayerJoinedGame'
+import { StartGame, StartGamePacket } from './Subpackets/StartGame'
+import { RemovePlayer, RemovePlayerPacket } from './Subpackets/RemovePlayer'
+import { GameData, GameDataPacket } from './Subpackets/GameData'
+import { JoinedGame, JoinedGamePacket } from './Subpackets/JoinedGame'
+import { EndGamePacket, EndGame } from './Subpackets/EndGame'
+import { AlterGame, AlterGamePacket } from './Subpackets/AlterGame'
+import { MasterServers, MasterServersPacket } from './Subpackets/MasterServers'
+import { Redirect, RedirectPacket } from './Subpackets/Redirect'
+import { GameSearchResults, GameSearchResultsPacket } from './Subpackets/GameSearchResults'
 import { GameSearchPacket, GameSearch } from './Subpackets/GameSearch'
-import KickPlayer, { KickPlayerPacket } from './Subpackets/KickPlayer'
-import WaitingForHost, { WaitingForHostPacket } from './Subpackets/WaitingForHost'
-import RemoveRoom, { RemoveRoomPacket } from './Subpackets/RemoveRoom'
+import { KickPlayer, KickPlayerPacket } from './Subpackets/KickPlayer'
+import { WaitingForHost, WaitingForHostPacket } from './Subpackets/WaitingForHost'
+import { RemoveRoom, RemoveRoomPacket } from './Subpackets/RemoveRoom'
 
 export type Packet = GameCreatePacket |
 						SetGameCodePacket |
@@ -36,34 +38,56 @@ export type Packet = GameCreatePacket |
 						GameSearchResultsPacket |
 						KickPlayerPacket |
 						WaitingForHostPacket |
-						RemoveRoomPacket
+            RemoveRoomPacket
+
+export enum UnreliablePacketType {
+  GameCreate = 'GameCreate',
+  SetGameCode = 'SetGameCode',
+  JoinGame = 'JoinGame',
+  JoinGameError = 'JoinGameError',
+  PlayerJoinedGame = 'PlayerJoinedGame',
+  StartGame = 'StartGame',
+  RemovePlayer = 'RemovePlayer',
+  GameData = 'GameData',
+  JoinedGame = 'JoinedGame',
+  EndGame = 'EndGame',
+  AlterGame = 'AlterGame',
+  MasterServers = 'MasterServers',
+  Redirect = 'Redirect',
+  GameSearch = 'GameSearch',
+  GameSearchResults = 'GameSearchResults',
+  KickPlayer = 'KickPlayer',
+  WaitingForHost = 'WaitingForHost'
+}
 
 export interface UnreliablePacket {
 	Packets: Packet[]
 }
 
-export default class Unreliable {
-	constructor(private room: Room, private toServer: boolean) {}
-	GameCreatePacketHandler = new GameCreate();
-	SetGameCodePacketHandler = new SetGameCode();
-	JoinGamePacketHandler = new JoinGame();
-	JoinGameErrorPacketHandler = new JoinGameError(this.room);
-	PlayerJoinedGamePacketHandler = new PlayerJoinedGame();
-	StartGamePacketHandler = new StartGame();
-	RemovePlayerPacketHandler = new RemovePlayer(this.room);
-	LateRejectionPacketHandler = this.RemovePlayerPacketHandler // fucking forte
-	GameDataPacketHandler = new GameData(this.room, this.toServer);
-	JoinedGamePacketHandler = new JoinedGame();
-	EndGamePacketHandler = new EndGame(this.room);
-	AlterGamePacketHandler = new AlterGame();
-	MasterServersPacketHandler = new MasterServers();
-	RedirectPacketHandler = new Redirect();
-	GameSearchPacketHandler = new GameSearch();
-	GameSearchResultsPacketHandler = new GameSearchResults();
-	KickPlayerPacketHandler = new KickPlayer();
-	WaitingForHostPacketHandler = new WaitingForHost();
-	RemoveRoomPacketHandler = new RemoveRoom();
-	parse(packet: PolusBuffer): UnreliablePacket {
+export const unreliablePackerHandlers: {
+  [type in keyof typeof UnreliablePacketType]: PacketHandler<Packet>
+} = {
+  [UnreliablePacketType.GameCreate]: GameCreate,
+  [UnreliablePacketType.SetGameCode]: SetGameCode,
+  [UnreliablePacketType.JoinGame]: JoinGame,
+  [UnreliablePacketType.JoinGameError]: JoinGameError,
+  [UnreliablePacketType.PlayerJoinedGame]: PlayerJoinedGame,
+  [UnreliablePacketType.StartGame]: StartGame,
+  [UnreliablePacketType.RemovePlayer]: RemovePlayer,
+  [UnreliablePacketType.GameData]: GameData,
+  [UnreliablePacketType.JoinedGame]: JoinedGame,
+  [UnreliablePacketType.EndGame]: EndGame,
+  [UnreliablePacketType.AlterGame]: AlterGame,
+  [UnreliablePacketType.MasterServers]: MasterServers,
+  [UnreliablePacketType.Redirect]: Redirect,
+  [UnreliablePacketType.GameSearch]: GameSearch,
+  [UnreliablePacketType.GameSearchResults]: GameSearchResults,
+  [UnreliablePacketType.KickPlayer]: KickPlayer,
+  [UnreliablePacketType.WaitingForHost]: WaitingForHost
+}
+
+export const Unreliable: PacketHandler<UnreliablePacket> = {
+	parse(packet: PolusBuffer, room: Room, opts: PacketHandlerOpts): UnreliablePacket {
 		const packets = [];
 		while (packet.dataRemaining().length != 0) {
 			const length = packet.readU16();
@@ -71,62 +95,64 @@ export default class Unreliable {
 			const data = packet.readBytes(length);
 			switch (type) {
 				case 0x00:
-					if (this.toServer) {
-						// @ts-ignore
-						packets.push({ type: "GameCreate", ...this.GameCreatePacketHandler.parse(data) });
+					if (opts.toServer) {
+						packets.push(GameCreate.parse(data, room))
 					} else {
-						packets.push({ type: "SetGameCode", ...this.SetGameCodePacketHandler.parse(data) });
+						packets.push(SetGameCode.parse(data, room))
 					}
 					break;
 				case 0x01:
-					if (this.toServer) {
-						packets.push({ type: "JoinGame", ...this.JoinGamePacketHandler.parse(data) });
+					if (opts.toServer) {
+						packets.push(JoinGame.parse(data, room))
 					} else {
 						if (data.length <= 4) {
-							packets.push({ type: "JoinGameError", ...this.JoinGameErrorPacketHandler.parse(data) });
+							packets.push(JoinGameError.parse(data, room))
 						} else {
-							packets.push({ type: "PlayerJoinedGame", ...this.PlayerJoinedGamePacketHandler.parse(data) });
+							packets.push(PlayerJoinedGame.parse(data, room))
 						}
 					}
 					break;
 				case 0x02:
-					packets.push({ type: "StartGame", ...this.StartGamePacketHandler.parse(data) });
+					packets.push(StartGame.parse(data, room))
 					break;
 				case 0x03:
-					packets.push({ type: "RemoveRoom", ...this.RemoveRoomPacketHandler.parse(data) })
+					packets.push(RemoveRoom.parse(data, room))
 				case 0x04:
-					packets.push({ type: "RemovePlayer", ...this.RemovePlayerPacketHandler.parse(data) });
+					packets.push(RemovePlayer.parse(data, room));
 					break;
 				case 0x05:
 				case 0x06:
-					packets.push({ type: "GameData", ...this.GameDataPacketHandler.parse(data, type == 0x06) });
+          packets.push(GameData.parse(data, room, {
+            toServer: opts.toServer,
+            isGameDataTo: type == 0x06
+          }))
 					break;
 				case 0x07:
-					packets.push({ type: "JoinedGame", ...this.JoinedGamePacketHandler.parse(data) });
+					packets.push(JoinedGame.parse(data, room));
 					break;
 				case 0x08:
-					packets.push({ type: "EndGame", ...this.EndGamePacketHandler.parse(data) });
+					packets.push(EndGame.parse(data, room));
 					break;
 				case 0x0a:
-					packets.push({ type: "AlterGame", ...this.AlterGamePacketHandler.parse(data) });
+					packets.push(AlterGame.parse(data, room));
 					break;
 				case 0x0b:
-					packets.push({ type: "KickPlayer", ...this.KickPlayerPacketHandler.parse(data)})
+					packets.push(KickPlayer.parse(data, room))
 					break;
 				case 0x0c:
-					packets.push({ type: "WaitingForHost", ...this.WaitingForHostPacketHandler.parse(data)})
+					packets.push(WaitingForHost.parse(data, room))
 					break;
 				case 0x0e:
-					packets.push({ type: "MasterServers", ...this.MasterServersPacketHandler.parse(data) });
+					packets.push(MasterServers.parse(data, room));
 					break;
 				case 0x0d:
-					packets.push({ type: "Redirect", ...this.RedirectPacketHandler.parse(data) });
+					packets.push(Redirect.parse(data, room));
 					break;
 				case 0x10:
-					if (this.toServer) {
-						packets.push({ type: "GameSearch", ...this.GameSearchPacketHandler.parse(data) });
+					if (opts.toServer) {
+						packets.push(GameSearch.parse(data, room));
 					} else {
-						packets.push({ type: "GameSearchResults", ...this.GameSearchResultsPacketHandler.parse(data) });
+						packets.push(GameSearchResults.parse(data, room));
 					}
 					break;
 				default:
@@ -134,15 +160,23 @@ export default class Unreliable {
 			}
 		}
 		return { Packets: packets };
-	}
-	serialize(packet: UnreliablePacket):PolusBuffer {
+  },
+
+	serialize(packet: UnreliablePacket, room: Room):PolusBuffer {
 		var buf = new PolusBuffer();
 		// console.log(packet)
 		packet.Packets.forEach(subpacket => {
-			// @ts-ignore
-			let serialized:PolusBuffer = this[subpacket.type + "PacketHandler"].serialize(subpacket)
-			let type: number;
-			// @ts-ignore
+      // @ts-ignore
+      const handler: PacketHandler<UnreliablePacket> = unreliablePackerHandlers[subpacket.type]
+
+      if (!handler) {
+        throw new Error('Missing handler for unrealiable packet:' + subpacket.type)
+      }
+
+      // TODO: fix this typing
+      const serialized = handler.serialize(subpacket as any, room)
+
+			let type: number | null = null;
 			switch(subpacket.type) {
 				case 'GameCreate':
 				case 'SetGameCode':
@@ -190,7 +224,12 @@ export default class Unreliable {
 				case 'GameSearchResults':
 					type = 0x10;
 					break;
-			}
+      }
+      
+      if (type === null) {
+        throw new Error(`Unknown UnreliablePacket type: ${type}`)
+      }
+
 			buf.writeU16(serialized.length);
 			buf.writeU8(type);
 			buf.writeBytes(serialized);

@@ -217,7 +217,4 @@ export default class PolusBuffer {
 	get length(): number {
 		return this.buf.length;
 	}
-	set length(val: number) {
-		throw new Error("Attempted to set property 'length' of a PolusBuffer")
-	}
 }

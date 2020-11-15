@@ -24,10 +24,14 @@ export enum DisconnectReasons {
 };
 
 export default class DisconnectReason {
-	reasonInt: number;
-	reason: string;
+	reasonInt?: number
+  reason: string = 'Default disconnect reason, you should not see this'
 
-	constructor(private packet?: PolusBuffer|number, private room?: Room){
+  room?: Room
+
+	constructor(packet?: PolusBuffer|number, room?: Room){
+    this.room = room
+
 		if(packet && packet instanceof PolusBuffer) {
 			if(packet.dataRemaining().length > 1) {
 				this.reasonInt = packet.readU32();
@@ -42,7 +46,8 @@ export default class DisconnectReason {
 		} else {
 			this.reasonInt = <number>packet
 		}
-	}
+  }
+
 	toString() {
 		if(this.room) {
 			switch (this.reasonInt) {

@@ -47,7 +47,6 @@ class RoomCode {
 	}
 
 	stringToInt(str: string): number {
-		let n:number;
 		if (str.length == 4) {
 			return this.stringToIntV1(str);
 		}
