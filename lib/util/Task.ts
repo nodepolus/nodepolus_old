@@ -1,10 +1,14 @@
 import AsyncEventEmitter from "./AsyncEventEmitter";
 
 export default class Task extends AsyncEventEmitter {
-	public complete: boolean;
-	constructor(public ID: number) {
+  complete: boolean = false
+  ID: number
+
+	constructor(ID: number) {
 		super()
-	}
+    this.ID = ID
+  }
+
 	private SetCompleteStatus(status: boolean) {
 		
 	}

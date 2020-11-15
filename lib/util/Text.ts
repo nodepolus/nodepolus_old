@@ -5,7 +5,7 @@ enum State{
 }
 
 export default class Text {
-    private _text;
+    private _text: string = ''
     public state = State.None;
     constructor(initialText: string = ""){
         this._text = initialText;

@@ -1,8 +1,6 @@
 import udp from 'udp-proxy'
 
-import Server from '../lib/Server'
 import { PacketType } from '../lib/packets/Packet'
-import { Room } from '../lib/util/Room'
 
 const options = {
 	address: '0.0.0.0',
@@ -17,15 +15,12 @@ const options = {
 
 const UDPProxy = udp.createServer(options);
 
-const server = new Server();
-let room = new Room(server);
-
-UDPProxy.on('message', function (message, senderRaw) {
+UDPProxy.on('message', function (message: any, senderRaw: any) {
   if (message[0] !== PacketType.PingPacket && message[0] !== PacketType.AcknowledgementPacket)
     console.log(senderRaw.address + ":" + senderRaw.port + " => S", message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
 })
 
-UDPProxy.on('proxyMsg', function (message, sender, peer) {
+UDPProxy.on('proxyMsg', function (message: any, sender: any, peer: any) {
   if (message[0] !== PacketType.PingPacket && message[0] !== PacketType.AcknowledgementPacket)
     console.log("S => " + peer.address + ":" + peer.port, message.toString('hex').toUpperCase().match(/.{1,2}/g).join(" "))
 })

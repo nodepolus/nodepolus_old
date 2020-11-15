@@ -1,15 +1,17 @@
 import PolusBuffer from '../util/PolusBuffer'
+import { PacketHandler } from './Packet';
 
 export interface AcknowledgementPacket {
 	Nonce: number
 }
 
-class Acknowledgement {
+export const Acknowledgement: PacketHandler<AcknowledgementPacket> = {
 	parse(packet: PolusBuffer): AcknowledgementPacket {
 		return {
 			Nonce: packet.readU16(true)
 		};
-	}
+  },
+
 	serialize(packet: AcknowledgementPacket): PolusBuffer {
 		var buf = new PolusBuffer(3);
 		buf.writeU16(packet.Nonce, true);
@@ -17,5 +19,3 @@ class Acknowledgement {
 		return buf;
 	}
 }
-
-export default Acknowledgement;

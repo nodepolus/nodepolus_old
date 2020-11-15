@@ -1,4 +1,4 @@
-import Player from "../util/Player";
+import { Player } from "../util/Player";
 import { Room } from "../util/Room";
 import { BaseCancelableEvent } from "./BaseEvents";
 

@@ -3,6 +3,7 @@ import Component from '../../PacketElements/Component'
 import { Room } from '../../../util/Room'
 import { IGameObject, SpawnFlags } from '../../../util/GameObject'
 import { GameDataPacketType } from '../GameData'
+import { PacketHandler } from '../../Packet'
 
 export enum ObjectType{
 	ShipStatus = 0,
@@ -15,9 +16,8 @@ export enum ObjectType{
 	AprilShipStatus = 7
 }
 
-export default class Spawn{
-	constructor(private room: Room){}
-	parse(buffer: PolusBuffer): IGameObject {
+export const Spawn: PacketHandler<IGameObject> = {
+	parse(buffer: PolusBuffer, room: Room): IGameObject {
 		const spawnPacket: IGameObject = {
       type: GameDataPacketType.Spawn,
 			SpawnID: buffer.readVarInt(),
@@ -27,13 +27,14 @@ export default class Spawn{
 		}
 		let len = buffer.readVarInt();
 		for(let i=0;i<len;i++){
-			let newComponent = new Component(spawnPacket.SpawnID, i, this.room);
+			let newComponent = new Component(spawnPacket.SpawnID, i);
 			newComponent.old = undefined;
-			spawnPacket.Components.push(newComponent.parse(buffer));
+			spawnPacket.Components.push(newComponent.parse(buffer, room));
 		}
 		return spawnPacket;
-	}
-	serialize(packet: IGameObject): PolusBuffer {
+  },
+
+	serialize(packet: IGameObject, room: Room): PolusBuffer {
 		let PB = new PolusBuffer();
 		PB.writeVarInt(packet.SpawnID);
 		PB.writeVarInt(packet.ClientID);
@@ -42,8 +43,8 @@ export default class Spawn{
 		for (let i = 0; i < packet.Components.length; i++) {
 			const component = packet.Components[i];
 			// console.log(component)
-			PB.writeBytes(component.serialize())
+			PB.writeBytes(component.serialize(room))
 		}
 		return PB;
-	};
-};
+	}
+}

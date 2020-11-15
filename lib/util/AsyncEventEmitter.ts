@@ -2,7 +2,8 @@ export default class AsyncEventEmitter {
 	emitterMap = new Map<string, Function[]>()
 	on(evt:string, fun:Function) {
 		if(this.emitterMap.has(evt)) {
-			let fnarr = this.emitterMap.get(evt);
+      let fnarr = this.emitterMap.get(evt);
+      if (!fnarr) fnarr = []
 			fnarr.push(fun)
 			this.emitterMap.set(evt, fnarr)
 		} else {
@@ -19,7 +20,8 @@ export default class AsyncEventEmitter {
 	}
 	off(evt:string, fun:Function) {
 		if (this.emitterMap.has(evt)) {
-			let fnarr = this.emitterMap.get(evt);
+      let fnarr = this.emitterMap.get(evt);
+      if (!fnarr) return
 			let idx = fnarr.indexOf(fun)
 			if(idx != -1) {
 				fnarr.splice(idx, 1)

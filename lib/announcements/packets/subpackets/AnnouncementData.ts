@@ -1,3 +1,4 @@
+import { PacketHandler } from '../../../packets/Packet';
 import PolusBuffer from '../../../util/PolusBuffer'
 
 export interface AnnouncementDataPacket{
@@ -6,14 +7,14 @@ export interface AnnouncementDataPacket{
     Text: string
 }
 
-export default class AnnouncementData {
+export const AnnouncementData: PacketHandler<AnnouncementDataPacket> = {
 	parse(packet: PolusBuffer): AnnouncementDataPacket {
 		return {
             type: "AnnouncementData",
             Id: packet.readVarInt(),
             Text: packet.readString()
 		};
-	}
+	},
 
 	serialize(packet: AnnouncementDataPacket): PolusBuffer {
         let buf = new PolusBuffer();
