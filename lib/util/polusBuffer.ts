@@ -5,10 +5,14 @@ type BuildFrom = number | Buffer | string | number[];
 export default class PolusBuffer {
   cursor: number;
   buf: Buffer;
-  constructor(buildFrom: BuildFrom = 0) {
+  constructor(buildFrom: BuildFrom = 0, isHex?: boolean) {
     this.cursor = 0;
     if (typeof buildFrom != "number") {
-      this.buf = Buffer.from(buildFrom);
+      if (typeof buildFrom === "string" && isHex) {
+        this.buf = Buffer.from(buildFrom, "hex");
+      } else {
+        this.buf = Buffer.from(buildFrom);
+      }
     } else {
       this.buf = Buffer.alloc(buildFrom);
     }
