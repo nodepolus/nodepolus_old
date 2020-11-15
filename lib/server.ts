@@ -118,13 +118,22 @@ export class Server extends AsyncEventEmitter {
 				MapCounts[room.settings.Map]++;
 				if (packet.RoomSettings.Language != 0 && room.settings.Language != packet.RoomSettings.Language) break
 				if (packet.RoomSettings.ImpostorCount != 0 && room.settings.ImpostorCount != packet.RoomSettings.ImpostorCount) break
-				if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
+        if ((packet.RoomSettings.Map & (2 ** room.settings.Map)) === 0) break
+
+        if (!this.config.accessibleIP || !this.config.accessiblePort) {
+          console.warn('Not returning returning gameList result because missing accessibleIP or accessiblePort')
+          return
+        }
+
+        if (!room.host) {
+          throw new Error('Room is missing host, aborting gameSearchResult')
+        }
 
 				RoomList.push({
 				  IP: this.config.accessibleIP,
 				  Port: this.config.accessiblePort,
 				  RoomCode: room.code,
-				  RoomName: room.host.name,
+				  RoomName: room.host?.name || 'unknown',
 				  PlayerCount: room.connections.length,
 				  Age: 0n,
 				  MapID: room.settings.Map,
