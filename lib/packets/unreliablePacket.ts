@@ -184,6 +184,7 @@ export const Unreliable: PacketHandler<UnreliablePacket> = {
     packet.Packets.forEach((subpacket) => {
       // @ts-ignore
       const handler: PacketHandler<UnreliablePacket> =
+        // @ts-ignore
         unreliablePackerHandlers[subpacket.type];
 
       if (!handler) {
