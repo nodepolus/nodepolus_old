@@ -1,6 +1,5 @@
 import RoomCode from '../PacketElements/RoomCode'
 import PolusBuffer from '../../util/PolusBuffer'
-import { PacketHandler } from '../Packet';
 
 export interface PlayerJoinedGamePacket {
   type: 'PlayerJoinedGame',
@@ -9,7 +8,7 @@ export interface PlayerJoinedGamePacket {
 	HostClientID: number
 }
 
-export const PlayerJoinedGame: PacketHandler<PlayerJoinedGamePacket> = {
+export default class PlayerJoinedGame {
 	parse(packet: PolusBuffer): PlayerJoinedGamePacket {
 		const playerJoinedGamePacket: PlayerJoinedGamePacket = {
       type: 'PlayerJoinedGame',
@@ -18,7 +17,7 @@ export const PlayerJoinedGame: PacketHandler<PlayerJoinedGamePacket> = {
 			HostClientID: packet.readU32()
 		}
 		return playerJoinedGamePacket;
-	},
+	}
 
 	serialize(packet: PlayerJoinedGamePacket): PolusBuffer {
 		const buf = new PolusBuffer(12);

@@ -3,36 +3,32 @@ import AmongUsMap from '../../data/enums/AmongUsMap'
 import { Room } from '../../util/Room'
 
 export class RoomSettings {
-	Length: number = -1;
-	Version: number = -1;
-	MaxPlayers: number = -1;
-	Language: number = -1;
-	Map: AmongUsMap = AmongUsMap.THE_SKELD;
-	PlayerSpeedModifier: number = -1;
-	CrewLightModifier: number = -1;
-	ImpostorLightModifier: number = -1;
-	KillCooldown: number = -1;
-	CommonTasks: number = -1;
-	LongTasks: number = -1;
-	ShortTasks: number = -1;
-	EmergencyCount: number = -1;
-	ImpostorCount: number = -1;
-	KillDistance: number = -1;
-	DiscussionTime: number = -1;
-	VotingTime: number = -1;
-	isDefault: boolean = true;
-	EmergencyCooldown: number = -1;
-	ConfirmEjects: boolean = false;
-	VisualTasks: boolean = false;
-	AnonymousVoting: boolean = false;
-  TaskBarUpdates: number = -1;
-
-	constructor(public room: Room) {
-    this.room = room
-  }
-
+	Length: number;
+	Version: number;
+	MaxPlayers: number;
+	Language: number;
+	Map: AmongUsMap;
+	PlayerSpeedModifier: number;
+	CrewLightModifier: number;
+	ImpostorLightModifier: number;
+	KillCooldown: number;
+	CommonTasks: number;
+	LongTasks: number;
+	ShortTasks: number;
+	EmergencyCount: number;
+	ImpostorCount: number;
+	KillDistance: number;
+	DiscussionTime: number;
+	VotingTime: number;
+	isDefault: boolean;
+	EmergencyCooldown?: number;
+	ConfirmEjects?: boolean;
+	VisualTasks?: boolean;
+	AnonymousVoting?: boolean;
+	TaskBarUpdates?: number;
+	constructor(public room?:Room) {}
 	serialize(): PolusBuffer {
-		let buf: PolusBuffer | null = null;
+		let buf;
 		if(!this.Version) {
 			this.Version = 1;
 			if (this.EmergencyCooldown != undefined) this.Version++;
@@ -56,12 +52,7 @@ export class RoomSettings {
 				buf = new PolusBuffer(47);
 				buf.writeU8(46);
 				break;
-    }
-    
-    if (!buf) {
-      throw new Error('Unknown RoomSettings version')
-    }
-
+		}
 		buf.writeU8(this.Version);
 		buf.writeU8(this.MaxPlayers);
 		buf.writeU32(this.Language);

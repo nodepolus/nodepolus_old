@@ -14,12 +14,11 @@ enum DeathType {
 }
 
 export class Player extends AsyncEventEmitter {
-	private int_ID?: number;
-	get ID(): number | undefined { return this.int_ID }
-	connection?: Connection;
+	private int_ID: number;
+	get ID(): PlayerColor { return this.int_ID }
+	connection: Connection;
 	get gameObjects():IGameObject[] {
-    if (!this.connection) return []
-		return this.connection.room.GameObjects.filter(GO => GO.ClientID == BigInt(this.connection?.ID))
+		return this.connection.room.GameObjects.filter(GO => GO.ClientID == BigInt(this.connection.ID))
 	}
 	get position():Vector2 {
 		// TODO: do pos handling
@@ -56,12 +55,12 @@ export class Player extends AsyncEventEmitter {
 	private int_isImpostor: boolean;
 	get isImpostor(): boolean { return this.int_isImpostor }
 	private int_vent?: Vent;
-	get vent(): Vent | undefined { return this.int_vent }
+	get vent(): Vent { return this.int_vent }
 	private int_deathType?: DeathType;
 	get isExiled(): boolean {return this.int_deathType == DeathType.Exiled};
 	get isMurdered(): boolean {return this.int_deathType == DeathType.Murdered};
-	private int_scene?: string;
-	get scene(): string | undefined {return this.int_scene};
+	private int_scene: string;
+	get scene(): string {return this.int_scene};
 	private int_name: string;
 	get name(): string {return this.int_name}
 	constructor(playerData:GameDataPlayerData) {

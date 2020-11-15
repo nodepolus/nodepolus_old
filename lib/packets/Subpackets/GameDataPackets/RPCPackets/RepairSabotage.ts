@@ -1,7 +1,6 @@
 import AmongUsMap from '../../../../data/enums/AmongUsMap'
 import PolusBuffer from '../../../../util/PolusBuffer'
 import { Room } from '../../../../util/Room'
-import { PacketHandler } from '../../../Packet'
 import SystemType from '../../../PacketElements/SystemType'
 
 export enum RepairAction {
@@ -78,8 +77,9 @@ export interface RepairSystemPacket {
 	RepairAmount: RepairLightsAmount | QueueMedbayScan | RepairO2Amount | RepairReactorAmount | ViewCams | ReopenDoorAmount | SabotageSystemAmount | NormalCommunicationsAmount | HqCommunicationsAmount | DecontaminationAmount
 }
 
-export const RepairSabotage: PacketHandler<RepairSystemPacket> = {
-	parse(packet: PolusBuffer, room: Room): RepairSystemPacket {
+export default class RepairSystem {
+    constructor(private room: Room) {}
+	parse(packet: PolusBuffer): RepairSystemPacket {
 		let systemType = packet.readU8();
 		let netID = packet.readVarInt();
 		let amount = packet.readU8();
@@ -136,7 +136,7 @@ export const RepairSabotage: PacketHandler<RepairSystemPacket> = {
 				}
 				break;
 			case SystemType.Communications:
-                if (room.settings.Map == AmongUsMap.MIRA_HQ) {
+                if (this.room.settings.Map == AmongUsMap.MIRA_HQ) {
                     data.RepairAmount = {
                         repaired: (amount & 0x80) != 0,
                         opened: (amount & 0x40) != 0,
@@ -158,9 +158,8 @@ export const RepairSabotage: PacketHandler<RepairSystemPacket> = {
                 break;
 		}
 		return data;
-  },
-
-	serialize(packet: RepairSystemPacket, room: Room): PolusBuffer {
+	}
+	serialize(packet: RepairSystemPacket): PolusBuffer {
 		// console.log("system: ", packet.System)
 		var buf = new PolusBuffer();
 		buf.writeU8(packet.System);
@@ -205,7 +204,7 @@ export const RepairSabotage: PacketHandler<RepairSystemPacket> = {
 			case SystemType.Communications:
                 retInteger = 0;
 
-                if (room.settings.Map == AmongUsMap.MIRA_HQ) {
+                if (this.room.settings.Map == AmongUsMap.MIRA_HQ) {
                     retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).repaired ? 0x80 : 0;
                     retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).opened ? 0x40 : 0;
                     retInteger |= (<HqCommunicationsAmount>packet.RepairAmount).closed ? 0x20 : 0;
@@ -227,5 +226,5 @@ export const RepairSabotage: PacketHandler<RepairSystemPacket> = {
 
 		}
 		return buf;
-	}
-}
+	};
+};

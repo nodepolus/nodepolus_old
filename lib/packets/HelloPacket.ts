@@ -1,5 +1,5 @@
 import PolusBuffer from '../util/PolusBuffer'
-import { PacketHandler } from './Packet';
+import { ParsedPacket } from './Packet'
 
 export interface HelloPacketData {
 	HazelVersion: number,
@@ -12,7 +12,7 @@ export interface HelloPacket {
 	Data: HelloPacketData
 };
 
-export const Hello: PacketHandler<HelloPacket> = {
+export default class Hello {
 	parse(packet: PolusBuffer): HelloPacket {
 		return {
 			Nonce: packet.readU16(true),
@@ -22,8 +22,8 @@ export const Hello: PacketHandler<HelloPacket> = {
 				Name: packet.readString()
 			}
 		};
-	},
-
+	}
+	
 	serialize(packet: HelloPacket): PolusBuffer {
 		var buf = new PolusBuffer();
 		buf.writeU16(packet.Nonce, true);

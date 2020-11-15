@@ -7,7 +7,7 @@ import Publicity from '../data/enums/publicity'
 import { RoomSettings } from '../packets/PacketElements/RoomSettings'
 import { Packet as Subpacket } from '../packets/UnreliablePacket'
 import { IGameObject } from './GameObject'
-import { GameDataPacketType } from '../packets/Subpackets/GameData'
+import { GameDataPacket, GameDataPacketType } from '../packets/Subpackets/GameData'
 
 import { addr2str } from './misc'
 import { RPCPacketType } from '../packets/Subpackets/GameDataPackets/RPC'
@@ -47,11 +47,11 @@ export class Room extends EventEmitter {
         this.internalSettings.room = this;
         this.syncSettings();
     };
-    public GameObjects:IGameObject[] = [];
-    game?: Game;
-    publicity?: Publicity = Publicity.Private;
-    setCode(code:string) {
-        this.internalCode = code;
+    public GameObjects: IGameObject[] = [];
+    game: Game;
+    publicity: Publicity = Publicity.Private;
+    setCode(code: string) {
+        this.code = code;
         this.connections.forEach(singleCon => {
             singleCon.send({
                 type: "SetGameCode",
@@ -96,20 +96,22 @@ export class Room extends EventEmitter {
             })
         })
     }
-    get host(): Connection | undefined {
-      return this.connections.find(con => con?.isHost);
+    get host(): Connection {
+        return this.connections.find(con => con.isHost);
     }
     handlePacket(packet: Subpacket, connection: Connection) {
         switch (packet.type) {
             case "EndGame":
             case "StartGame":
                 this.connections.forEach(otherClient => {
+                    // @ts-ignore
                     otherClient.send(packet)
                 })
                 break;
             case "KickPlayer":
             case "RemovePlayer":
                 this.connections.forEach(otherClient => {
+                    // @ts-ignore
                     otherClient.send(packet)
                 })
                 //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
@@ -190,12 +192,12 @@ export class Room extends EventEmitter {
     handleNewConnection(connection: Connection) {
         if (!this.host) connection.isHost = true;
         this.connections.forEach(conn => {
-          conn.send({
-            type: 'PlayerJoinedGame',
-            RoomCode: this.code,
-            PlayerClientID: connection.ID,
-            HostClientID: this.host?.ID || -1
-          })
+            conn.send({
+                type: 'PlayerJoinedGame',
+                RoomCode: this.code,
+                PlayerClientID: connection.ID,
+                HostClientID: this.host.ID
+            })
         })
         this.connections.push(connection);
         connection.on('close', () => {
@@ -209,7 +211,7 @@ export class Room extends EventEmitter {
                     type: "RemovePlayer",
                     RoomCode: this.code,
                     PlayerClientID: connection.ID,
-                    HostClientID: this.host?.ID || -1,
+                    HostClientID: this.host.ID,
                     DisconnectReason: new DisconnectReason(0)
                 })
                 TSconnection.endPacketGroup();

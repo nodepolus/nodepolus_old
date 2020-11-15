@@ -1,5 +1,4 @@
 import PolusBuffer from '../../../../util/PolusBuffer'
-import { PacketHandler } from '../../../Packet';
 
 export interface SetTasksPacket {
 	PlayerID: number,
@@ -7,23 +6,19 @@ export interface SetTasksPacket {
 	Tasks: number[]
 }
 
-export const SetTasks: PacketHandler<SetTasksPacket> = {
+export default class SetTasks {
+
 	parse(packet: PolusBuffer): SetTasksPacket {
-    const playerId = packet.readU8()
-    const taskCount = packet.readVarInt()
-
 		let returnData: SetTasksPacket = {
-			PlayerID: playerId,
-			TaskCount: taskCount,
+			PlayerID: packet.readU8(),
+			TaskCount: packet.readVarInt(),
 			Tasks: []
-    };
-
-		for (let i = 0; i < taskCount; i++) {
+		};
+		for (let i = 0; i < returnData.TaskCount; i++) {
 			returnData.Tasks[i] = packet.readU8();
 		}
 		return returnData;
-  },
-
+	}
 	serialize(packet: SetTasksPacket): PolusBuffer {
 		let buf = new PolusBuffer();
 		buf.writeU8(packet.PlayerID);
@@ -32,5 +27,5 @@ export const SetTasks: PacketHandler<SetTasksPacket> = {
 			buf.writeU8(packet.Tasks[i]);
 		}
 		return buf;
-	}
-}
+	};
+};

@@ -1,6 +1,6 @@
-import { Unreliable, UnreliablePacket } from './UnreliablePacket'
+import Unreliable, { UnreliablePacket } from './UnreliablePacket'
 import PolusBuffer from '../util/PolusBuffer'
-import { PacketHandler, PacketHandlerOpts, ParsedPacket } from './Packet'
+import { ParsedPacket } from './Packet'
 import { Room } from '../util/Room'
 
 export interface ReliablePacket {
@@ -8,20 +8,20 @@ export interface ReliablePacket {
 	Data: UnreliablePacket
 }
 
-export const Reliable: PacketHandler<ReliablePacket | ParsedPacket> = {
-	parse(packet: PolusBuffer, room: Room, opts: PacketHandlerOpts): ReliablePacket {
+class Reliable {
+	constructor(private room: Room, private toServer: boolean) {}
+	UnreliablePacketHandler = new Unreliable(this.room, this.toServer)
+	parse(packet: PolusBuffer): ReliablePacket {
 		return {
 			Nonce: packet.readU16(true),
-			Data: Unreliable.parse(packet, room, opts)
+			Data: this.UnreliablePacketHandler.parse(packet)
 		};
-  },
-
-	serialize(packet: ParsedPacket | ReliablePacket, room: Room): PolusBuffer {
-    var buf = new PolusBuffer();
-    // if (!packet.Nonce) throw new Error('Tried to serialize a reliable packet that is missing a nonce')
-    // @ts-ignore
-    buf.writeU16(packet.Nonce, true);
-    buf.writeBytes(Unreliable.serialize(packet.Data as UnreliablePacket, room))
+	}
+	serialize(packet: ParsedPacket): PolusBuffer {
+		var buf = new PolusBuffer();
+		buf.writeU16(packet.Nonce, true);
+		//@ts-ignore
+		buf.writeBytes(this.UnreliablePacketHandler.serialize(packet.Data))
 		return buf;
 	}
 }

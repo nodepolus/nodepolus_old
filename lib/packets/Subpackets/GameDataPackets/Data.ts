@@ -2,35 +2,29 @@ import PolusBuffer from '../../../util/PolusBuffer'
 import Component from '../../PacketElements/Component'
 import { Room } from '../../../util/Room'
 import { GameDataPacketType } from '../GameData'
-import { PacketHandler } from '../../Packet'
 
 export interface DataPacket {
   type: GameDataPacketType.Data,
 	Component: Component;
 }
 
-export const Data: PacketHandler<DataPacket> = {
-	parse(packet: PolusBuffer, room: Room): DataPacket {
+export default class Data {
+	constructor(private room:Room) {}
+	parse(packet: PolusBuffer): DataPacket {
 		let ComponentNetID = packet.readVarInt();
-    let component = room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
-
-    if (!component) {
-      throw new Error('Could not find matching GameObject for component: ' + ComponentNetID)
-    }
-    
+		let Component = this.room.GameObjects.map(e => e.Components).flat(1).find(comp => comp.netID == ComponentNetID);
 		return {
 			type: GameDataPacketType.Data,
-			Component: component.parse(packet, room)
+			Component: Component.parse(packet)
 		};
-  },
-
-	serialize(packet: DataPacket, room: Room): PolusBuffer {
+	}
+	serialize(packet: DataPacket): PolusBuffer {
 		let {Component} = packet;
 		let ComponentNetID = Component.netID;
 		let buf = new PolusBuffer();
 		buf.writeVarInt(ComponentNetID);
-		let serialized = Component.serialize(room);
+		let serialized = Component.serialize();
 		buf.writeBytes(serialized);
 		return buf;
-	}
-}
+	};
+};

@@ -21,8 +21,8 @@ export interface ServerConfig {
   accessiblePort?: number
 }
 
-export class Server extends AsyncEventEmitter {
-  config: ServerConfig
+class Server extends AsyncEventEmitter {
+	config: ServerConfig
 	sock: Socket;
 	rooms: Map<string, Room> = new Map();
 	connections: Map<string, Connection>;
@@ -151,9 +151,9 @@ export class Server extends AsyncEventEmitter {
 		})
 		this.emit("roomListingRequest", roomListingRequestEvent)
         if(roomListingRequestEvent.isCanceled) {
-          roomListingRequestEvent.response.SkeldRoomCount = 0
-          roomListingRequestEvent.response.MiraHQRoomCount = 0
-          roomListingRequestEvent.response.PolusRoomCount = 0
+          delete roomListingRequestEvent.response.SkeldRoomCount
+          delete roomListingRequestEvent.response.MiraHQRoomCount
+          delete roomListingRequestEvent.response.PolusRoomCount
           roomListingRequestEvent.response.Rooms = [];
         }
         connection.send({
@@ -203,3 +203,5 @@ export class Server extends AsyncEventEmitter {
     return this.clientIDIncrementer++;
 	}
 }
+
+export default Server

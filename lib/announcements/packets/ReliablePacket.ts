@@ -1,27 +1,27 @@
-import { Unreliable, UnreliablePacket } from './UnreliablePacket'
+import Unreliable, { UnreliablePacket } from './UnreliablePacket'
 import PolusBuffer from '../../util/PolusBuffer'
 import { ParsedPacket } from './Packet'
-import { PacketHandler } from '../../packets/Packet'
-import { Room } from '../../util/Room'
 
 export interface ReliablePacket {
 	Nonce: number,
 	Data: UnreliablePacket
 }
 
-export const Reliable: PacketHandler<ReliablePacket | ParsedPacket> = {
-	parse(packet: PolusBuffer, room: Room): ReliablePacket {
+class Reliable {
+	constructor() {}
+	UnreliablePacketHandler = new Unreliable()
+	parse(packet: PolusBuffer): ReliablePacket {
 		return {
-      Nonce: packet.readU16(true),
-      Data: Unreliable.parse(packet, room)
+			Nonce: packet.readU16(true),
+			Data: this.UnreliablePacketHandler.parse(packet)
 		};
-  },
-
-	serialize(packet: ParsedPacket, room: Room): PolusBuffer {
-    var buf = new PolusBuffer();
-    // @ts-ignore
+	}
+	serialize(packet: ParsedPacket): PolusBuffer {
+		var buf = new PolusBuffer();
 		buf.writeU16(packet.Nonce, true);
-		buf.writeBytes(Unreliable.serialize(packet.Data as UnreliablePacket, room))
+		buf.writeBytes(this.UnreliablePacketHandler.serialize(<UnreliablePacket>packet.Data))
 		return buf;
 	}
 }
+
+export default Reliable;

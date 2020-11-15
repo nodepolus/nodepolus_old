@@ -1,6 +1,5 @@
 import PolusBuffer from '../../util/PolusBuffer'
 import { Room } from '../../util/Room'
-import { PacketHandler } from '../Packet'
 import DisconnectReason from '../PacketElements/DisconnectReason'
 
 export interface JoinGameErrorPacket {
@@ -8,13 +7,15 @@ export interface JoinGameErrorPacket {
 	DisconnectReason: DisconnectReason
 }
 
-export const JoinGameError: PacketHandler<JoinGameErrorPacket> = {
-	parse(packet: PolusBuffer, room: Room): JoinGameErrorPacket {
+export default class JoinGameError {
+	constructor(private room: Room) {}
+
+	parse(packet: PolusBuffer): JoinGameErrorPacket {
 		return {
       type: 'JoinGameError',
-      DisconnectReason: new DisconnectReason(packet, room)
+      DisconnectReason: new DisconnectReason(packet, this.room)
     }
-	},
+	}
 
 	serialize(packet: JoinGameErrorPacket): PolusBuffer {
 		return packet.DisconnectReason.serialize();
