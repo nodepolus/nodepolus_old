@@ -12,7 +12,7 @@ import { UnreliablePacket, Packet as UnreliablePacketPacket } from '../packets/U
 import { GameDataPacketType } from '../packets/Subpackets/GameData'
 import AsyncEventEmitter from './AsyncEventEmitter'
 
-let nullRoom = new Room(null);
+let nullRoom = new Room(null)
 
 export default class Connection extends AsyncEventEmitter {
     player?: Player;

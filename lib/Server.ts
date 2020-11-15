@@ -63,46 +63,45 @@ class Server extends AsyncEventEmitter {
 	  })
 	}
   private async handlePacket(packet: Subpacket, connection: Connection){
-		let room:Room;
 		switch(packet.type) {
-			case 'GameCreate':
-				room = new Room(this);
-				room.settings = packet.RoomSettings;
-				let roomEvent = new RoomCreationEvent(room)
-				await this.emit("roomCreated", roomEvent);
-				if(roomEvent.isCanceled) {
-					room.close()
-					connection.disconnect(roomEvent.cancelReason)
-					return
-				}
-				this.rooms.set(room.code, room);
-				connection.send({
-					type: 'SetGameCode',
-					RoomCode: room.code
-				});
-				room.on('close', () => {
-					this.rooms.delete(room.code);
-				})
-			break;
-			case 'JoinGame':
-				let joinRoomRequestEvent = new JoinRoomRequestEvent(packet.RoomCode, connection);
-				await this.emit("joinRoomRequest", joinRoomRequestEvent)
-				await connection.emit("joinRoomRequest", joinRoomRequestEvent)
-				if(joinRoomRequestEvent.isCanceled) {
-					connection.disconnect();
-					let room = this.rooms.get(packet.RoomCode)
-					if(room && room.connections.length == 0) {
+			case 'GameCreate': {
+					let room = new Room(this);
+					room.settings = packet.RoomSettings;
+					let roomEvent = new RoomCreationEvent(room)
+					await this.emit("roomCreated", roomEvent);
+					if(roomEvent.isCanceled) {
 						room.close()
+						connection.disconnect(roomEvent.cancelReason)
+						return
+					}
+					this.rooms.set(room.code, room);
+					connection.send({
+						type: 'SetGameCode',
+						RoomCode: room.code
+					});
+					room.on('close', () => {
+						this.rooms.delete(room.code);
+					})
+				}
+				break;
+			case 'JoinGame': {
+					let joinRoomRequestEvent = new JoinRoomRequestEvent(packet.RoomCode, connection);
+					await this.emit("joinRoomRequest", joinRoomRequestEvent)
+					await connection.emit("joinRoomRequest", joinRoomRequestEvent)
+					if(joinRoomRequestEvent.isCanceled) {
+						connection.disconnect();
+						let room = this.rooms.get(packet.RoomCode)
+						if(room && room.connections.length == 0) {
+							room.close()
+						}
+					}
+
+					if (this.rooms.get(packet.RoomCode)) {
+						connection.moveRoom(this.rooms.get(packet.RoomCode));
+					} else {
+						connection.disconnect(new DisconnectReason(DisconnectReasons.GameNotFound));
 					}
 				}
-				room = this.rooms.get(packet.RoomCode);
-
-				if (room) {
-					connection.moveRoom(room);
-				} else {
-					connection.disconnect(new DisconnectReason(DisconnectReasons.GameNotFound));
-				}
-
 				break;
 			case 'GameSearch':
 			  let rooms = [...this.rooms.values()];
