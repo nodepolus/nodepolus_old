@@ -1,4 +1,4 @@
-import Server from '../lib/server'
+import Server from '../lib/Server'
 import RoomCreationEvent from '../lib/events/RoomCreationEvent';
 import JoinRoomRequestEvent from '../lib/events/JoinRoomRequestEvent';
 import ConnectionEvent from '../lib/events/ConnectionEvent';
