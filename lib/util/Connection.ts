@@ -185,8 +185,6 @@ export default class Connection extends AsyncEventEmitter {
         return i;
     }
     public moveRoom(room: Room) {
-      if (!this.player) throw new Error('Tried to move room while missing a player')
-
         this.room = room;
         room.handleNewConnection(this);
         this.startPacketGroup();

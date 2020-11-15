@@ -16,9 +16,10 @@ import PolusBuffer from './PolusBuffer'
 import { DataPacket } from '../packets/Subpackets/GameDataPackets/Data'
 import { ObjectType } from '../packets/Subpackets/GameDataPackets/Spawn'
 import { Player } from './Player'
+import JoinRoomEvent from '../events/joinRoomEvent'
 
 export declare interface Room {
-  on(event: 'close', listener: Function): this
+    on(event: 'close', listener: Function): this
 }
 
 export class Room extends EventEmitter {
@@ -31,10 +32,13 @@ export class Room extends EventEmitter {
     }
     public connections: Connection[] = [];
     private internalCode: string;
-    public get code():string {
+    public get code(): string {
         return this.internalCode
     }
-    private internalSettings:RoomSettings = new RoomSettings(this);
+    public set code(input: string) {
+        throw new Error("Use <Room>#setCode(<string>) to set the room code")
+    }
+    private internalSettings: RoomSettings = new RoomSettings(this);
     public get settings(): RoomSettings {
         return this.internalSettings
     };
@@ -55,7 +59,7 @@ export class Room extends EventEmitter {
             })
         })
     }
-    setPublicity(publicity:Publicity) {
+    setPublicity(publicity: Publicity) {
         this.publicity = publicity;
         this.connections.forEach(singleCon => {
             singleCon.send({
@@ -66,10 +70,10 @@ export class Room extends EventEmitter {
             })
         })
     }
-    syncSettings(NetIDIn?:bigint) {
+    syncSettings(NetIDIn?: bigint) {
         let NetID = 0n;
         let go = this.GameObjects.find(go => Number(go.SpawnID) == ObjectType.Player)
-        if(go) {
+        if (go) {
             NetID = go.Components[0].netID
         }
         if (NetIDIn) {
@@ -96,7 +100,7 @@ export class Room extends EventEmitter {
       return this.connections.find(con => con?.isHost);
     }
     handlePacket(packet: Subpacket, connection: Connection) {
-        switch(packet.type) {
+        switch (packet.type) {
             case "EndGame":
             case "StartGame":
                 this.connections.forEach(otherClient => {
@@ -113,22 +117,62 @@ export class Room extends EventEmitter {
                 break;
             case "GameData":
                 if (packet.RecipientClientID && packet.RecipientClientID === 2147483646n) {
-                    connection.send({
+                  if (!this.host) throw new Error('Could not find host to removePlayer')
+                  connection.send({
                       type: 'RemovePlayer',
                       RoomCode: this.code,
                       PlayerClientID: 2147483646,
-                      HostClientID: this.host?.ID || -1,
+                      HostClientID: this.host.ID,
                       DisconnectReason: new DisconnectReason(new PolusBuffer(Buffer.from("00", 'hex')))
-                    })
-                    packet.Packets.forEach(packet => {
-                        if(packet.type == GameDataPacketType.Spawn && Number(packet.SpawnID) == ObjectType.GameData && packet.Components[0].Data?.type === 'GameData') {
+                  })
+                  packet.Packets.forEach(packet => {
+                      if (packet.type == GameDataPacketType.Spawn && Number(packet.SpawnID) == ObjectType.GameData && packet.Components[0].Data?.type == "GameData") {
                           let playerData = packet.Components[0].Data.players[0]
-                          if (this.host) this.host.player = new Player(playerData)
+                          // playerData.Tasks = 
+                        if (!this.host) {
+                          throw new Error('Could not find host to set player')
                         }
-                    })
-                    // this.host.emit("joinRoom", )
-                    break;
+
+                        this.host.player = new Player(playerData)
+                      }
+                  })
+                  if (!this.host.player) throw new Error("Data for host not recieved")
+                  let joinRoomEvent = new JoinRoomEvent(this.host.player, this)
+                  this.host.emit("joinRoom", joinRoomEvent)
+                  this.emit("playerJoined", joinRoomEvent)
+                  if (joinRoomEvent.isCanceled) {
+                      this.host.disconnect()
+                  }
+                  break;
                 }
+                packet.Packets.forEach(GDPacket => {
+                    if (GDPacket.type == GameDataPacketType.RPC) {
+                        if (GDPacket.RPCFlag == RPCPacketType.UpdateGameData) {
+                            // GDPacket.Packet.PlayerData
+                        }
+                    }
+                    if (GDPacket.type == GameDataPacketType.Spawn) {
+                        this.GameObjects.push(GDPacket)
+                    }
+                    if (GDPacket.type == GameDataPacketType.Data) {
+                        let gthis = this;
+                        this.GameObjects.forEach((gameObject, idx) => {
+                            let oldcomp = gameObject.Components.findIndex(testcomp => testcomp.netID == (<DataPacket>GDPacket).Component.netID);
+                            if (oldcomp != -1) {
+                                gthis.GameObjects[idx].Components[oldcomp] = (<DataPacket>GDPacket).Component
+                            }
+                        })
+                    }
+                    if (GDPacket.type == GameDataPacketType.Despawn) {
+                        let gthis = this;
+                        this.GameObjects.forEach((gameObject, idx) => {
+                            let cIdx = gameObject.Components.map(c => c.netID).indexOf(GDPacket.NetID)
+                            if (cIdx != -1) {
+                                gthis.GameObjects[idx].Components.splice(cIdx, 1)
+                            }
+                        })
+                    }
+                })
                 if (packet.RecipientClientID) {
                     this.connections.filter(conn => BigInt(conn.ID) == packet.RecipientClientID).forEach(recipient => {
                         recipient.send(packet)
@@ -136,29 +180,6 @@ export class Room extends EventEmitter {
 
                     break;
                 }
-                packet.Packets.forEach(GDPacket => {
-                    if(GDPacket.type == GameDataPacketType.Spawn) {
-                        this.GameObjects.push(<IGameObject>GDPacket)
-                    }
-                    if(GDPacket.type == GameDataPacketType.Data) {
-                        let gthis = this;
-                        this.GameObjects.forEach((gameObject, idx) => {
-                            let oldcomp = gameObject.Components.findIndex(testcomp => testcomp.netID == (<DataPacket>GDPacket).Component.netID);
-                            if(oldcomp != -1) {
-                                gthis.GameObjects[idx].Components[oldcomp] = (<DataPacket>GDPacket).Component
-                            }
-                        })
-                    }
-                    if(GDPacket.type == GameDataPacketType.Despawn) {
-                        let gthis = this;
-                        this.GameObjects.forEach((gameObject, idx) => {
-                            let cIdx = gameObject.Components.map(c => c.netID).indexOf(GDPacket.NetID)
-                            if(cIdx != -1) {
-                                gthis.GameObjects[idx].Components.splice(cIdx, 1)
-                            }
-                        })
-                    }
-                })
             default:
                 this.connections.filter(conn => addr2str(conn.address) != addr2str(connection.address)).forEach(otherClient => {
                     otherClient.send(packet)
@@ -167,7 +188,7 @@ export class Room extends EventEmitter {
         }
     }
     handleNewConnection(connection: Connection) {
-        if(!this.host) connection.isHost = true;
+        if (!this.host) connection.isHost = true;
         this.connections.forEach(conn => {
           conn.send({
             type: 'PlayerJoinedGame',
@@ -179,7 +200,7 @@ export class Room extends EventEmitter {
         this.connections.push(connection);
         connection.on('close', () => {
             this.connections.splice(this.connections.indexOf(connection), 1);
-            if(connection.isHost && this.connections.length > 0) {
+            if (connection.isHost && this.connections.length > 0) {
                 this.connections[0].isHost = true;
             }
             this.connections.forEach(TSconnection => {
@@ -193,14 +214,14 @@ export class Room extends EventEmitter {
                 })
                 TSconnection.endPacketGroup();
             })
-            if(this.connections.length === 0) {
+            if (this.connections.length === 0) {
                 this.close()
             }
         })
     }
-    public close(reason:string|number = 19) {
+    public close(reason: string | number = 19) {
         let pb = new PolusBuffer()
-        if(typeof reason == 'number') {
+        if (typeof reason == 'number') {
             pb.writeU8(reason)
         } else {
             pb.writeU8(0x08)
