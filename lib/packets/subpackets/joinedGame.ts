@@ -1,47 +1,47 @@
-import RoomCode from '../packetElements/roomCode'
-import PolusBuffer from '../../util/polusBuffer'
-import { PacketHandler } from '../packet'
+import RoomCode from "../packetElements/roomCode";
+import PolusBuffer from "../../util/polusBuffer";
+import { PacketHandler } from "../packet";
 
 export interface JoinedGamePacket {
-  	type: 'JoinedGame',
-	RoomCode: string,
-	PlayerClientID: number,
-	HostClientID: number,
-	PlayerCount?: bigint,
-	OtherPlayers: bigint[]
+  type: "JoinedGame";
+  RoomCode: string;
+  PlayerClientID: number;
+  HostClientID: number;
+  PlayerCount?: bigint;
+  OtherPlayers: bigint[];
 }
 
 export const JoinedGame: PacketHandler<JoinedGamePacket> = {
-	parse(packet: PolusBuffer): JoinedGamePacket {
-    const roomCode = RoomCode.intToString(packet.read32())
-    const playerClientId = packet.readU32()
-    const hostClientId = packet.readU32()
-    const playerCount = packet.readVarInt()
+  parse(packet: PolusBuffer): JoinedGamePacket {
+    const roomCode = RoomCode.intToString(packet.read32());
+    const playerClientId = packet.readU32();
+    const hostClientId = packet.readU32();
+    const playerCount = packet.readVarInt();
 
-		const baseObject:JoinedGamePacket = {
-      type: 'JoinedGame',
-			RoomCode: roomCode,
-			PlayerClientID: playerClientId,
-			HostClientID: hostClientId,
-			PlayerCount: playerCount,
-			OtherPlayers: []
+    const baseObject: JoinedGamePacket = {
+      type: "JoinedGame",
+      RoomCode: roomCode,
+      PlayerClientID: playerClientId,
+      HostClientID: hostClientId,
+      PlayerCount: playerCount,
+      OtherPlayers: [],
     };
 
-		for(let i = 0; i < playerCount; i++) {
-			baseObject.OtherPlayers.push(packet.readVarInt());
-		}
-		return baseObject;
+    for (let i = 0; i < playerCount; i++) {
+      baseObject.OtherPlayers.push(packet.readVarInt());
+    }
+    return baseObject;
   },
 
-	serialize(packet: JoinedGamePacket): PolusBuffer {
-		var buf = new PolusBuffer(12);
-		buf.write32(RoomCode.stringToInt(packet.RoomCode))
-		buf.writeU32(packet.PlayerClientID);
-		buf.writeU32(packet.HostClientID);
-		buf.writeVarInt(BigInt(packet.OtherPlayers.length));
-		for (let i = 0; i < packet.OtherPlayers.length; i++) {
-			buf.writeVarInt(packet.OtherPlayers[i]);
-		}
-		return buf;
-	}
-}
+  serialize(packet: JoinedGamePacket): PolusBuffer {
+    var buf = new PolusBuffer(12);
+    buf.write32(RoomCode.stringToInt(packet.RoomCode));
+    buf.writeU32(packet.PlayerClientID);
+    buf.writeU32(packet.HostClientID);
+    buf.writeVarInt(BigInt(packet.OtherPlayers.length));
+    for (let i = 0; i < packet.OtherPlayers.length; i++) {
+      buf.writeVarInt(packet.OtherPlayers[i]);
+    }
+    return buf;
+  },
+};

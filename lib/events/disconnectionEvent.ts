@@ -1,7 +1,8 @@
 import Connection from "../util/connection";
-import { BaseEvent } from './baseEvents'
-
+import { BaseEvent } from "./baseEvents";
 
 export default class DisconnectionEvent extends BaseEvent {
-	constructor(public connection: Connection) { super() }
+  constructor(public connection: Connection) {
+    super();
+  }
 }

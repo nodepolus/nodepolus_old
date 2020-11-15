@@ -1,20 +1,20 @@
-import PolusBuffer from '../../../../util/polusBuffer'
-import { PacketHandler } from '../../../packet'
+import PolusBuffer from "../../../../util/polusBuffer";
+import { PacketHandler } from "../../../packet";
 
 export interface EnterVentPacket {
-	VentID: bigint
+  VentID: bigint;
 }
 
 export const EnterVent: PacketHandler<EnterVentPacket> = {
-	parse(packet: PolusBuffer): EnterVentPacket {
-		return {
-			VentID: packet.readVarInt()
-		}
+  parse(packet: PolusBuffer): EnterVentPacket {
+    return {
+      VentID: packet.readVarInt(),
+    };
   },
 
-	serialize(packet: EnterVentPacket): PolusBuffer {
-		var buf = new PolusBuffer();
-		buf.writeVarInt(packet.VentID);
-		return buf;
-	}
-}
+  serialize(packet: EnterVentPacket): PolusBuffer {
+    var buf = new PolusBuffer();
+    buf.writeVarInt(packet.VentID);
+    return buf;
+  },
+};

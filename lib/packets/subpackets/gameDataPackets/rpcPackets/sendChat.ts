@@ -1,18 +1,18 @@
-import PolusBuffer from '../../../../util/polusBuffer'
-import { PacketHandler } from '../../../packet'
+import PolusBuffer from "../../../../util/polusBuffer";
+import { PacketHandler } from "../../../packet";
 
 export interface SendChatPacket {
-	ChatText: string
+  ChatText: string;
 }
 
 export const SendChat: PacketHandler<SendChatPacket> = {
-	parse(packet: PolusBuffer): SendChatPacket {
-		return {ChatText: packet.readString()}
+  parse(packet: PolusBuffer): SendChatPacket {
+    return { ChatText: packet.readString() };
   },
 
-	serialize(packet: SendChatPacket): PolusBuffer {
-		var buf = new PolusBuffer();
-		buf.writeString(packet.ChatText);
-		return buf;
-	}
-}
+  serialize(packet: SendChatPacket): PolusBuffer {
+    var buf = new PolusBuffer();
+    buf.writeString(packet.ChatText);
+    return buf;
+  },
+};

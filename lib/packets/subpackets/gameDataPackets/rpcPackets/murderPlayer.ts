@@ -1,18 +1,18 @@
-import PolusBuffer from '../../../../util/polusBuffer'
-import { PacketHandler } from '../../../packet'
+import PolusBuffer from "../../../../util/polusBuffer";
+import { PacketHandler } from "../../../packet";
 
 export interface MurderPlayerPacket {
-	NetID: number
+  NetID: number;
 }
 
 export const MurderPlayer: PacketHandler<MurderPlayerPacket> = {
-	parse(packet: PolusBuffer): MurderPlayerPacket {
-		return {NetID: packet.readU8()}
+  parse(packet: PolusBuffer): MurderPlayerPacket {
+    return { NetID: packet.readU8() };
   },
 
-	serialize(packet: MurderPlayerPacket): PolusBuffer {
-		var buf = new PolusBuffer();
-		buf.writeU8(packet.NetID);
-		return buf;
-	}
-}
+  serialize(packet: MurderPlayerPacket): PolusBuffer {
+    var buf = new PolusBuffer();
+    buf.writeU8(packet.NetID);
+    return buf;
+  },
+};

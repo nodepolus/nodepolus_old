@@ -3,218 +3,242 @@
  */
 type BuildFrom = number | Buffer | string | number[];
 export default class PolusBuffer {
-	cursor: number;
-	buf: Buffer;
-	constructor(buildFrom: BuildFrom = 0) {
-		this.cursor = 0;
-		if (typeof buildFrom != "number") {
-			this.buf = Buffer.from(buildFrom);
-		} else {
-			this.buf = Buffer.alloc(buildFrom);
-		}
-	}
+  cursor: number;
+  buf: Buffer;
+  constructor(buildFrom: BuildFrom = 0) {
+    this.cursor = 0;
+    if (typeof buildFrom != "number") {
+      this.buf = Buffer.from(buildFrom);
+    } else {
+      this.buf = Buffer.alloc(buildFrom);
+    }
+  }
 
-	private resizeBuffer(addsize: number): void {
-		let newlen = this.cursor + addsize;
-		if (this.buf.length < this.cursor + addsize) {
-			newlen = newlen - this.buf.length + this.cursor;
-		}
-		const newb = Buffer.alloc(newlen);
-		this.buf.copy(newb);
-		this.buf = newb;
-	}
+  private resizeBuffer(addsize: number): void {
+    let newlen = this.cursor + addsize;
+    if (this.buf.length < this.cursor + addsize) {
+      newlen = newlen - this.buf.length + this.cursor;
+    }
+    const newb = Buffer.alloc(newlen);
+    this.buf.copy(newb);
+    this.buf = newb;
+  }
 
-	readBoolean(): boolean {
-		return this.readU8() != 0x00;
-	}
+  readBoolean(): boolean {
+    return this.readU8() != 0x00;
+  }
 
-	readU8(): number {
-		return this.buf[this.cursor++];
-	}
+  readU8(): number {
+    return this.buf[this.cursor++];
+  }
 
-	readU16(isBigEndian: boolean = false): number {
-		const uint16 = this.buf[isBigEndian ? 'readUInt16BE' : 'readUInt16LE'](this.cursor);
-		this.cursor += 2;
-		return uint16;
-	}
+  readU16(isBigEndian: boolean = false): number {
+    const uint16 = this.buf[isBigEndian ? "readUInt16BE" : "readUInt16LE"](
+      this.cursor
+    );
+    this.cursor += 2;
+    return uint16;
+  }
 
-	readU32(isBigEndian = false): number {
-		let uint32 = this.buf[isBigEndian ? 'readUInt32BE' : 'readUInt32LE'](this.cursor);
-		this.cursor += 4;
-		return uint32;
-	}
+  readU32(isBigEndian = false): number {
+    let uint32 = this.buf[isBigEndian ? "readUInt32BE" : "readUInt32LE"](
+      this.cursor
+    );
+    this.cursor += 4;
+    return uint32;
+  }
 
-	read8(): number {
-		return this.buf.readInt8(this.cursor);
-	}
+  read8(): number {
+    return this.buf.readInt8(this.cursor);
+  }
 
-	read16(isBigEndian = false): number {
-		const int16 = this.buf[isBigEndian ? 'readInt16BE' : 'readInt16LE'](this.cursor);
-		this.cursor += 2;
-		return int16;
-	}
+  read16(isBigEndian = false): number {
+    const int16 = this.buf[isBigEndian ? "readInt16BE" : "readInt16LE"](
+      this.cursor
+    );
+    this.cursor += 2;
+    return int16;
+  }
 
-	read32(isBigEndian = false): number {
-		const int32 = this.buf[isBigEndian ? 'readInt32BE' : 'readInt32LE'](this.cursor);
-		this.cursor += 4;
-		return int32;
-	}
+  read32(isBigEndian = false): number {
+    const int32 = this.buf[isBigEndian ? "readInt32BE" : "readInt32LE"](
+      this.cursor
+    );
+    this.cursor += 4;
+    return int32;
+  }
 
-	readFloat32(isBigEndian = false): number {
-		const float32 = this.buf[isBigEndian ? 'readFloatBE' : 'readFloatLE'](this.cursor);
-		this.cursor += 4;
-		return float32;
-	}
+  readFloat32(isBigEndian = false): number {
+    const float32 = this.buf[isBigEndian ? "readFloatBE" : "readFloatLE"](
+      this.cursor
+    );
+    this.cursor += 4;
+    return float32;
+  }
 
-	readVarInt(): bigint {
-		let readMore: boolean = true;
-		let shift: bigint = 0n;
-		let output: bigint = 0n;
-		while (readMore) {
-			let b = BigInt(this.buf.readUInt8(this.cursor++));
-			if (b >= 0x80n) {
-				readMore = true;
-				b ^= 0x80n;
-			} else {
-				readMore = false;
-			}
+  readVarInt(): bigint {
+    let readMore: boolean = true;
+    let shift: bigint = 0n;
+    let output: bigint = 0n;
+    while (readMore) {
+      let b = BigInt(this.buf.readUInt8(this.cursor++));
+      if (b >= 0x80n) {
+        readMore = true;
+        b ^= 0x80n;
+      } else {
+        readMore = false;
+      }
 
-			output |= b << shift;
-			shift += 7n;
-		}
+      output |= b << shift;
+      shift += 7n;
+    }
 
-		return output;
-	}
+    return output;
+  }
 
-	readString(): string {
-		const length = this.readVarInt();
-		return this.readBytes(Number(length)).buf.toString();
-	}
+  readString(): string {
+    const length = this.readVarInt();
+    return this.readBytes(Number(length)).buf.toString();
+  }
 
-	readBytes(length: number): PolusBuffer {
-		const buffer = new PolusBuffer(this.buf.slice(this.cursor, this.cursor + length));
-		this.cursor += length;
-		return buffer;
-	}
+  readBytes(length: number): PolusBuffer {
+    const buffer = new PolusBuffer(
+      this.buf.slice(this.cursor, this.cursor + length)
+    );
+    this.cursor += length;
+    return buffer;
+  }
 
-	writeBoolean(value: boolean) {
-		this.writeU8(value ? 1 : 0);
-	}
+  writeBoolean(value: boolean) {
+    this.writeU8(value ? 1 : 0);
+  }
 
-	writeU8(value: number) {
-		this.resizeBuffer(1);
-		if (value > 255 || value < 0) {
-			return new RangeError("Value " + value + " outside of UInt8 Range [0 - 255]");
-		}
-		this.buf[this.cursor++] = value;
-	}
+  writeU8(value: number) {
+    this.resizeBuffer(1);
+    if (value > 255 || value < 0) {
+      return new RangeError(
+        "Value " + value + " outside of UInt8 Range [0 - 255]"
+      );
+    }
+    this.buf[this.cursor++] = value;
+  }
 
-	writeU16(value: number, isBigEndian: boolean = false) {
-		this.resizeBuffer(2);
-		if (value > 65535 || value < 0) {
-			return new RangeError("Value " + value + " outside of UInt16 Range [0 - 65535]");
-		}
-		if (isBigEndian) {
-			this.buf.writeUInt16BE(value, this.cursor);
-		} else {
-			this.buf.writeUInt16LE(value, this.cursor);
-		}
-		this.cursor += 2;
-	}
+  writeU16(value: number, isBigEndian: boolean = false) {
+    this.resizeBuffer(2);
+    if (value > 65535 || value < 0) {
+      return new RangeError(
+        "Value " + value + " outside of UInt16 Range [0 - 65535]"
+      );
+    }
+    if (isBigEndian) {
+      this.buf.writeUInt16BE(value, this.cursor);
+    } else {
+      this.buf.writeUInt16LE(value, this.cursor);
+    }
+    this.cursor += 2;
+  }
 
-	writeU32(value: number, isBigEndian: boolean = false) {
-		this.resizeBuffer(4);
-		if (value > 4294967295 || value < 0) {
-			return new RangeError("Value " + value + " outside of UInt8 Range [0 - 4294967295]");
-		}
-		if (isBigEndian) {
-			this.buf.writeUInt32BE(value, this.cursor);
-		} else {
-			this.buf.writeUInt32LE(value, this.cursor);
-		}
-		this.cursor += 4;
-	}
+  writeU32(value: number, isBigEndian: boolean = false) {
+    this.resizeBuffer(4);
+    if (value > 4294967295 || value < 0) {
+      return new RangeError(
+        "Value " + value + " outside of UInt8 Range [0 - 4294967295]"
+      );
+    }
+    if (isBigEndian) {
+      this.buf.writeUInt32BE(value, this.cursor);
+    } else {
+      this.buf.writeUInt32LE(value, this.cursor);
+    }
+    this.cursor += 4;
+  }
 
-	write8(value: number) {
-		this.resizeBuffer(1);
-		if (value > 127 || value < -128) {
-			return new RangeError("Value " + value + " outside of UInt8 Range [-128 - 127]");
-		}
-		this.buf.writeInt8(value, this.cursor++);
-	}
-	
-	write16(value: number, isBigEndian: boolean = false) {
-		this.resizeBuffer(2);
-		if (value > 32767 || value < -32768) {
-			return new RangeError("Value " + value + " outside of UInt16 Range [-32768 - 32767]");
-		}
-		if (isBigEndian) {
-			this.buf.writeInt16BE(value, this.cursor);
-		} else {
-			this.buf.writeInt16LE(value, this.cursor);
-		}
-		this.cursor += 2;
-	}
+  write8(value: number) {
+    this.resizeBuffer(1);
+    if (value > 127 || value < -128) {
+      return new RangeError(
+        "Value " + value + " outside of UInt8 Range [-128 - 127]"
+      );
+    }
+    this.buf.writeInt8(value, this.cursor++);
+  }
 
-	write32(value: number, isBigEndian: boolean = false) {
-		this.resizeBuffer(4);
-		if (value > 2147483647 || value < -2147483648) {
-			return new RangeError("Value " + value + " outside of UInt8 Range [-2147483648 - 2147483647]");
-		}
-		if (isBigEndian) {
-			this.buf.writeInt32BE(value, this.cursor);
-		} else {
-			this.buf.writeInt32LE(value, this.cursor);
-		}
-		this.cursor += 4;
-	}
+  write16(value: number, isBigEndian: boolean = false) {
+    this.resizeBuffer(2);
+    if (value > 32767 || value < -32768) {
+      return new RangeError(
+        "Value " + value + " outside of UInt16 Range [-32768 - 32767]"
+      );
+    }
+    if (isBigEndian) {
+      this.buf.writeInt16BE(value, this.cursor);
+    } else {
+      this.buf.writeInt16LE(value, this.cursor);
+    }
+    this.cursor += 2;
+  }
 
-	writeFloat32(value: number, isBigEndian = false) {
-		this.resizeBuffer(4);
-		let temp;
-		if (isBigEndian) {
-			temp = this.buf.writeFloatLE(value, this.cursor);
-		} else {
-			temp = this.buf.writeFloatLE(value, this.cursor);
-		}
-		this.cursor += 4;
-		return temp;
-	}
+  write32(value: number, isBigEndian: boolean = false) {
+    this.resizeBuffer(4);
+    if (value > 2147483647 || value < -2147483648) {
+      return new RangeError(
+        "Value " + value + " outside of UInt8 Range [-2147483648 - 2147483647]"
+      );
+    }
+    if (isBigEndian) {
+      this.buf.writeInt32BE(value, this.cursor);
+    } else {
+      this.buf.writeInt32LE(value, this.cursor);
+    }
+    this.cursor += 4;
+  }
 
-	writeVarInt(value: bigint) {
-		let val = value;
-		do {
-			let b = val & 0xffn;
-			if (val >= 0x80n) {
-				b |= 0x80n;
-			}
-			this.resizeBuffer(1);
-			this.buf.writeUInt8(Number(b), this.cursor++);
-			val >>= 7n;
-		} while (val > 0n);
-	}
+  writeFloat32(value: number, isBigEndian = false) {
+    this.resizeBuffer(4);
+    let temp;
+    if (isBigEndian) {
+      temp = this.buf.writeFloatLE(value, this.cursor);
+    } else {
+      temp = this.buf.writeFloatLE(value, this.cursor);
+    }
+    this.cursor += 4;
+    return temp;
+  }
 
-	writeString(value: string) {
-		this.writeVarInt(BigInt(value.length));
-		this.writeBytes(value);
-	}
+  writeVarInt(value: bigint) {
+    let val = value;
+    do {
+      let b = val & 0xffn;
+      if (val >= 0x80n) {
+        b |= 0x80n;
+      }
+      this.resizeBuffer(1);
+      this.buf.writeUInt8(Number(b), this.cursor++);
+      val >>= 7n;
+    } while (val > 0n);
+  }
 
-	writeBytes(bytes: Buffer | Number[] | String | PolusBuffer) {
-		if (bytes instanceof PolusBuffer) {
-			bytes = bytes.buf;
-		}
-		this.resizeBuffer(bytes.length);
-		const b = Buffer.from(bytes);
-		b.copy(this.buf, this.cursor);
-		this.cursor += b.length;
-	}
-	dataRemaining(): Buffer {
-		return this.buf.slice(this.cursor);
-	}
-	static concat(...PolusBuffers: PolusBuffer[]) {
-		return new PolusBuffer(Buffer.concat(PolusBuffers.map(PB => PB.buf)))
-	}
-	get length(): number {
-		return this.buf.length;
-	}
+  writeString(value: string) {
+    this.writeVarInt(BigInt(value.length));
+    this.writeBytes(value);
+  }
+
+  writeBytes(bytes: Buffer | Number[] | String | PolusBuffer) {
+    if (bytes instanceof PolusBuffer) {
+      bytes = bytes.buf;
+    }
+    this.resizeBuffer(bytes.length);
+    const b = Buffer.from(bytes);
+    b.copy(this.buf, this.cursor);
+    this.cursor += b.length;
+  }
+  dataRemaining(): Buffer {
+    return this.buf.slice(this.cursor);
+  }
+  static concat(...PolusBuffers: PolusBuffer[]) {
+    return new PolusBuffer(Buffer.concat(PolusBuffers.map((PB) => PB.buf)));
+  }
+  get length(): number {
+    return this.buf.length;
+  }
 }

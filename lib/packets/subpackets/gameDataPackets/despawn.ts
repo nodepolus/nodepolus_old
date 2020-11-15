@@ -1,23 +1,23 @@
-import PolusBuffer from '../../../util/polusBuffer'
-import { PacketHandler } from '../../packet';
-import { GameDataPacketType } from '../gameData'
+import PolusBuffer from "../../../util/polusBuffer";
+import { PacketHandler } from "../../packet";
+import { GameDataPacketType } from "../gameData";
 
 export interface DespawnPacket {
-  type: GameDataPacketType.Despawn,
-	NetID: bigint
+  type: GameDataPacketType.Despawn;
+  NetID: bigint;
 }
 
 export const Despawn: PacketHandler<DespawnPacket> = {
-	parse(buffer: PolusBuffer): DespawnPacket {
-		return {
+  parse(buffer: PolusBuffer): DespawnPacket {
+    return {
       type: GameDataPacketType.Despawn,
-			NetID: buffer.readVarInt()
-		}
+      NetID: buffer.readVarInt(),
+    };
   },
 
-	serialize(packet: DespawnPacket): PolusBuffer {
-		var pb = new PolusBuffer();
-		pb.writeVarInt(packet.NetID);
-		return pb;
-	}
-}
+  serialize(packet: DespawnPacket): PolusBuffer {
+    var pb = new PolusBuffer();
+    pb.writeVarInt(packet.NetID);
+    return pb;
+  },
+};
