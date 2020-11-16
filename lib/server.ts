@@ -7,15 +7,18 @@ import Connection from "./util/connection";
 import { Packet as Subpacket } from "./packets/unreliablePacket";
 import { addr2str } from "./util/misc";
 import { RoomListing } from "./packets/subpackets/gameSearchResults";
-import ConnectionEvent from "./events/connectionEvent";
 import AsyncEventEmitter from "./util/asyncEventEmitter";
-import RoomCreationEvent from "./events/roomCreationEvent";
-import JoinRoomRequestEvent from "./events/joinRoomRequestEvent";
 import DisconnectReason, {
   DisconnectReasons,
 } from "./packets/packetElements/disconnectReason";
-import RoomListingRequestEvent from "./events/roomListingRequestEvent";
-import DisconnectionEvent from "./events/disconnectionEvent";
+
+import {
+  ConnectionEvent,
+  RoomCreationEvent,
+  JoinRoomRequestEvent,
+  RoomListingRequestEvent,
+  DisconnectionEvent,
+} from "./events";
 
 export interface ServerConfig {
   port?: number;

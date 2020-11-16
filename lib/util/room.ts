@@ -16,7 +16,7 @@ import PolusBuffer from "./polusBuffer";
 import { DataPacket } from "../packets/subpackets/gameDataPackets/data";
 import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
 import { Player } from "./player";
-import JoinRoomEvent from "../events/joinRoomEvent";
+import { JoinRoomEvent } from "../events";
 
 export declare interface Room {
   on(event: "close", listener: Function): this;
