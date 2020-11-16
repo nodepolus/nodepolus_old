@@ -16,7 +16,7 @@ import PolusBuffer from "./polusBuffer";
 import { DataPacket } from "../packets/subpackets/gameDataPackets/data";
 import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
 import { Player } from "./player";
-import JoinRoomEvent from "../events/joinRoomEvent";
+import { JoinRoomEvent } from "../events";
 import { UpdateGameDataPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/updateGameData";
 import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import Task from "./task";

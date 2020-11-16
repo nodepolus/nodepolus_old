@@ -57,7 +57,7 @@ export default class AnnouncementServer extends EventEmitter {
           if (!client) throw new Error("Could not get client");
           let packet = Packet.parse(new PolusBuffer(buf), this.room);
           if (packet.Reliable) {
-            // @ts-ignore
+            if (!packet.Nonce) throw new Error("Reliable packet missing Nonce");
             this.ack(info, packet.Nonce);
           }
           switch (packet.Type) {
@@ -146,6 +146,7 @@ export default class AnnouncementServer extends EventEmitter {
       });
     };
     interval = setInterval(reliableSend, 1000);
+    reliableSend();
   }
   private getClient(info: RemoteInfo): ClientData | null {
     let addr = addr2str(info);
