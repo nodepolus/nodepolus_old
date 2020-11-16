@@ -146,6 +146,7 @@ export default class AnnouncementServer extends EventEmitter {
       });
     };
     interval = setInterval(reliableSend, 1000);
+    reliableSend();
   }
   private getClient(info: RemoteInfo): ClientData | null {
     let addr = addr2str(info);
