@@ -17,6 +17,9 @@ import { DataPacket } from "../packets/subpackets/gameDataPackets/data";
 import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
 import { Player } from "./player";
 import JoinRoomEvent from "../events/joinRoomEvent";
+import { UpdateGameDataPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/updateGameData";
+import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
+import Task from "./task";
 
 export declare interface Room {
   on(event: "close", listener: Function): this;
@@ -30,6 +33,7 @@ export class Room extends EventEmitter {
       charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     });
   }
+  private PlayerIDtoConnectionIDMap = new Map<number, bigint>();
   public connections: Connection[] = [];
   private internalCode: string;
   public get code(): string {
@@ -131,31 +135,90 @@ export class Room extends EventEmitter {
             ),
           });
           packet.Packets.forEach((packet) => {
+            if (packet.type == GameDataPacketType.Spawn) {
+              if (Number(packet.SpawnID) == ObjectType.Player && packet.Components[0].Data?.type == 'PlayerControl') {
+                if (packet.ClientID != 2147483646n) {
+                  this.PlayerIDtoConnectionIDMap.set(packet.Components[0].Data.id, packet.ClientID)
+                }
+              }
+            }
             if (
               packet.type == GameDataPacketType.Spawn &&
               Number(packet.SpawnID) == ObjectType.GameData &&
               packet.Components[0].Data?.type == "GameData"
             ) {
-              let playerData = packet.Components[0].Data.players[0];
-              if (!this.host) {
-                throw new Error("Could not find host to set player on");
-              }
-              this.host.player = new Player(playerData);
+              this.GameObjects.push(packet);
             }
           });
-          if (!this.host.player) throw new Error("Data for host not recieved");
-          let joinRoomEvent = new JoinRoomEvent(this.host.player, this);
-          this.host.emit("joinRoom", joinRoomEvent);
-          this.emit("playerJoined", joinRoomEvent);
-          if (joinRoomEvent.isCanceled) {
-            this.host.disconnect();
-          }
           break;
         }
-        packet.Packets.forEach((GDPacket) => {
+        packet.Packets = packet.Packets.filter((GDPacket) => {
+          // @ts-ignore
+          console.log(GDPacket.Packet)
+          if(GDPacket.type == GameDataPacketType.Spawn) {
+            if (Number(GDPacket.SpawnID) == ObjectType.Player && GDPacket.Components[0].Data?.type == 'PlayerControl') {
+              if (GDPacket.ClientID != 2147483646n) {
+                this.PlayerIDtoConnectionIDMap.set(GDPacket.Components[0].Data.id, GDPacket.ClientID)
+                let connection = this.connections.find(con => con.ID == Number(GDPacket.ClientID))
+                if(connection) {
+                  connection.netIDs = GDPacket.Components.map(c => c.netID);
+                } else {
+                  throw new Error("Data recieved about undefined connection")
+                }
+              }
+            }
+          }
           if (GDPacket.type == GameDataPacketType.RPC) {
             if (GDPacket.RPCFlag == RPCPacketType.UpdateGameData) {
-              // GDPacket.Packet.PlayerData
+              let pd = (<UpdateGameDataPacket>GDPacket.Packet).PlayerData;
+              if(connection.isHost && pd[0].PlayerName != '') {
+                let connectionID = (this.PlayerIDtoConnectionIDMap.get(pd[0].PlayerID))
+                let connection = this.connections.find(con => con.ID == Number(connectionID))
+                if(connection) {
+                  if(!connection.player) {
+                    connection.player = new Player(<GameDataPlayerData><unknown>pd[0]);
+                    connection.player.connection = connection
+                    let joinRoomEvent = new JoinRoomEvent(connection.player, this);
+                    process.nextTick((connection: Connection) => {
+                      connection.emit("joinRoom", joinRoomEvent);
+                      this.emit("playerJoined", joinRoomEvent);
+                      if (joinRoomEvent.isCanceled) {
+                        connection.disconnect();
+                      }
+                    }, connection)
+                  } else {
+                    this.startPacketGroupBroadcastToAll()
+                    connection.player.setName(pd[0].PlayerName)
+                    connection.player.setColor(pd[0].Color)
+                    connection.player.setHat(Number(pd[0].HatID))
+                    connection.player.setPet(Number(pd[0].PetID))
+                    connection.player.setSkin(Number(pd[0].SkinID))
+                    connection.player.setTasks(pd[0].Tasks.map((taskData) => {
+                      let t = new Task(Number(taskData.TaskID));
+                      if (taskData.TaskCompleted) {
+                        t.Complete();
+                      } else {
+                        t.Uncomplete();
+                      }
+                      return t;
+                    }), true)
+                    this.endPacketGroupBroadcastToAll()
+                  }
+                  if(pd[0].Flags.Impostor) {
+                    connection.player.setImpostor()
+                  } else {
+                    connection.player.setCrewmate()
+                  }
+                  if(pd[0].Flags.Dead) {
+                    connection.player.setDead()
+                  } else {
+                    connection.player.revive()
+                  }
+                  return false;
+                } else {
+                  throw new Error("Data recieved for an undefined connection")
+                }
+              }
             }
           }
           if (GDPacket.type == GameDataPacketType.Spawn) {
@@ -186,6 +249,7 @@ export class Room extends EventEmitter {
               }
             });
           }
+          return true;
         });
         if (packet.RecipientClientID) {
           this.connections
@@ -254,5 +318,20 @@ export class Room extends EventEmitter {
         DisconnectReason: new DisconnectReason(pb),
       });
     });
+  }
+  public broadcastToAll(packet: Subpacket) {
+    this.connections.forEach(con => {
+      con.send(packet)
+    })
+  }
+  public startPacketGroupBroadcastToAll() {
+    this.connections.forEach(con => {
+      con.startPacketGroup()
+    })
+  }
+  public endPacketGroupBroadcastToAll() {
+    this.connections.forEach(con => {
+      con.endPacketGroup()
+    })
   }
 }

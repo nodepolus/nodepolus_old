@@ -4,6 +4,7 @@ import JoinRoomRequestEvent from "../lib/events/joinRoomRequestEvent";
 import ConnectionEvent from "../lib/events/connectionEvent";
 import RoomListingRequestEvent from "../lib/events/roomListingRequestEvent";
 import DisconnectionEvent from "../lib/events/disconnectionEvent";
+import JoinRoomEvent from "../lib/events/joinRoomEvent";
 // import AnnouncementServer from "../lib/announcements/Server";
 // import { FreeWeekendState } from '../lib/announcements/packets/subpackets/FreeWeekend';
 // import Text from '../lib/util/Text';
@@ -36,15 +37,17 @@ server.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
 });
 
 server.on("connection", async (evt: ConnectionEvent) => {
-  console.log("[Event] Server > 'connection'");
+  let connection = evt.connection
+  console.log(`[Event] Server > 'connection'[${connection.ID}]`);
   evt.connection.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
-    console.log("[Event] Connection > 'joinRoomRequest'");
+    console.log(`[Event] Connection[${connection.ID}] > 'joinRoomRequest'`);
   });
   evt.connection.on("disconnection", async (evt: JoinRoomRequestEvent) => {
-    console.log("[Event] Connection > 'disconnection'");
+    console.log(`[Event] Connection[${connection.ID}] > 'disconnection'`);
   });
-  evt.connection.on("joinRoom", async (evt: JoinRoomRequestEvent) => {
-    console.log("[Event] Connection > 'joinRoom'");
+  evt.connection.on("joinRoom", async (evt: JoinRoomEvent) => {
+    console.log(`[Event] Connection[${connection.ID}] > 'joinRoom'`);
+    evt.player.setName("A Name Override")
   });
 });
 

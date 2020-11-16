@@ -20,6 +20,7 @@ import AsyncEventEmitter from "./asyncEventEmitter";
 let nullRoom = new Room();
 
 export default class Connection extends AsyncEventEmitter {
+  public netIDs: bigint[] = [];
   player?: Player;
   nonce: number = 1;
   clientVersion?: number;
