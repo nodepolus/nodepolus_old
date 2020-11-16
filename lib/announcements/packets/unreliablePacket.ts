@@ -16,9 +16,23 @@ export type UnreliablePacketData =
   | AnnouncementDataPacket
   | FreeWeekendPacket;
 
+export enum UnreliablePacketType {
+  CacheAnnouncement = "CacheAnnouncement",
+  AnnouncementData = "AnnouncementData",
+  FreeWeekend = "FreeWeekend",
+}
+
 export interface UnreliablePacket {
   Packets: UnreliablePacketData[];
 }
+
+const handlers: {
+  [x in keyof typeof UnreliablePacketType]: PacketHandler<UnreliablePacketData>;
+} = {
+  [UnreliablePacketType.CacheAnnouncement]: CacheAnnouncement,
+  [UnreliablePacketType.AnnouncementData]: AnnouncementData,
+  [UnreliablePacketType.FreeWeekend]: FreeWeekend,
+};
 
 export const Unreliable: PacketHandler<UnreliablePacket> = {
   parse(packet: PolusBuffer, room: Room): UnreliablePacket {
@@ -45,14 +59,17 @@ export const Unreliable: PacketHandler<UnreliablePacket> = {
     return { Packets: packets };
   },
 
-  serialize(packet: UnreliablePacket): PolusBuffer {
-    var buf = new PolusBuffer();
-    // console.log(packet)
+  serialize(packet: UnreliablePacket, room: Room): PolusBuffer {
+    const buf = new PolusBuffer();
     packet.Packets.forEach((subpacket) => {
-      // @ts-ignore
-      let serialized: PolusBuffer = this[
-        subpacket.type + "PacketHandler"
-      ].serialize(subpacket);
+      const handler = handlers[subpacket.type];
+      if (!handler)
+        throw new Error(
+          "Could not find packet handler for unreliable packet type: " +
+            subpacket.type
+        );
+
+      const serialized = handler.serialize(subpacket, room);
       let type: number;
       switch (subpacket.type) {
         case "CacheAnnouncement":

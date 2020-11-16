@@ -57,7 +57,7 @@ export default class AnnouncementServer extends EventEmitter {
           if (!client) throw new Error("Could not get client");
           let packet = Packet.parse(new PolusBuffer(buf), this.room);
           if (packet.Reliable) {
-            // @ts-ignore
+            if (!packet.Nonce) throw new Error("Reliable packet missing Nonce");
             this.ack(info, packet.Nonce);
           }
           switch (packet.Type) {

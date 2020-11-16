@@ -68,6 +68,8 @@ export enum UnreliablePacketType {
   GameSearchResults = "GameSearchResults",
   KickPlayer = "KickPlayer",
   WaitingForHost = "WaitingForHost",
+  RemoveRoom = "RemoveRoom",
+  LateRejection = "LateRejection",
 }
 
 export interface UnreliablePacket {
@@ -84,6 +86,7 @@ export const unreliablePackerHandlers: {
   [UnreliablePacketType.PlayerJoinedGame]: PlayerJoinedGame,
   [UnreliablePacketType.StartGame]: StartGame,
   [UnreliablePacketType.RemovePlayer]: RemovePlayer,
+  [UnreliablePacketType.LateRejection]: RemovePlayer,
   [UnreliablePacketType.GameData]: GameData,
   [UnreliablePacketType.JoinedGame]: JoinedGame,
   [UnreliablePacketType.EndGame]: EndGame,
@@ -94,6 +97,7 @@ export const unreliablePackerHandlers: {
   [UnreliablePacketType.GameSearchResults]: GameSearchResults,
   [UnreliablePacketType.KickPlayer]: KickPlayer,
   [UnreliablePacketType.WaitingForHost]: WaitingForHost,
+  [UnreliablePacketType.RemoveRoom]: RemoveRoom,
 };
 
 export const Unreliable: PacketHandler<UnreliablePacket> = {
@@ -182,9 +186,7 @@ export const Unreliable: PacketHandler<UnreliablePacket> = {
     var buf = new PolusBuffer();
     // console.log(packet)
     packet.Packets.forEach((subpacket) => {
-      // @ts-ignore
-      const handler: PacketHandler<UnreliablePacket> =
-        // @ts-ignore
+      const handler: PacketHandler<Packet> =
         unreliablePackerHandlers[subpacket.type];
 
       if (!handler) {
