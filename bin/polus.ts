@@ -48,7 +48,7 @@ server.on("roomCreated", async (evt: RoomCreationEvent) => {
   //       .appendColor("BF3F3F99")
   //       .append("} ")
   //     if(evt.player.connection.isHost) {
-  //       prefix  
+  //       prefix
   //         .appendColor("7F3FBF99")
   //         .append("{")
   //         .appendColor("7F3FBFFF")
@@ -95,7 +95,7 @@ server.on("roomCreated", async (evt: RoomCreationEvent) => {
   //         .toString()
   //     )
   //   }
-    
+
   // })
 });
 
@@ -104,7 +104,7 @@ server.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
 });
 
 server.on("connection", async (evt: ConnectionEvent) => {
-  let connection = evt.connection
+  let connection = evt.connection;
   console.log(`[Event] Server > 'connection'[${connection.ID}]`);
   evt.connection.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
     console.log(`[Event] Connection[${connection.ID}] > 'joinRoomRequest'`);
