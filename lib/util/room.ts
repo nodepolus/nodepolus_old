@@ -22,7 +22,7 @@ import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import Task from "./task";
 
 export declare interface Room {
-  on(event: "close", listener: Function): this;
+  on(event: "close" | "playerJoined", listener: Function): this;
 }
 
 export class Room extends EventEmitter {
@@ -153,8 +153,6 @@ export class Room extends EventEmitter {
           break;
         }
         packet.Packets = packet.Packets.filter((GDPacket) => {
-          // @ts-ignore
-          console.log(GDPacket.Packet)
           if(GDPacket.type == GameDataPacketType.Spawn) {
             if (Number(GDPacket.SpawnID) == ObjectType.Player && GDPacket.Components[0].Data?.type == 'PlayerControl') {
               if (GDPacket.ClientID != 2147483646n) {

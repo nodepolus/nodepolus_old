@@ -45,6 +45,7 @@ export default class Connection extends AsyncEventEmitter {
     this.room = nullRoom;
 
     this.on("message", async (msg: Buffer) => {
+      console.log(msg.toString('hex'))
       if (this.TEMPDONTUSE) return;
       this.TEMPDONTUSE = true;
       const parsed = new Packet(this.isToClient).parse(

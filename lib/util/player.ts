@@ -141,7 +141,7 @@ export class Player extends AsyncEventEmitter {
         Impostor: this.isImpostor,
         Dead: !this.isAlive
       },
-      Tasks: this.tasks.map(t => { return { TaskID: t.ID, TaskCompleted: t.complete } })
+      Tasks: this.tasks.map(t => { return { TaskID: BigInt(t.ID), TaskCompleted: t.complete } })
     }
     this.connection?.room.broadcastToAll({
       type: "GameData",
