@@ -16,4 +16,5 @@ the **Region Server** is usable, however **Plugin Support** is still in developm
 You can install the server by:
 1. Install NodeJS 15.0.1 (or newer)
 2. Download NodePolus
-3. `npm start`
+3. `npm install` or `npm i`
+4. `npm start`
