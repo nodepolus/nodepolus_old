@@ -124,11 +124,15 @@ export class Player extends AsyncEventEmitter {
   enterVent() {}
 
   private sendGameDataSync() {
-    if(!this.connection) throw new Error("Player has no associated connection")
-    let NetID:any = this.connection.room.GameObjects.find(go => Number(go.SpawnID) == ObjectType.GameData)
-    if(!NetID) throw new Error("Room does not have a GameData GameObject")
-    NetID = NetID.Components[0].netID
-    if(!NetID) throw new Error("GameData GameObject's Component[0] Missing NetID")
+    if (!this.connection)
+      throw new Error("Player has no associated connection");
+    let NetID: any = this.connection.room.GameObjects.find(
+      (go) => Number(go.SpawnID) == ObjectType.GameData
+    );
+    if (!NetID) throw new Error("Room does not have a GameData GameObject");
+    NetID = NetID.Components[0].netID;
+    if (!NetID)
+      throw new Error("GameData GameObject's Component[0] Missing NetID");
     let thisPlayerData = {
       PlayerID: this.ID,
       PlayerName: this.name,
@@ -139,26 +143,26 @@ export class Player extends AsyncEventEmitter {
       Flags: {
         Disconnected: false,
         Impostor: this.isImpostor,
-        Dead: !this.isAlive
+        Dead: !this.isAlive,
       },
-      Tasks: this.tasks.map(t => { return { TaskID: BigInt(t.ID), TaskCompleted: t.complete } })
-    }
+      Tasks: this.tasks.map((t) => {
+        return { TaskID: BigInt(t.ID), TaskCompleted: t.complete };
+      }),
+    };
     this.connection?.room.broadcastToAll({
       type: "GameData",
       RoomCode: this.connection.room.code,
       Packets: [
         {
-          "type": 2,
+          type: 2,
           NetID,
-          "RPCFlag": RPCPacketType.UpdateGameData,
+          RPCFlag: RPCPacketType.UpdateGameData,
           Packet: {
-            PlayerData: [
-              thisPlayerData
-            ]
-          }
-        }
-      ]
-    })
+            PlayerData: [thisPlayerData],
+          },
+        },
+      ],
+    });
   }
 
   setID(playerID: number) {
@@ -168,7 +172,7 @@ export class Player extends AsyncEventEmitter {
   }
 
   setName(playerName: string) {
-    if(this.int_name != playerName) {
+    if (this.int_name != playerName) {
       this.int_name = playerName;
       //TODO: Emit event 'NameChanged':NameChangedEvent
       this.connection?.room.broadcastToAll({
@@ -176,21 +180,21 @@ export class Player extends AsyncEventEmitter {
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetName,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetName,
             Packet: {
-              Name: this.int_name
-            }
-          }
-        ]
-      })
-      this.sendGameDataSync()
+              Name: this.int_name,
+            },
+          },
+        ],
+      });
+      this.sendGameDataSync();
     }
   }
 
   setColor(playerColor: PlayerColor) {
-    if(this.int_color != playerColor) {
+    if (this.int_color != playerColor) {
       this.int_color = playerColor;
       //TODO: Emit event 'ColorChanged':ColorChangedEvent
       this.connection?.room.broadcastToAll({
@@ -198,21 +202,21 @@ export class Player extends AsyncEventEmitter {
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetColor,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetColor,
             Packet: {
-              Color: this.int_color
-            }
-          }
-        ]
-      })
-      this.sendGameDataSync()
+              Color: this.int_color,
+            },
+          },
+        ],
+      });
+      this.sendGameDataSync();
     }
   }
 
   setHat(playerHat: PlayerHat) {
-    if(playerHat != this.int_hat) {
+    if (playerHat != this.int_hat) {
       this.int_hat = playerHat;
       //TODO: Emit event 'HatChanged':HatChangedEvent
       this.connection?.room.broadcastToAll({
@@ -220,21 +224,21 @@ export class Player extends AsyncEventEmitter {
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetHat,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetHat,
             Packet: {
-              Hat: this.int_hat
-            }
-          }
-        ]
-      })
-      this.sendGameDataSync()
+              Hat: this.int_hat,
+            },
+          },
+        ],
+      });
+      this.sendGameDataSync();
     }
   }
 
   setPet(playerPet: PlayerPet) {
-    if(this.int_pet != playerPet) {
+    if (this.int_pet != playerPet) {
       this.int_pet = playerPet;
       //TODO: Emit event 'PetChanged':PetChangedEvent
       this.connection?.room.broadcastToAll({
@@ -242,21 +246,21 @@ export class Player extends AsyncEventEmitter {
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetPet,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetPet,
             Packet: {
-              Color: this.int_pet
-            }
-          }
-        ]
-      })
-      this.sendGameDataSync()
+              Color: this.int_pet,
+            },
+          },
+        ],
+      });
+      this.sendGameDataSync();
     }
   }
 
   setSkin(playerSkin: PlayerSkin) {
-    if(playerSkin != this.int_skin) {
+    if (playerSkin != this.int_skin) {
       this.int_skin = playerSkin;
       //TOOD: Emit event 'SkinChanged':SkinChangedEvent
       this.connection?.room.broadcastToAll({
@@ -264,61 +268,61 @@ export class Player extends AsyncEventEmitter {
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetSkin,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetSkin,
             Packet: {
-              Color: this.int_skin
-            }
-          }
-        ]
-      })
-      this.sendGameDataSync()
+              Color: this.int_skin,
+            },
+          },
+        ],
+      });
+      this.sendGameDataSync();
     }
   }
 
-  setTasks(playerTasks: Task[], doNotCreateGroup?:boolean) {
-    if(this.int_tasks != playerTasks) {
+  setTasks(playerTasks: Task[], doNotCreateGroup?: boolean) {
+    if (this.int_tasks != playerTasks) {
       this.int_tasks = playerTasks;
       //TODO: Emit event 'TasksUpdated':TasksUpdatedEvent
       if (!doNotCreateGroup) {
-        this.connection?.room.startPacketGroupBroadcastToAll()
+        this.connection?.room.startPacketGroupBroadcastToAll();
       }
       this.connection?.room.broadcastToAll({
         type: "GameData",
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetTasks,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetTasks,
             Packet: {
-              Tasks: this.int_tasks.map(task => task.ID)
-            }
-          }
-        ]
-      })
+              Tasks: this.int_tasks.map((task) => task.ID),
+            },
+          },
+        ],
+      });
       this.int_tasks.forEach((task, idx) => {
-        if(task.complete) {
+        if (task.complete) {
           this.connection?.room.broadcastToAll({
             type: "GameData",
             RoomCode: this.connection.room.code,
             Packets: [
               {
-                "type": 2,
-                "NetID": this.connection.netIDs[0],
-                "RPCFlag": RPCPacketType.CompleteTask,
+                type: 2,
+                NetID: this.connection.netIDs[0],
+                RPCFlag: RPCPacketType.CompleteTask,
                 Packet: {
-                  TaskIndex: idx
-                }
-              }
-            ]
-          })
+                  TaskIndex: idx,
+                },
+              },
+            ],
+          });
         }
-      })
-      this.sendGameDataSync()
+      });
+      this.sendGameDataSync();
       if (!doNotCreateGroup) {
-        this.connection?.room.endPacketGroupBroadcastToAll()
+        this.connection?.room.endPacketGroupBroadcastToAll();
       }
     }
   }
@@ -336,7 +340,7 @@ export class Player extends AsyncEventEmitter {
   }
 
   setImpostor() {
-    if(!this.int_isImpostor) {
+    if (!this.int_isImpostor) {
       this.int_isImpostor = true;
       //TODO: Emit event 'impostor':null
       this.connection?.room.broadcastToAll({
@@ -344,16 +348,16 @@ export class Player extends AsyncEventEmitter {
         RoomCode: this.connection.room.code,
         Packets: [
           {
-            "type": 2,
-            "NetID": this.connection.netIDs[0],
-            "RPCFlag": RPCPacketType.SetInfected,
+            type: 2,
+            NetID: this.connection.netIDs[0],
+            RPCFlag: RPCPacketType.SetInfected,
             Packet: {
-              InfectedPlayerIDs: [this.ID]
-            }
-          }
-        ]
-      })
-      this.sendGameDataSync()
+              InfectedPlayerIDs: [this.ID],
+            },
+          },
+        ],
+      });
+      this.sendGameDataSync();
     }
   }
 
@@ -371,7 +375,7 @@ export class Player extends AsyncEventEmitter {
       //TODO player emit event 'died':null
       //TODO send RPC murder
     } else {
-      throw new Error("Player either has no connection or is already dead.")
+      throw new Error("Player either has no connection or is already dead.");
     }
   }
 }

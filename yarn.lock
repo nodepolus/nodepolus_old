@@ -209,7 +209,7 @@
     "eslint-scope" "^5.0.0"
     "eslint-utils" "^2.0.0"
 
-"@typescript-eslint/parser@^4.6.1":
+"@typescript-eslint/parser@^4.0.0", "@typescript-eslint/parser@^4.6.1":
   "integrity" "sha512-lScKRPt1wM9UwyKkGKyQDqf0bh6jm8DQ5iN37urRIXDm16GEv+HGEmum2Fc423xlk5NUOkOpfTnKZc/tqKZkDQ=="
   "resolved" "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-4.6.1.tgz"
   "version" "4.6.1"
@@ -264,15 +264,20 @@
   "resolved" "https://registry.npmjs.org/acorn-walk/-/acorn-walk-8.0.0.tgz"
   "version" "8.0.0"
 
-"acorn@^7.1.1", "acorn@^7.4.0":
+"acorn@^6.0.0 || ^7.0.0 || ^8.0.0", "acorn@^8.0.1":
+  "integrity" "sha512-XNP0PqF1XD19ZlLKvB7cMmnZswW4C/03pRHgirB30uSJTaS3A3V1/P4sS3HPvFmjoriPCJQs+JDSbm4bL1TxGQ=="
+  "resolved" "https://registry.npmjs.org/acorn/-/acorn-8.0.4.tgz"
+  "version" "8.0.4"
+
+"acorn@^7.1.1":
   "integrity" "sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A=="
   "resolved" "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz"
   "version" "7.4.1"
 
-"acorn@^8.0.1":
-  "integrity" "sha512-XNP0PqF1XD19ZlLKvB7cMmnZswW4C/03pRHgirB30uSJTaS3A3V1/P4sS3HPvFmjoriPCJQs+JDSbm4bL1TxGQ=="
-  "resolved" "https://registry.npmjs.org/acorn/-/acorn-8.0.4.tgz"
-  "version" "8.0.4"
+"acorn@^7.4.0":
+  "integrity" "sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A=="
+  "resolved" "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz"
+  "version" "7.4.1"
 
 "aggregate-error@^3.0.0":
   "integrity" "sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA=="
@@ -326,28 +331,21 @@
   "resolved" "https://registry.npmjs.org/ansi-regex/-/ansi-regex-5.0.0.tgz"
   "version" "5.0.0"
 
-"ansi-styles@^3.2.0", "ansi-styles@^3.2.1":
+"ansi-styles@^3.2.0":
   "integrity" "sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA=="
   "resolved" "https://registry.npmjs.org/ansi-styles/-/ansi-styles-3.2.1.tgz"
   "version" "3.2.1"
   dependencies:
     "color-convert" "^1.9.0"
 
-"ansi-styles@^4.0.0":
-  "integrity" "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="
-  "resolved" "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz"
-  "version" "4.3.0"
+"ansi-styles@^3.2.1":
+  "integrity" "sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA=="
+  "resolved" "https://registry.npmjs.org/ansi-styles/-/ansi-styles-3.2.1.tgz"
+  "version" "3.2.1"
   dependencies:
-    "color-convert" "^2.0.1"
+    "color-convert" "^1.9.0"
 
-"ansi-styles@^4.1.0":
-  "integrity" "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="
-  "resolved" "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz"
-  "version" "4.3.0"
-  dependencies:
-    "color-convert" "^2.0.1"
-
-"ansi-styles@^4.2.1":
+"ansi-styles@^4.0.0", "ansi-styles@^4.1.0", "ansi-styles@^4.2.1":
   "integrity" "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="
   "resolved" "https://registry.npmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz"
   "version" "4.3.0"
@@ -1290,6 +1288,49 @@
   "resolved" "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-2.0.0.tgz"
   "version" "2.0.0"
 
+"eslint@*", "eslint@^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0", "eslint@^3 || ^4 || ^5 || ^6 || ^7", "eslint@^3.17.0 || ^4 || ^5 || ^6 || ^7", "eslint@^5.0.0 || ^6.0.0 || ^7.0.0", "eslint@^7.12.1", "eslint@>= 4.12.1", "eslint@>=4.0.0":
+  "integrity" "sha512-HlMTEdr/LicJfN08LB3nM1rRYliDXOmfoO4vj39xN6BLpFzF00hbwBoqHk8UcJ2M/3nlARZWy/mslvGEuZFvsg=="
+  "resolved" "https://registry.npmjs.org/eslint/-/eslint-7.12.1.tgz"
+  "version" "7.12.1"
+  dependencies:
+    "@babel/code-frame" "^7.0.0"
+    "@eslint/eslintrc" "^0.2.1"
+    "ajv" "^6.10.0"
+    "chalk" "^4.0.0"
+    "cross-spawn" "^7.0.2"
+    "debug" "^4.0.1"
+    "doctrine" "^3.0.0"
+    "enquirer" "^2.3.5"
+    "eslint-scope" "^5.1.1"
+    "eslint-utils" "^2.1.0"
+    "eslint-visitor-keys" "^2.0.0"
+    "espree" "^7.3.0"
+    "esquery" "^1.2.0"
+    "esutils" "^2.0.2"
+    "file-entry-cache" "^5.0.1"
+    "functional-red-black-tree" "^1.0.1"
+    "glob-parent" "^5.0.0"
+    "globals" "^12.1.0"
+    "ignore" "^4.0.6"
+    "import-fresh" "^3.0.0"
+    "imurmurhash" "^0.1.4"
+    "is-glob" "^4.0.0"
+    "js-yaml" "^3.13.1"
+    "json-stable-stringify-without-jsonify" "^1.0.1"
+    "levn" "^0.4.1"
+    "lodash" "^4.17.19"
+    "minimatch" "^3.0.4"
+    "natural-compare" "^1.4.0"
+    "optionator" "^0.9.1"
+    "progress" "^2.0.0"
+    "regexpp" "^3.1.0"
+    "semver" "^7.2.1"
+    "strip-ansi" "^6.0.0"
+    "strip-json-comments" "^3.1.0"
+    "table" "^5.2.3"
+    "text-table" "^0.2.0"
+    "v8-compile-cache" "^2.0.3"
+
 "eslint@^6.8.0":
   "integrity" "sha512-K+Iayyo2LtyYhDSYwz5D5QdWw0hCacNzyq1Y821Xna2xSJj7cijoLLYmLxTQgcgZ9mC61nryMy9S7GRbYpI5Ig=="
   "resolved" "https://registry.npmjs.org/eslint/-/eslint-6.8.0.tgz"
@@ -1329,49 +1370,6 @@
     "semver" "^6.1.2"
     "strip-ansi" "^5.2.0"
     "strip-json-comments" "^3.0.1"
-    "table" "^5.2.3"
-    "text-table" "^0.2.0"
-    "v8-compile-cache" "^2.0.3"
-
-"eslint@^7.12.1":
-  "integrity" "sha512-HlMTEdr/LicJfN08LB3nM1rRYliDXOmfoO4vj39xN6BLpFzF00hbwBoqHk8UcJ2M/3nlARZWy/mslvGEuZFvsg=="
-  "resolved" "https://registry.npmjs.org/eslint/-/eslint-7.12.1.tgz"
-  "version" "7.12.1"
-  dependencies:
-    "@babel/code-frame" "^7.0.0"
-    "@eslint/eslintrc" "^0.2.1"
-    "ajv" "^6.10.0"
-    "chalk" "^4.0.0"
-    "cross-spawn" "^7.0.2"
-    "debug" "^4.0.1"
-    "doctrine" "^3.0.0"
-    "enquirer" "^2.3.5"
-    "eslint-scope" "^5.1.1"
-    "eslint-utils" "^2.1.0"
-    "eslint-visitor-keys" "^2.0.0"
-    "espree" "^7.3.0"
-    "esquery" "^1.2.0"
-    "esutils" "^2.0.2"
-    "file-entry-cache" "^5.0.1"
-    "functional-red-black-tree" "^1.0.1"
-    "glob-parent" "^5.0.0"
-    "globals" "^12.1.0"
-    "ignore" "^4.0.6"
-    "import-fresh" "^3.0.0"
-    "imurmurhash" "^0.1.4"
-    "is-glob" "^4.0.0"
-    "js-yaml" "^3.13.1"
-    "json-stable-stringify-without-jsonify" "^1.0.1"
-    "levn" "^0.4.1"
-    "lodash" "^4.17.19"
-    "minimatch" "^3.0.4"
-    "natural-compare" "^1.4.0"
-    "optionator" "^0.9.1"
-    "progress" "^2.0.0"
-    "regexpp" "^3.1.0"
-    "semver" "^7.2.1"
-    "strip-ansi" "^6.0.0"
-    "strip-json-comments" "^3.1.0"
     "table" "^5.2.3"
     "text-table" "^0.2.0"
     "v8-compile-cache" "^2.0.3"
@@ -1510,7 +1508,14 @@
     "path-exists" "^2.0.0"
     "pinkie-promise" "^2.0.0"
 
-"find-up@^2.0.0", "find-up@^2.1.0":
+"find-up@^2.0.0":
+  "integrity" "sha1-RdG35QbHF93UgndaK3eSCjwMV6c="
+  "resolved" "https://registry.npmjs.org/find-up/-/find-up-2.1.0.tgz"
+  "version" "2.1.0"
+  dependencies:
+    "locate-path" "^2.0.0"
+
+"find-up@^2.1.0":
   "integrity" "sha1-RdG35QbHF93UgndaK3eSCjwMV6c="
   "resolved" "https://registry.npmjs.org/find-up/-/find-up-2.1.0.tgz"
   "version" "2.1.0"
@@ -2500,14 +2505,7 @@
   dependencies:
     "p-try" "^1.0.0"
 
-"p-limit@^2.0.0":
-  "integrity" "sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w=="
-  "resolved" "https://registry.npmjs.org/p-limit/-/p-limit-2.3.0.tgz"
-  "version" "2.3.0"
-  dependencies:
-    "p-try" "^2.0.0"
-
-"p-limit@^2.2.0":
+"p-limit@^2.0.0", "p-limit@^2.2.0":
   "integrity" "sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w=="
   "resolved" "https://registry.npmjs.org/p-limit/-/p-limit-2.3.0.tgz"
   "version" "2.3.0"
@@ -3180,25 +3178,7 @@
     "is-fullwidth-code-point" "^2.0.0"
     "strip-ansi" "^5.1.0"
 
-"string-width@^4.0.0":
-  "integrity" "sha512-zUz5JD+tgqtuDjMhwIg5uFVV3dtqZ9yQJlZVfq4I01/K5Paj5UHj7VyrQOJvzawSVlKpObApbfD0Ed6yJc+1eg=="
-  "resolved" "https://registry.npmjs.org/string-width/-/string-width-4.2.0.tgz"
-  "version" "4.2.0"
-  dependencies:
-    "emoji-regex" "^8.0.0"
-    "is-fullwidth-code-point" "^3.0.0"
-    "strip-ansi" "^6.0.0"
-
-"string-width@^4.1.0":
-  "integrity" "sha512-zUz5JD+tgqtuDjMhwIg5uFVV3dtqZ9yQJlZVfq4I01/K5Paj5UHj7VyrQOJvzawSVlKpObApbfD0Ed6yJc+1eg=="
-  "resolved" "https://registry.npmjs.org/string-width/-/string-width-4.2.0.tgz"
-  "version" "4.2.0"
-  dependencies:
-    "emoji-regex" "^8.0.0"
-    "is-fullwidth-code-point" "^3.0.0"
-    "strip-ansi" "^6.0.0"
-
-"string-width@^4.2.0":
+"string-width@^4.0.0", "string-width@^4.1.0", "string-width@^4.2.0":
   "integrity" "sha512-zUz5JD+tgqtuDjMhwIg5uFVV3dtqZ9yQJlZVfq4I01/K5Paj5UHj7VyrQOJvzawSVlKpObApbfD0Ed6yJc+1eg=="
   "resolved" "https://registry.npmjs.org/string-width/-/string-width-4.2.0.tgz"
   "version" "4.2.0"
@@ -3497,7 +3477,7 @@
   dependencies:
     "is-typedarray" "^1.0.0"
 
-"typescript@^4.0.5":
+"typescript@*", "typescript@^4.0.5", "typescript@>=2.7", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
   "integrity" "sha512-ywmr/VrTVCmNTJ6iV2LwIrfG1P+lv6luD8sUJs+2eI9NLGigaN+nUQc13iHqisq7bra9lnmUSYqbJvegraBOPQ=="
   "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.0.5.tgz"
   "version" "4.0.5"
