@@ -11,18 +11,19 @@ import { Despawn, DespawnPacket } from "./gameDataPackets/despawn";
 import { IGameObject } from "../../util/gameObject";
 import { PacketHandler, PacketHandlerOpts } from "../packet";
 
+export type GameDataSubtype =
+  | DataPacket
+  | RPCPacket
+  | IGameObject
+  | ReadyPacket
+  | SceneChangePacket
+  | DespawnPacket;
+
 export interface GameDataPacket {
   type: "GameData";
   RoomCode: string;
   RecipientClientID?: bigint;
-  Packets: (
-    | DataPacket
-    | RPCPacket
-    | IGameObject
-    | ReadyPacket
-    | SceneChangePacket
-    | DespawnPacket
-  )[];
+  Packets: GameDataSubtype[];
 }
 
 export enum GameDataPacketType {
@@ -33,6 +34,17 @@ export enum GameDataPacketType {
   SceneChange = 0x06,
   Ready = 0x07,
 }
+
+const handlers: {
+  [type: number]: PacketHandler<GameDataSubtype>;
+} = {
+  [GameDataPacketType.Data]: Data,
+  [GameDataPacketType.RPC]: RPC,
+  [GameDataPacketType.Spawn]: Spawn,
+  [GameDataPacketType.Despawn]: Despawn,
+  [GameDataPacketType.SceneChange]: SceneChange,
+  [GameDataPacketType.Ready]: Ready,
+};
 
 export const GameData: PacketHandler<GameDataPacket> = {
   parse(
@@ -52,27 +64,16 @@ export const GameData: PacketHandler<GameDataPacket> = {
       const length = packet.readU16();
       const type = packet.readU8();
       const rawdata = packet.readBytes(length);
-      switch (type) {
-        case GameDataPacketType.Data:
-          data.Packets.push(Data.parse(rawdata, room));
-          break;
-        case GameDataPacketType.RPC:
-          data.Packets.push(RPC.parse(rawdata, room));
-          break;
-        case GameDataPacketType.Spawn:
-          data.Packets.push(Spawn.parse(rawdata, room));
-          break;
-        case GameDataPacketType.Despawn:
-          data.Packets.push(Despawn.parse(rawdata, room));
-          break;
-        case GameDataPacketType.SceneChange:
-          data.Packets.push(SceneChange.parse(rawdata, room));
-          break;
-        case GameDataPacketType.Ready:
-          data.Packets.push(Ready.parse(rawdata, room));
-          break;
+
+      const handler: PacketHandler<GameDataSubtype> = handlers[type];
+
+      if (!handler) {
+        throw new Error("Could not find handler for GameData subtype: " + type);
       }
+
+      data.Packets.push(handler.parse(rawdata, room));
     }
+
     return data;
   },
 
@@ -86,32 +87,18 @@ export const GameData: PacketHandler<GameDataPacket> = {
       PolusBuffer.concat(
         ...packet.Packets.map((subpacket) => {
           let dataPB;
-          switch (subpacket.type) {
-            case GameDataPacketType.Data:
-              dataPB = Data.serialize(subpacket, room);
-              break;
-            case GameDataPacketType.RPC:
-              dataPB = RPC.serialize(subpacket, room);
-              break;
-            case GameDataPacketType.Spawn:
-              dataPB = Spawn.serialize(subpacket, room);
-              break;
-            case GameDataPacketType.Despawn:
-              dataPB = Despawn.serialize(subpacket, room);
-              break;
-            case GameDataPacketType.SceneChange:
-              dataPB = SceneChange.serialize(subpacket, room);
-              break;
-            case GameDataPacketType.Ready:
-              dataPB = Ready.serialize(subpacket, room);
-              break;
-            default:
-              console.error(
-                "AA?A??A?A?A??A??A?AAAAA GAME DATA SERIALIZATION FAILED. UNK PACKET TYPE",
-                packet
-              );
-              process.exit();
+
+          const handler: PacketHandler<GameDataSubtype> =
+            handlers[subpacket.type];
+
+          if (!handler) {
+            throw new Error(
+              "Could not find handler for GameData subtype: " + subpacket.type
+            );
           }
+
+          dataPB = handler.serialize(subpacket, room);
+
           let dataPBlenPB = new PolusBuffer(3);
           dataPBlenPB.writeU16(dataPB.length);
           dataPBlenPB.writeU8(subpacket.type);

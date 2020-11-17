@@ -51,45 +51,48 @@ import {
   UpdateGameData,
   UpdateGameDataPacket,
 } from "./rpcPackets/updateGameData";
+import { Exiled } from "./rpcPackets/exiled";
 import { GameDataPacketType } from "../gameData";
 import { Room } from "../../../util/room";
 import { PacketHandler } from "../../packet";
+
+export type RPCPacketSubtype =
+  | PlayAnimationPacket
+  | CompleteTaskPacket
+  | SyncSettingsPacket
+  | SetInfectedPacket
+  | CheckNamePacket
+  | SetNamePacket
+  | CheckColorPacket
+  | SetColorPacket
+  | SetHatPacket
+  | SetSkinPacket
+  | ReportDeadBodyPacket
+  | MurderPlayerPacket
+  | SendChatPacket
+  | CallEmergencyMeetingPacket
+  | SetScannerPacket
+  | SendChatNotePacket
+  | SetPetPacket
+  | SetStartCounterPacket
+  | EnterVentPacket
+  | ExitVentPacket
+  | SnapToPacket
+  | VotingClosedPacket
+  | VotingCompletePacket
+  | CastVotePacket
+  | ClearVotePacket
+  | CastVoteKickPacket
+  | CloseDoorsOfTypePacket
+  | RepairSabotagePacket
+  | SetTasksPacket
+  | UpdateGameDataPacket;
 
 export interface RPCPacket {
   type: GameDataPacketType.RPC;
   NetID: bigint;
   RPCFlag: RPCPacketType;
-  Packet:
-    | PlayAnimationPacket
-    | CompleteTaskPacket
-    | SyncSettingsPacket
-    | SetInfectedPacket
-    | CheckNamePacket
-    | SetNamePacket
-    | CheckColorPacket
-    | SetColorPacket
-    | SetHatPacket
-    | SetSkinPacket
-    | ReportDeadBodyPacket
-    | MurderPlayerPacket
-    | SendChatPacket
-    | CallEmergencyMeetingPacket
-    | SetScannerPacket
-    | SendChatNotePacket
-    | SetPetPacket
-    | SetStartCounterPacket
-    | EnterVentPacket
-    | ExitVentPacket
-    | SnapToPacket
-    | VotingClosedPacket
-    | VotingCompletePacket
-    | CastVotePacket
-    | ClearVotePacket
-    | CastVoteKickPacket
-    | CloseDoorsOfTypePacket
-    | RepairSabotagePacket
-    | SetTasksPacket
-    | UpdateGameDataPacket;
+  Packet: RPCPacketSubtype;
 }
 
 export enum RPCPacketType {
@@ -126,335 +129,80 @@ export enum RPCPacketType {
   UpdateGameData = 0x1e,
 }
 
+const handlers: {
+  [type: number]: PacketHandler<RPCPacketSubtype>;
+} = {
+  [RPCPacketType.PlayAnimation]: PlayAnimation,
+  [RPCPacketType.CompleteTask]: CompleteTask,
+  [RPCPacketType.SyncSettings]: SyncSettings,
+  [RPCPacketType.SetInfected]: SetInfected,
+  [RPCPacketType.Exiled]: Exiled,
+  [RPCPacketType.CheckName]: CheckName,
+  [RPCPacketType.SetName]: SetName,
+  [RPCPacketType.CheckColor]: CheckColor,
+  [RPCPacketType.SetColor]: SetColor,
+  [RPCPacketType.SetHat]: SetHat,
+  [RPCPacketType.SetSkin]: SetSkin,
+  [RPCPacketType.ReportDeadBody]: ReportDeadBody,
+  [RPCPacketType.MurderPlayer]: MurderPlayer,
+  [RPCPacketType.SendChat]: SendChat,
+  [RPCPacketType.CallEmergencyMeeting]: CallEmergencyMeeting,
+  [RPCPacketType.SetScanner]: SetScanner,
+  [RPCPacketType.SendChatNote]: SendChatNote,
+  [RPCPacketType.SetPet]: SetPet,
+  [RPCPacketType.SetStartCounter]: SetStartCounter,
+  [RPCPacketType.EnterVent]: EnterVent,
+  [RPCPacketType.ExitVent]: ExitVent,
+  [RPCPacketType.SnapTo]: SnapTo,
+  [RPCPacketType.VotingClosed]: VotingClosed,
+  [RPCPacketType.VotingComplete]: VotingComplete,
+  [RPCPacketType.CastVote]: CastVote,
+  [RPCPacketType.ClearVote]: ClearVote,
+  [RPCPacketType.CastVoteKick]: CastVoteKick,
+  [RPCPacketType.CloseDoorsOfType]: CloseDoorsOfType,
+  [RPCPacketType.RepairSabotage]: RepairSabotage,
+  [RPCPacketType.SetTasks]: SetTasks,
+  [RPCPacketType.UpdateGameData]: UpdateGameData,
+};
+
 export const RPC: PacketHandler<RPCPacket> = {
   parse(packet: PolusBuffer, room: Room): RPCPacket {
     const netId = packet.readVarInt();
     const rpcFlag = packet.readU8();
 
-    let data: RPCPacket = {
+    const handler: PacketHandler<RPCPacketSubtype> | undefined =
+      handlers[rpcFlag];
+
+    if (!handler) {
+      throw new Error("Could not find handler for RPC subtype: " + rpcFlag);
+    }
+
+    return {
       type: GameDataPacketType.RPC,
       NetID: netId,
       RPCFlag: rpcFlag,
-      Packet: {},
+      Packet: {
+        RPCFlag: rpcFlag,
+        ...handler.parse(packet, room),
+      },
     };
-
-    switch (data.RPCFlag) {
-      case RPCPacketType.PlayAnimation:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...PlayAnimation.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.CompleteTask:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CompleteTask.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SyncSettings:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SyncSettings.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetInfected:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SetInfected.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.Exiled:
-        throw new Error("Exiled packets aren't used.");
-        return data;
-      case RPCPacketType.CheckName:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CheckName.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetName:
-        data.Packet = { RPCFlag: data.RPCFlag, ...SetName.parse(packet, room) };
-        return data;
-      case RPCPacketType.CheckColor:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CheckColor.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetColor:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SetColor.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetHat:
-        data.Packet = { RPCFlag: data.RPCFlag, ...SetHat.parse(packet, room) };
-        return data;
-      case RPCPacketType.SetSkin:
-        data.Packet = { RPCFlag: data.RPCFlag, ...SetSkin.parse(packet, room) };
-        return data;
-      case RPCPacketType.ReportDeadBody:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...ReportDeadBody.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.MurderPlayer:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...MurderPlayer.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SendChat:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SendChat.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.CallEmergencyMeeting:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CallEmergencyMeeting.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetScanner:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SetScanner.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SendChatNote:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SendChatNote.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetPet:
-        data.Packet = { RPCFlag: data.RPCFlag, ...SetPet.parse(packet, room) };
-        return data;
-      case RPCPacketType.SetStartCounter:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SetStartCounter.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.EnterVent:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...EnterVent.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.ExitVent:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...ExitVent.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SnapTo:
-        data.Packet = { RPCFlag: data.RPCFlag, ...SnapTo.parse(packet, room) };
-        return data;
-      case RPCPacketType.VotingClosed:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...VotingClosed.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.VotingComplete:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...VotingComplete.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.CastVote:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CastVote.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.ClearVote:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...ClearVote.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.CastVoteKick:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CastVoteKick.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.CloseDoorsOfType:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...CloseDoorsOfType.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.RepairSabotage:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...RepairSabotage.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.SetTasks:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...SetTasks.parse(packet, room),
-        };
-        return data;
-      case RPCPacketType.UpdateGameData:
-        data.Packet = {
-          RPCFlag: data.RPCFlag,
-          ...UpdateGameData.parse(packet, room),
-        };
-        return data;
-    }
   },
 
   serialize(packet: RPCPacket, room: Room): PolusBuffer {
     var buf = new PolusBuffer();
     buf.writeVarInt(packet.NetID);
     buf.writeU8(packet.RPCFlag);
-    switch (packet.RPCFlag) {
-      case RPCPacketType.PlayAnimation:
-        buf.writeBytes(
-          PlayAnimation.serialize(<PlayAnimationPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.CompleteTask:
-        buf.writeBytes(
-          CompleteTask.serialize(<CompleteTaskPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SyncSettings:
-        buf.writeBytes(
-          SyncSettings.serialize(<SyncSettingsPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SetInfected:
-        buf.writeBytes(
-          SetInfected.serialize(<SetInfectedPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.Exiled:
-        throw new Error("Exiled packets aren't used.");
-        break;
-      case RPCPacketType.CheckName:
-        buf.writeBytes(
-          CheckName.serialize(<CheckNamePacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SetName:
-        buf.writeBytes(SetName.serialize(<SetNamePacket>packet.Packet, room));
-        break;
-      case RPCPacketType.CheckColor:
-        buf.writeBytes(
-          CheckColor.serialize(<CheckColorPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SetColor:
-        buf.writeBytes(SetColor.serialize(<SetColorPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.SetHat:
-        buf.writeBytes(SetHat.serialize(<SetHatPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.SetSkin:
-        buf.writeBytes(SetSkin.serialize(<SetSkinPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.ReportDeadBody:
-        buf.writeBytes(
-          ReportDeadBody.serialize(<ReportDeadBodyPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.MurderPlayer:
-        buf.writeBytes(
-          MurderPlayer.serialize(<MurderPlayerPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SendChat:
-        buf.writeBytes(SendChat.serialize(<SendChatPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.CallEmergencyMeeting:
-        buf.writeBytes(
-          CallEmergencyMeeting.serialize(
-            <CallEmergencyMeetingPacket>packet.Packet,
-            room
-          )
-        );
-        break;
-      case RPCPacketType.SetScanner:
-        buf.writeBytes(
-          SetScanner.serialize(<SetScannerPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SendChatNote:
-        buf.writeBytes(
-          SendChatNote.serialize(<SendChatNotePacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SetPet:
-        buf.writeBytes(SetPet.serialize(<SetPetPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.SetStartCounter:
-        buf.writeBytes(
-          SetStartCounter.serialize(<SetStartCounterPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.EnterVent:
-        buf.writeBytes(
-          EnterVent.serialize(<EnterVentPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.ExitVent:
-        buf.writeBytes(ExitVent.serialize(<ExitVentPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.SnapTo:
-        buf.writeBytes(SnapTo.serialize(<SnapToPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.VotingClosed:
-        buf.writeBytes(
-          VotingClosed.serialize(<VotingClosedPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.VotingComplete:
-        buf.writeBytes(
-          VotingComplete.serialize(<VotingCompletePacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.CastVote:
-        buf.writeBytes(CastVote.serialize(<CastVotePacket>packet.Packet, room));
-        break;
-      case RPCPacketType.ClearVote:
-        buf.writeBytes(
-          ClearVote.serialize(<ClearVotePacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.CastVoteKick:
-        buf.writeBytes(
-          CastVoteKick.serialize(<CastVoteKickPacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.CloseDoorsOfType:
-        buf.writeBytes(
-          CloseDoorsOfType.serialize(
-            <CloseDoorsOfTypePacket>packet.Packet,
-            room
-          )
-        );
-        break;
-      case RPCPacketType.RepairSabotage:
-        buf.writeBytes(
-          RepairSabotage.serialize(<RepairSabotagePacket>packet.Packet, room)
-        );
-        break;
-      case RPCPacketType.SetTasks:
-        buf.writeBytes(SetTasks.serialize(<SetTasksPacket>packet.Packet, room));
-        break;
-      case RPCPacketType.UpdateGameData:
-        buf.writeBytes(
-          UpdateGameData.serialize(<UpdateGameDataPacket>packet.Packet, room)
-        );
-        break;
+
+    const handler: PacketHandler<RPCPacketSubtype> | undefined =
+      handlers[packet.RPCFlag];
+
+    if (!handler) {
+      throw new Error(
+        "Could not find handler for RPC subtype: " + packet.RPCFlag
+      );
     }
+
+    buf.writeBytes(handler.serialize(packet.Packet, room));
     return buf;
   },
 };
