@@ -56,7 +56,7 @@ server.on("connection", async (evt: ConnectionEvent) => {
   evt.connection.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
     console.log(`[Event] Connection[${connection.ID}] > 'joinRoomRequest'`);
   });
-  evt.connection.on("disconnection", async (evt: JoinRoomRequestEvent) => {
+  evt.connection.on("disconnection", async (evt: DisconnectionEvent) => {
     console.log(`[Event] Connection[${connection.ID}] > 'disconnection'`);
   });
   evt.connection.on("joinRoom", async (evt: JoinRoomEvent) => {

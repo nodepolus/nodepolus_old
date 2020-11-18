@@ -15,11 +15,25 @@ import {
   Packet as UnreliablePacketPacket,
 } from "../packets/unreliablePacket";
 import { GameDataPacketType } from "../packets/subpackets/gameData";
-import AsyncEventEmitter from "./asyncEventEmitter";
+import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
+import {
+  DisconnectionEvent,
+  JoinRoomEvent,
+  JoinRoomRequestEvent,
+} from "../events";
 
 let nullRoom = new Room();
 
-export default class Connection extends AsyncEventEmitter {
+type ConnectionEvents = Events & {
+  disconnection: (event: DisconnectionEvent) => Promise<void>;
+  message: (msg: Buffer) => Promise<void>;
+  packet: (packet: UnreliablePacketPacket) => Promise<void>;
+  close: () => Promise<void>;
+  joinRoomRequest: (event: JoinRoomRequestEvent) => Promise<void>;
+  joinRoom: (event: JoinRoomEvent) => Promise<void>;
+};
+
+export default class Connection extends AsyncEventEmitter<ConnectionEvents> {
   public netIDs: bigint[] = [];
   player?: Player;
   nonce: number = 1;

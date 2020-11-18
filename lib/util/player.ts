@@ -9,7 +9,7 @@ import {
 import Task from "./task";
 import Connection from "./connection";
 import { IGameObject } from "./gameObject";
-import AsyncEventEmitter from "./asyncEventEmitter";
+import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import { RPCPacketType } from "../packets/subpackets/gameDataPackets/rpc";
 import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
@@ -21,7 +21,9 @@ enum DeathType {
   Other = 0x03,
 }
 
-export class Player extends AsyncEventEmitter {
+type PlayerEvents = Events & {};
+
+export class Player extends AsyncEventEmitter<PlayerEvents> {
   private int_ID?: number;
   get ID(): number | undefined {
     return this.int_ID;
