@@ -10,7 +10,8 @@
     "proxy": "ts-node-dev bin/proxy",
     "lint": "prettier --check .",
     "lint-and-fix": "npx prettier --write .",
-    "test": "ava"
+    "test": "ava",
+    "pretest": "npm run lint"
   },
   "author": "",
   "license": "ISC",
