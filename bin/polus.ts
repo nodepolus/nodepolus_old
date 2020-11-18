@@ -36,67 +36,14 @@ process.stdin.on("data", () => {
 
 server.on("roomCreated", async (evt: RoomCreationEvent) => {
   console.log("[Event] Server > 'roomCreated'");
-  // let room = evt.room
-  // room.setCode("POSSUM")
-  // room.on('playerJoined', async (evt: JoinRoomEvent) => {
-  //   if (evt.player?.connection?.name === "roobscoob") {
-  //     let prefix = new Text()
-  //       .appendColor("BF3F3F99")
-  //       .append("{")
-  //       .appendColor("BF3F3FFF")
-  //       .append("*")
-  //       .appendColor("BF3F3F99")
-  //       .append("} ")
-  //     if(evt.player.connection.isHost) {
-  //       prefix
-  //         .appendColor("7F3FBF99")
-  //         .append("{")
-  //         .appendColor("7F3FBFFF")
-  //         .append("H")
-  //         .appendColor("7F3FBF99")
-  //         .append("} ")
-  //     }
-  //     evt.player.setName(
-  //       prefix
-  //         // .appendColor("BF3F3FFF")
-  //         // .append("r")
-  //         // .appendColor("BF7F3FFF")
-  //         // .append("o")
-  //         // .appendColor("BFBF3FFF")
-  //         // .append("o")
-  //         // .appendColor("7FBF3FFF")
-  //         // .append("b")
-  //         // .appendColor("3FBF3FFF")
-  //         // .append("s")
-  //         // .appendColor("3FBF7FFF")
-  //         // .append("c")
-  //         // .appendColor("3FBFBFFF")
-  //         // .append("o")
-  //         // .appendColor("3F7FBFFF")
-  //         // .append("o")
-  //         // .appendColor("3F3FBFFF")
-  //         // .append("b")
-  //         .toString()
-  //     )
-  //     return;
-  //   }
-
-  //   if(evt.player.connection?.isHost) {
-  //     evt.player.setName(
-  //       new Text()
-  //         .appendColor("7F3FBF99")
-  //         .append("{")
-  //         .appendColor("7F3FBFFF")
-  //         .append("H")
-  //         .appendColor("7F3FBF99")
-  //         .append("} ")
-  //         .appendColor("FFFFFFFF")
-  //         .append(evt.player.name)
-  //         .toString()
-  //     )
-  //   }
-
-  // })
+  let room = evt.room
+  room.on('playerJoined', async (evt: JoinRoomEvent) => {
+    setInterval(() => {
+      if(evt.player.connection) {
+        evt.player.setName(String(evt.player.connection.name));
+      }
+    }, 2500)
+  })
 });
 
 server.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
