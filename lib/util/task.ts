@@ -1,6 +1,11 @@
-import AsyncEventEmitter from "./asyncEventEmitter";
+import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 
-export default class Task extends AsyncEventEmitter {
+type TaskEvents = Events & {
+  completed: () => Promise<void>;
+  uncompleted: () => Promise<void>;
+};
+
+export default class Task extends AsyncEventEmitter<TaskEvents> {
   complete: boolean = false;
   ID: number;
 
