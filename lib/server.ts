@@ -7,7 +7,7 @@ import Connection from "./util/connection";
 import { Packet as Subpacket } from "./packets/unreliablePacket";
 import { addr2str } from "./util/misc";
 import { RoomListing } from "./packets/subpackets/gameSearchResults";
-import AsyncEventEmitter from "./util/asyncEventEmitter";
+import { AsyncEventEmitter, Events } from "./util/asyncEventEmitter";
 import DisconnectReason, {
   DisconnectReasons,
 } from "./packets/packetElements/disconnectReason";
@@ -26,7 +26,17 @@ export interface ServerConfig {
   accessiblePort?: number;
 }
 
-export class Server extends AsyncEventEmitter {
+type ServerEvents = Events & {
+  listening: (port: number) => Promise<void>;
+  connection: (event: ConnectionEvent) => Promise<void>;
+  disconnection: (event: DisconnectionEvent) => Promise<void>;
+  message: (message: Buffer) => Promise<void>;
+  roomCreated: (event: RoomCreationEvent) => Promise<void>;
+  joinRoomRequest: (event: JoinRoomRequestEvent) => Promise<void>;
+  roomListingRequest: (event: RoomListingRequestEvent) => Promise<void>;
+};
+
+export class Server extends AsyncEventEmitter<ServerEvents> {
   config: ServerConfig;
   sock: Socket;
   rooms: Map<string, Room> = new Map();
@@ -221,10 +231,10 @@ export class Server extends AsyncEventEmitter {
   private buildConnection(remote: RemoteInfo): Connection {
     let conn = new Connection(remote, this.sock, true, this.requestClientID());
     this.connections.set(addr2str(remote), conn);
-    conn.on("packet", (packet: Subpacket) => {
+    conn.on("packet", async (packet: Subpacket) => {
       this.handlePacket(packet, conn);
     });
-    conn.on("close", () => {
+    conn.on("close", async () => {
       this.connections.delete(addr2str(remote));
       let de = new DisconnectionEvent(conn);
       this.emit("disconnection", de);

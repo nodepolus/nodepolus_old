@@ -306,7 +306,7 @@ export class Room extends EventEmitter {
       });
     });
     this.connections.push(connection);
-    connection.on("close", () => {
+    connection.on("close", async () => {
       this.connections.splice(this.connections.indexOf(connection), 1);
       if (connection.isHost && this.connections.length > 0) {
         this.connections[0].isHost = true;
