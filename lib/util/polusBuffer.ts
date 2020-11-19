@@ -53,7 +53,7 @@ export default class PolusBuffer {
   }
 
   read8(): number {
-    return this.buf.readInt8(this.cursor);
+    return this.buf.readInt8(this.cursor++);
   }
 
   read16(isBigEndian = false): number {
@@ -102,7 +102,7 @@ export default class PolusBuffer {
 
   readString(): string {
     const length = this.readVarInt();
-    return this.readBytes(Number(length)).buf.toString();
+    return this.readBytes(Number(length)).buf.toString("utf8");
   }
 
   readBytes(length: number): PolusBuffer {
@@ -223,8 +223,9 @@ export default class PolusBuffer {
   }
 
   writeString(value: string) {
-    this.writeVarInt(BigInt(value.length));
-    this.writeBytes(value);
+    let bytes = Buffer.from(value);
+    this.writeVarInt(BigInt(bytes.length));
+    this.writeBytes(bytes);
   }
 
   writeBytes(bytes: Buffer | Number[] | String | PolusBuffer) {
