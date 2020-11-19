@@ -9,6 +9,7 @@ import {
   RoomListingRequestEvent,
   DisconnectionEvent,
   JoinRoomEvent,
+  GameStartEvent,
 } from "../lib/events";
 
 // import AnnouncementServer from "../lib/announcements/Server";
@@ -44,6 +45,9 @@ server.on("roomCreated", async (evt: RoomCreationEvent) => {
       }
     }, 2500);
   });
+  room.on('gameStart', async (evt : GameStartEvent) => {
+    console.log(`[Event] Room(${evt.room.code}) > 'gameStart'`)
+  })
 });
 
 server.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {

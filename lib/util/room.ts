@@ -19,10 +19,11 @@ import { Player } from "./player";
 import { JoinRoomEvent } from "../events";
 import { UpdateGameDataPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/updateGameData";
 import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
+import { GameStartEvent } from '../events'
 import Task from "./task";
 
 export declare interface Room {
-  on(event: "close" | "playerJoined", listener: Function): this;
+  on(event: "close" | "playerJoined" | 'gameStart', listener: Function): this;
 }
 
 export class Room extends EventEmitter {
@@ -109,6 +110,9 @@ export class Room extends EventEmitter {
         this.connections.forEach((otherClient) => {
           otherClient.send(packet);
         });
+        this.emit('gameStart', new GameStartEvent(
+          this
+        ))
         break;
       case "KickPlayer":
       case "RemovePlayer":

@@ -5,3 +5,4 @@ export { JoinRoomRequestEvent } from "./joinRoomRequestEvent";
 export { DisconnectionEvent } from "./disconnectionEvent";
 export { RoomCreationEvent } from "./roomCreationEvent";
 export { RoomListingRequestEvent } from "./roomListingRequestEvent";
+export { GameStartEvent } from './gameStartEvent'
