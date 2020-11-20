@@ -1,5 +1,5 @@
 import { Room } from "../util/room";
-import PolusBuffer from "../util/polusBuffer";
+import { PolusBuffer } from "../util/polusBuffer";
 import { PacketHandler, PacketHandlerOpts } from "./packet";
 
 import { GameCreate, GameCreatePacket } from "./subpackets/gameCreate";

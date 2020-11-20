@@ -1,5 +1,5 @@
-import PolusBuffer from "../../../util/polusBuffer";
-import Component from "../../packetElements/component";
+import { PolusBuffer } from "../../../util/polusBuffer";
+import { Component } from "../../packetElements/component";
 import { Room } from "../../../util/room";
 import { IGameObject, SpawnFlags } from "../../../util/gameObject";
 import { GameDataPacketType } from "../gameData";

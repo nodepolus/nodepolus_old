@@ -6,7 +6,7 @@ export interface DeconStateByteInterface {
   HeadingUp: boolean;
 }
 
-class DeconStateByte {
+export class DeconStateByte {
   public static parse(byte: number): DeconStateByteInterface {
     return {
       Idle: byte == 0,
@@ -29,5 +29,3 @@ class DeconStateByte {
     return returnInt;
   }
 }
-
-export default DeconStateByte;

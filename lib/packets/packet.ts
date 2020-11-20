@@ -8,7 +8,7 @@ import {
 } from "./acknowledgementPacket";
 import { Ping, PingPacket } from "./pingPacket";
 import { Room } from "../util/room";
-import PolusBuffer from "../util/polusBuffer";
+import { PolusBuffer } from "../util/polusBuffer";
 
 export enum PacketType {
   UnreliablePacket = 0x00,
@@ -41,7 +41,7 @@ export interface PacketHandler<T> {
   serialize(packet: T, room: Room): PolusBuffer;
 }
 
-export default class Packet {
+export class Packet {
   toServer: boolean;
 
   constructor(toServer: boolean) {

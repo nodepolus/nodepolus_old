@@ -1,4 +1,4 @@
-import DisconnectReason from "../packets/packetElements/disconnectReason";
+import { DisconnectReason } from "../packets/packetElements/disconnectReason";
 
 export abstract class BaseEvent {
   timeEmitted: number;

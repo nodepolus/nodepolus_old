@@ -1,7 +1,7 @@
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { Room } from "../../util/room";
 import { PacketHandler } from "../packet";
-import DisconnectReason from "../packetElements/disconnectReason";
+import { DisconnectReason } from "../packetElements/disconnectReason";
 
 export interface JoinGameErrorPacket {
   type: "JoinGameError";

@@ -1,4 +1,4 @@
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 
 class RoomCode {
   V2Int: number[] = [
@@ -96,4 +96,4 @@ class RoomCode {
   }
 }
 
-export default new RoomCode();
+export const roomCode = new RoomCode();

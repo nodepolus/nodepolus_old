@@ -1,8 +1,8 @@
-import AmongUsMap from "../../../../data/enums/amongUsMap";
-import PolusBuffer from "../../../../util/polusBuffer";
+import { AmongUsMap } from "../../../../data/enums/amongUsMap";
+import { PolusBuffer } from "../../../../util/polusBuffer";
 import { Room } from "../../../../util/room";
 import { PacketHandler } from "../../../packet";
-import SystemType from "../../../packetElements/systemType";
+import { SystemType } from "../../../packetElements/systemType";
 
 export enum RepairAction {
   Repaired = 0x01,

@@ -1,9 +1,9 @@
 import test from "ava";
 
-import Packet, { PacketType } from "../../lib/packets/packet";
+import { Packet, PacketType } from "../../lib/packets/packet";
 import { SetGameCodePacket } from "../../lib/packets/subpackets/setGameCode";
 import { UnreliablePacket } from "../../lib/packets/unreliablePacket";
-import PolusBuffer from "../../lib/util/polusBuffer";
+import { PolusBuffer } from "../../lib/util/polusBuffer";
 import { Room } from "../../lib/util/room";
 
 test("correctly parses a packet", (t) => {

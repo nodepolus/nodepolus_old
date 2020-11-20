@@ -5,7 +5,7 @@ type TaskEvents = Events & {
   uncompleted: () => Promise<void>;
 };
 
-export default class Task extends AsyncEventEmitter<TaskEvents> {
+export class Task extends AsyncEventEmitter<TaskEvents> {
   complete: boolean = false;
   ID: number;
 

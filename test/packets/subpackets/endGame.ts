@@ -1,7 +1,7 @@
 import test from "ava";
 
 import { EndGame, EndReason } from "../../../lib/packets/subpackets/endGame";
-import PolusBuffer from "../../../lib/util/polusBuffer";
+import { PolusBuffer } from "../../../lib/util/polusBuffer";
 import { Room } from "../../../lib/util/room";
 
 const room = new Room();

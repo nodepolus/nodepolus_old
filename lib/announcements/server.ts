@@ -2,11 +2,11 @@ import { EventEmitter } from "events";
 import { createSocket, RemoteInfo, Socket } from "dgram";
 import { addr2str } from "../util/misc";
 import { Packet, PacketType } from "./packets/packet";
-import PolusBuffer from "../util/polusBuffer";
+import { PolusBuffer } from "../util/polusBuffer";
 import { HelloPacketData } from "./packets/helloPacket";
 import { UnreliablePacketData } from "./packets/unreliablePacket";
 import { FreeWeekendState } from "./packets/subpackets/freeWeekend";
-import Text from "../util/text";
+import { Text } from "../util/text";
 import { Room } from "../../lib/util/room";
 
 export interface ClientData {
@@ -27,7 +27,7 @@ export interface Announce {
   freeWeekend?: FreeWeekendState;
 }
 
-export default class AnnouncementServer extends EventEmitter {
+export class AnnouncementServer extends EventEmitter {
   room: Room;
   sock: Socket;
   private clientMap: Map<string, ClientData> = new Map();

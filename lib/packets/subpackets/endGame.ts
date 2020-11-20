@@ -1,5 +1,5 @@
-import RoomCode from "../packetElements/roomCode";
-import PolusBuffer from "../../util/polusBuffer";
+import { roomCode } from "../packetElements/roomCode";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { PacketHandler } from "../packet";
 
 export enum EndReason {
@@ -23,7 +23,7 @@ export const EndGame: PacketHandler<EndGamePacket> = {
   parse(packet: PolusBuffer): EndGamePacket {
     return {
       type: "EndGame",
-      RoomCode: RoomCode.intToString(packet.read32()),
+      RoomCode: roomCode.intToString(packet.read32()),
       EndReason: packet.readU8(),
       ShowAdvert: packet.readBoolean(),
     };
@@ -31,7 +31,7 @@ export const EndGame: PacketHandler<EndGamePacket> = {
 
   serialize(packet: EndGamePacket): PolusBuffer {
     const buf = new PolusBuffer(6);
-    buf.write32(RoomCode.stringToInt(packet.RoomCode));
+    buf.write32(roomCode.stringToInt(packet.RoomCode));
     buf.writeU8(packet.EndReason);
     buf.writeBoolean(packet.ShowAdvert);
     return buf;
