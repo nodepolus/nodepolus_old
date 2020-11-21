@@ -1,5 +1,5 @@
-import { Vector2/*, Vector3*/ } from "../../packets/packetElements/vector";
-// import Polygon from "polygon";
+import { Vector2, Vector3 } from "../../packets/packetElements/vector";
+import Polygon from "polygon";
 import SystemType from "../../packets/packetElements/systemType";
 // import { PolusVents } from "../enums/playerEnums";
 
@@ -124,41 +124,41 @@ export interface StaticMapData {
   colliders: RawStaticColliderData[];
 }
 
-// export class Collider {
-//   public type: 'box' | 'polygon' | 'edge';
-//   public name: string;
-//   public position: Vector3;
-//   public offset: Vector2;
-//   public rotation: Vector3;
-//   public isTrigger: boolean;
-//   public polygon: Polygon;
-//   constructor(sd: RawStaticColliderData) {
-//     if (sd.type == "edge" || sd.type == "polygon") {
-//       this.type = sd.type
-//       this.name = sd.name
-//       this.position = new Vector3(sd.position.x, sd.position.y, sd.position.z)
-//       this.offset = new Vector2(sd.offset.x, sd.offset.y)
-//       this.rotation = new Vector3(sd.rotation.x, sd.rotation.y, sd.rotation.z)
-//       this.isTrigger = sd.isTrigger
-//       this.polygon = new Polygon(sd.points)
-//     } else {
-//       if(sd.type == 'box') {
-//         this.type = sd.type;
-//         this.name = sd.name;
-//         this.position = new Vector3(sd.position.x, sd.position.y, sd.position.z);
-//         this.offset = new Vector2(sd.offset.x, sd.offset.y);
-//         this.rotation = new Vector3(sd.rotation.x, sd.rotation.y, sd.rotation.z);
-//         this.isTrigger = sd.isTrigger;
-//         this.polygon = new Polygon([
-//           { x: sd.position.x - sd.size.x, y: sd.position.y - sd.size.y },
-//           { x: sd.position.x + sd.size.x, y: sd.position.y - sd.size.y },
-//           { x: sd.position.x + sd.size.x, y: sd.position.y + sd.size.y },
-//           { x: sd.position.x - sd.size.x, y: sd.position.y + sd.size.y },
-//           { x: sd.position.x - sd.size.x, y: sd.position.y - sd.size.y },
-//         ]);
-//       } else {
-//         throw new Error("Unknown collider type: " + sd.type);
-//       }
-//     }
-//   }
-// }
+export class Collider {
+  public type: 'box' | 'polygon' | 'edge';
+  public name: string;
+  public position: Vector3;
+  public offset: Vector2;
+  public rotation: Vector3;
+  public isTrigger: boolean;
+  public polygon: Polygon;
+  constructor(sd: RawStaticColliderData) {
+    if (sd.type == "edge" || sd.type == "polygon") {
+      this.type = sd.type
+      this.name = sd.name
+      this.position = new Vector3(sd.position.x, sd.position.y, sd.position.z)
+      this.offset = new Vector2(sd.offset.x, sd.offset.y)
+      this.rotation = new Vector3(sd.rotation.x, sd.rotation.y, sd.rotation.z)
+      this.isTrigger = sd.isTrigger
+      this.polygon = new Polygon(sd.points)
+    } else {
+      if(sd.type == 'box') {
+        this.type = sd.type;
+        this.name = sd.name;
+        this.position = new Vector3(sd.position.x, sd.position.y, sd.position.z);
+        this.offset = new Vector2(sd.offset.x, sd.offset.y);
+        this.rotation = new Vector3(sd.rotation.x, sd.rotation.y, sd.rotation.z);
+        this.isTrigger = sd.isTrigger;
+        this.polygon = new Polygon([
+          { x: sd.position.x - sd.size.x, y: sd.position.y - sd.size.y },
+          { x: sd.position.x + sd.size.x, y: sd.position.y - sd.size.y },
+          { x: sd.position.x + sd.size.x, y: sd.position.y + sd.size.y },
+          { x: sd.position.x - sd.size.x, y: sd.position.y + sd.size.y },
+          { x: sd.position.x - sd.size.x, y: sd.position.y - sd.size.y },
+        ]);
+      } else {
+        throw new Error("Unknown collider type: " + sd.type);
+      }
+    }
+  }
+}
