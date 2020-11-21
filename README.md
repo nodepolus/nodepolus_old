@@ -16,8 +16,8 @@ Only the **region server** is in a usable state, with **plugin support** in its 
 
 1. Install node.js v15.0.1 or later
 1. Download NodePolus
-    - Either by downloading the zip [here](https://github.com/roobscoob/NodePolus/archive/main.zip)
-    - Or by cloning the repo via `git clone git@github.com:roobscoob/NodePolus.git`
+    - Either by downloading the zip [here](https://github.com/nodepolus/NodePolus/archive/main.zip)
+    - Or by cloning the repo via `git clone git@github.com:nodepolus/NodePolus.git`
 1. Open a terminal inside the extracted archive directory or the cloned repo directory
 1. Install the dependencies
     - If you downloaded the zip archive: `npm install --ignore-scripts`
