@@ -5,8 +5,12 @@ import { Vector2, Vector3 } from "../../packets/packetElements/vector";
 =======
 import { Vector2, Vector3 } from "../../packets/packetElements/vector";
 import Polygon from "polygon";
+<<<<<<< HEAD
 import SystemType from "../../packets/packetElements/systemType";
 >>>>>>> fixed a few basic issues to not cause merge issues in the future
+=======
+import { SystemType } from "../../packets/packetElements/systemType";
+>>>>>>> rebase & minor fixes
 // import { PolusVents } from "../enums/playerEnums";
 
 export enum DoorOrientation {
@@ -127,7 +131,7 @@ export interface StaticMapData {
   rooms: StaticRoomData[];
   vents: StaticVentData[];
   tasks: StaticTaskData[];
-  colliders: RawStaticColliderData[];
+  colliders: Collider[];
 }
 
 export class Collider {
