@@ -1,4 +1,4 @@
-enum Tasks {
+export enum Tasks {
   SubmitScan = 0,
   PrimeShields = 1,
   FuelEngines = 2,
@@ -43,4 +43,3 @@ enum Tasks {
   RecordTemperature = 41,
   RebootWifi = 42,
 }
-export default Tasks;

@@ -1,5 +1,5 @@
 import { BaseCancelableEvent } from "./baseEvents";
-import RoomSettings from "../packets/packetElements/roomSettings";
+import { RoomSettings } from "../packets/packetElements/roomSettings";
 import { RoomListing } from "../packets/subpackets/gameSearchResults";
 
 export class RoomListingRequestEvent extends BaseCancelableEvent {

@@ -1,7 +1,7 @@
-import PolusBuffer from "../../../../util/polusBuffer";
+import { PolusBuffer } from "../../../../util/polusBuffer";
 import { Room } from "../../../../util/room";
 import { PacketHandler } from "../../../packet";
-import RoomSettings from "../../../packetElements/roomSettings";
+import { RoomSettings } from "../../../packetElements/roomSettings";
 
 export interface SyncSettingsPacket {
   RoomSettings: RoomSettings;

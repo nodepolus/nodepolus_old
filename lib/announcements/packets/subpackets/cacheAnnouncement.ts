@@ -1,5 +1,5 @@
 import { PacketHandler } from "../../../packets/packet";
-import PolusBuffer from "../../../util/polusBuffer";
+import { PolusBuffer } from "../../../util/polusBuffer";
 
 export interface CacheAnnouncementPacket {
   type: "CacheAnnouncement";

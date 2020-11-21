@@ -1,5 +1,5 @@
-import RoomCode from "../packetElements/roomCode";
-import PolusBuffer from "../../util/polusBuffer";
+import { roomCode } from "../packetElements/roomCode";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { Room } from "../../util/room";
 
 import { Data, DataPacket } from "./gameDataPackets/data";
@@ -54,7 +54,7 @@ export const GameData: PacketHandler<GameDataPacket> = {
   ): GameDataPacket {
     let data: GameDataPacket = {
       type: "GameData",
-      RoomCode: RoomCode.intToString(packet.read32()),
+      RoomCode: roomCode.intToString(packet.read32()),
       Packets: new Array(),
     };
     if (opts?.isGameDataTo) {
@@ -79,7 +79,7 @@ export const GameData: PacketHandler<GameDataPacket> = {
 
   serialize(packet: GameDataPacket, room: Room): PolusBuffer {
     var pb = new PolusBuffer();
-    pb.write32(RoomCode.stringToInt(packet.RoomCode));
+    pb.write32(roomCode.stringToInt(packet.RoomCode));
     if (packet.RecipientClientID || packet.RecipientClientID === 0n) {
       pb.writeVarInt(packet.RecipientClientID);
     }

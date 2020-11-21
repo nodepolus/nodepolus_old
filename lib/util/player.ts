@@ -1,4 +1,4 @@
-import {Vector2} from "../packets/packetElements/vector";
+import { Vector2 } from "../packets/packetElements/vector2";
 import {
   PlayerColor,
   PlayerSkin,
@@ -6,8 +6,8 @@ import {
   PlayerPet,
   Vent,
 } from "../data/enums/playerEnums";
-import Task from "./task";
-import Connection from "./connection";
+import { Task } from "./task";
+import { Connection } from "./connection";
 import { IGameObject } from "./gameObject";
 import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
@@ -274,7 +274,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetSkin,
             Packet: {
-              Hat: this.int_skin,
+              Skin: this.int_skin,
             },
           },
         ],

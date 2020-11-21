@@ -1,7 +1,7 @@
 import { DeconStateByteInterface } from "./deconStateByte";
 import { StateByteInterface } from "./stateByte";
-import SystemType from "./systemType";
-import {Vector2} from "./vector";
+import { SystemType } from "./systemType";
+import { Vector2 } from "./vector";
 
 export interface MeetingHud {
   type: "MeetingHud";

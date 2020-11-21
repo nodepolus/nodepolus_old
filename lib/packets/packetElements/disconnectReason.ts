@@ -1,5 +1,5 @@
 import { Room } from "../../util/room";
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 
 export enum DisconnectReasons {
   ExitGame = 0,
@@ -23,7 +23,7 @@ export enum DisconnectReasons {
   NewConnection = 210,
 }
 
-export default class DisconnectReason {
+export class DisconnectReason {
   reasonInt?: number;
   reason: string = "Default disconnect reason, you should not see this";
 

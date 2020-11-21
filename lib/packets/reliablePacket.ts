@@ -1,5 +1,5 @@
 import { Unreliable, UnreliablePacket } from "./unreliablePacket";
-import PolusBuffer from "../util/polusBuffer";
+import { PolusBuffer } from "../util/polusBuffer";
 import { PacketHandler, PacketHandlerOpts, ParsedPacket } from "./packet";
 import { Room } from "../util/room";
 
@@ -29,5 +29,3 @@ export const Reliable: PacketHandler<ReliablePacket | ParsedPacket> = {
     return buf;
   },
 };
-
-export default Reliable;

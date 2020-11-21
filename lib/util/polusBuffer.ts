@@ -2,7 +2,7 @@
  * Core buffer type for reading and writing messages
  */
 type BuildFrom = number | Buffer | string | number[];
-export default class PolusBuffer {
+export class PolusBuffer {
   cursor: number;
   buf: Buffer;
   constructor(buildFrom: BuildFrom = 0, isHex?: boolean) {

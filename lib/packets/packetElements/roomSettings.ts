@@ -1,5 +1,5 @@
-import PolusBuffer from "../../util/polusBuffer";
-import AmongUsMap from "../../data/enums/amongUsMap";
+import { PolusBuffer } from "../../util/polusBuffer";
+import { AmongUsMap } from "../../data/enums/amongUsMap";
 import { Room } from "../../util/room";
 
 export class RoomSettings {
@@ -209,5 +209,3 @@ export class RoomSettings {
     this.room.syncSettings();
   }
 }
-
-export default RoomSettings;

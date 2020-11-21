@@ -1,5 +1,5 @@
-import PolusBuffer from "../util/polusBuffer";
-import DisconnectReason from "./packetElements/disconnectReason";
+import { PolusBuffer } from "../util/polusBuffer";
+import { DisconnectReason } from "./packetElements/disconnectReason";
 import { Room } from "../util/room";
 import { PacketHandler } from "./packet";
 

@@ -3,7 +3,7 @@ import { Reliable, ReliablePacket } from "./reliablePacket";
 import { Hello, HelloPacket, HelloPacketData } from "./helloPacket";
 import { Disconnect, DisconnectPacket } from "./disconnectPacket";
 import { Ping, PingPacket } from "../../packets/pingPacket";
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { Room } from "../../util/room";
 import {
   Acknowledgement,

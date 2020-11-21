@@ -1,13 +1,14 @@
 import { RemoteInfo, Socket } from "dgram";
 
-import Packet, {
+import {
+  Packet,
   ParsedPacket,
   PacketType,
   ParsedPacketData,
 } from "../packets/packet";
 import { Player } from "./player";
-import DisconnectReason from "../packets/packetElements/disconnectReason";
-import PolusBuffer from "./polusBuffer";
+import { DisconnectReason } from "../packets/packetElements/disconnectReason";
+import { PolusBuffer } from "./polusBuffer";
 import { HelloPacket } from "../packets/helloPacket";
 import { Room } from "./room";
 import {
@@ -33,7 +34,7 @@ type ConnectionEvents = Events & {
   joinRoom: (event: JoinRoomEvent) => Promise<void>;
 };
 
-export default class Connection extends AsyncEventEmitter<ConnectionEvents> {
+export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   public netIDs: bigint[] = [];
   player?: Player;
   nonce: number = 1;

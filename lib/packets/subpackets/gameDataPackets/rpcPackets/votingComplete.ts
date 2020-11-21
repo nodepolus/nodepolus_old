@@ -1,6 +1,7 @@
-import PolusBuffer from "../../../../util/polusBuffer";
+import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
-import StateByte, {
+import {
+  StateByte,
   StateByteInterface,
 } from "../../../packetElements/stateByte";
 

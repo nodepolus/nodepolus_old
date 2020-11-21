@@ -1,9 +1,9 @@
 import { EventEmitter } from "events";
 import * as randomstring from "randomstring";
 
-import Connection from "./connection";
-import Game from "./game";
-import Publicity from "../data/enums/publicity";
+import { Connection } from "./connection";
+import { Game } from "./game";
+import { Publicity } from "../data/enums/publicity";
 import { RoomSettings } from "../packets/packetElements/roomSettings";
 import { Packet as Subpacket } from "../packets/unreliablePacket";
 import { IGameObject } from "./gameObject";
@@ -11,15 +11,15 @@ import { GameDataPacketType } from "../packets/subpackets/gameData";
 
 import { addr2str } from "./misc";
 import { RPCPacketType } from "../packets/subpackets/gameDataPackets/rpc";
-import DisconnectReason from "../packets/packetElements/disconnectReason";
-import PolusBuffer from "./polusBuffer";
+import { DisconnectReason } from "../packets/packetElements/disconnectReason";
+import { PolusBuffer } from "./polusBuffer";
 import { DataPacket } from "../packets/subpackets/gameDataPackets/data";
 import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
 import { Player } from "./player";
 import { JoinRoomEvent } from "../events";
 import { UpdateGameDataPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/updateGameData";
 import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
-import Task from "./task";
+import { Task } from "./task";
 
 export declare interface Room {
   on(event: "close" | "playerJoined", listener: Function): this;
