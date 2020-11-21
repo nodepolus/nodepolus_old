@@ -273,7 +273,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetSkin,
             Packet: {
-              Hat: this.int_skin,
+              Skin: this.int_skin,
             },
           },
         ],
