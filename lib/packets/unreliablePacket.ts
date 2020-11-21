@@ -215,7 +215,7 @@ export const Unreliable: PacketHandler<UnreliablePacket> = {
         case "RemoveRoom":
           type = 0x03;
           break;
-        case 'LateRejection':
+        case "LateRejection":
         case "RemovePlayer":
           type = 0x04;
           break;

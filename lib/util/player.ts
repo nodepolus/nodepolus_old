@@ -192,7 +192,6 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
           },
         ],
       });
-      this.sendGameDataSync();
     }
   }
 
@@ -214,7 +213,6 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
           },
         ],
       });
-      this.sendGameDataSync();
     }
   }
 
@@ -236,7 +234,6 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
           },
         ],
       });
-      this.sendGameDataSync();
     }
   }
 
@@ -253,12 +250,11 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetPet,
             Packet: {
-              Color: this.int_pet,
+              PetID: this.int_pet,
             },
           },
         ],
       });
-      this.sendGameDataSync();
     }
   }
 
@@ -275,12 +271,11 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetSkin,
             Packet: {
-              Color: this.int_skin,
+              Hat: this.int_skin,
             },
           },
         ],
       });
-      this.sendGameDataSync();
     }
   }
 
@@ -323,7 +318,6 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
           });
         }
       });
-      this.sendGameDataSync();
       if (!doNotCreateGroup) {
         this.connection?.room.endPacketGroupBroadcastToAll();
       }
@@ -355,12 +349,11 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetInfected,
             Packet: {
-              InfectedPlayerIDs: [this.ID],
+              InfectedPlayerIDs: [BigInt(this.ID)],
             },
           },
         ],
       });
-      this.sendGameDataSync();
     }
   }
 

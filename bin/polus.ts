@@ -25,14 +25,14 @@ process.stdin.on("data", () => {
 
 server.on("roomCreated", async (evt: RoomCreationEvent) => {
   console.log("[Event] Server > 'roomCreated'");
-  let room = evt.room
-  room.on('playerJoined', async (evt: JoinRoomEvent) => {
+  let room = evt.room;
+  room.on("playerJoined", async (evt: JoinRoomEvent) => {
     setInterval(() => {
-      if(evt.player.connection) {
+      if (evt.player.connection) {
         evt.player.setName(String(evt.player.connection.name));
       }
-    }, 2500)
-  })
+    }, 2500);
+  });
 });
 
 server.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {

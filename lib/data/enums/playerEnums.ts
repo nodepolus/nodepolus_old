@@ -7,7 +7,7 @@ export enum PlayerColor {
   YELLOW = 5,
   BLACK = 6,
   WHITE = 7,
-  PRUPLE = 8,
+  PURPLE = 8,
   BROWN = 9,
   CYAN = 10,
   LIME = 11,
