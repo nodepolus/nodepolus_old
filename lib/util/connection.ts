@@ -85,9 +85,9 @@ export default class Connection extends AsyncEventEmitter<ConnectionEvents> {
           this.room
         );
         // console.log("RawParsed", parsed)
-        // const serialized = new Packet(this.room, this.isToClient).serialize(parsed);
+        // const serialized = new Packet(!this.isToClient).serialize(parsed, this.room);
         // try {
-        //     if (packet.Type != PacketType.UnreliablePacket)assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
+        //     if (packet.Type != PacketType.UnreliablePacket) assert.equal(serialized.buf.toString('hex'), msg.toString('hex'))
         // } catch(err) {
         //     console.log("actual  ", serialized.buf.toString('hex'))
         //     console.log("expected", msg.toString('hex'))

@@ -24,7 +24,7 @@ export const SetInfected: PacketHandler<SetInfectedPacket> = {
     let buf = new PolusBuffer();
     buf.writeVarInt(BigInt(packet.InfectedPlayerIDs.length));
     for (let i = 0; i < packet.InfectedPlayerIDs.length; i++) {
-      buf.writeVarInt(packet.InfectedPlayerIDs[i]);
+      buf.writeVarInt(BigInt(packet.InfectedPlayerIDs[i]));
     }
     return buf;
   },

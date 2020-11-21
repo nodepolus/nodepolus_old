@@ -19,6 +19,17 @@ const server = new Server({
   port: 22023,
 });
 
+// const annServer = new AnnouncementServer({
+// 	defaultMessage: new Text("Someone should create")
+// 		.append(" ")
+// 		.appendLink("https://wiki.weewoo.net/wiki/Announcements")
+// 			.append("a Text wiki page")
+// 		.clearState()
+// 		.append("!"),
+// 	port: 22024,
+// 	freeWeekend: FreeWeekendState.NotFree
+// })
+
 process.stdin.on("data", () => {
   process.exit(1);
 });
