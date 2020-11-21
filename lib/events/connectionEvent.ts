@@ -1,4 +1,4 @@
-import Connection from "../util/connection";
+import { Connection } from "../util/connection";
 import { BaseCancelableEvent } from "./baseEvents";
 
 export class ConnectionEvent extends BaseCancelableEvent {

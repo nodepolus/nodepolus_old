@@ -1,4 +1,4 @@
-enum SystemType {
+export enum SystemType {
   Hallway = 0,
   Storage = 1,
   Cafeteria = 2,
@@ -30,4 +30,3 @@ enum SystemType {
   Specimens = 28,
   BoilerRoom = 29,
 }
-export default SystemType;

@@ -1,5 +1,5 @@
 import { Unreliable, UnreliablePacket } from "./unreliablePacket";
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { ParsedPacket } from "./packet";
 import { PacketHandler } from "../../packets/packet";
 import { Room } from "../../util/room";

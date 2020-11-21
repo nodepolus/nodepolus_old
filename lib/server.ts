@@ -3,12 +3,13 @@ const publicIp = require("public-ip");
 import { Socket, createSocket, RemoteInfo } from "dgram";
 
 import { Room } from "./util/room";
-import Connection from "./util/connection";
+import { Connection } from "./util/connection";
 import { Packet as Subpacket } from "./packets/unreliablePacket";
 import { addr2str } from "./util/misc";
 import { RoomListing } from "./packets/subpackets/gameSearchResults";
 import { AsyncEventEmitter, Events } from "./util/asyncEventEmitter";
-import DisconnectReason, {
+import {
+  DisconnectReason,
   DisconnectReasons,
 } from "./packets/packetElements/disconnectReason";
 
@@ -246,5 +247,3 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
     return this.clientIDIncrementer++;
   }
 }
-
-export default Server;

@@ -1,4 +1,4 @@
-import Component from "../packets/packetElements/component";
+import { Component } from "../packets/packetElements/component";
 import { GameDataPacketType } from "../packets/subpackets/gameData";
 
 export enum SpawnFlags {

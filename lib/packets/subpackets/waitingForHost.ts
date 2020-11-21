@@ -1,6 +1,6 @@
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { PacketHandler } from "../packet";
-import RoomCode from "../packetElements/roomCode";
+import { roomCode } from "../packetElements/roomCode";
 
 export interface WaitingForHostPacket {
   type: "WaitingForHost";
@@ -12,14 +12,14 @@ export const WaitingForHost: PacketHandler<WaitingForHostPacket> = {
   parse(packet: PolusBuffer): WaitingForHostPacket {
     return {
       type: "WaitingForHost",
-      RoomCode: RoomCode.intToString(packet.read32()),
+      RoomCode: roomCode.intToString(packet.read32()),
       WaitingClientID: packet.readU32(),
     };
   },
 
   serialize(packet: WaitingForHostPacket): PolusBuffer {
     var buf = new PolusBuffer();
-    buf.write32(RoomCode.stringToInt(packet.RoomCode));
+    buf.write32(roomCode.stringToInt(packet.RoomCode));
     buf.writeU32(packet.WaitingClientID);
     return buf;
   },

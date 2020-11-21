@@ -1,6 +1,6 @@
 import test from "ava";
 
-import PolusBuffer from "../../lib/util/polusBuffer";
+import { PolusBuffer } from "../../lib/util/polusBuffer";
 
 test("reads a boolean", (t) => {
   const buf = new PolusBuffer("0100", true);

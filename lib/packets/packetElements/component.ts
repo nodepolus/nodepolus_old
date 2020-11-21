@@ -1,10 +1,10 @@
-import SystemType from "./systemType";
+import { SystemType } from "./systemType";
 import { Room } from "../../util/room";
-import PolusBuffer from "../../util/polusBuffer";
-import AmongUsMap from "../../data/enums/amongUsMap";
+import { PolusBuffer } from "../../util/polusBuffer";
+import { AmongUsMap } from "../../data/enums/amongUsMap";
 import { ObjectType } from "../subpackets/gameDataPackets/spawn";
-import StateByte, { StateByteInterface } from "./stateByte";
-import DeconStateByte, { DeconStateByteInterface } from "./deconStateByte";
+import { StateByte, StateByteInterface } from "./stateByte";
+import { DeconStateByte, DeconStateByteInterface } from "./deconStateByte";
 import {
   ComponentData,
   MeetingHud,
@@ -26,7 +26,7 @@ import {
   CustomTransformData,
   PolusDoorSystem,
 } from "./componentTypes";
-import Vector2 from "./vector2";
+import { Vector2 } from "./vector2";
 
 //stolen from SO
 function arraysEqual(a: any[], b: any[]) {
@@ -458,7 +458,7 @@ const MAP_SYSTEM_ORDER = [
   ],
 ];
 
-export default class Component {
+export class Component {
   public old?: Component = undefined;
   public Data: ComponentData | null = null;
   public length: number = -1;

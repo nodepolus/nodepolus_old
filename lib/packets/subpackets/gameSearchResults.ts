@@ -1,5 +1,5 @@
-import RoomCode from "../packetElements/roomCode";
-import PolusBuffer from "../../util/polusBuffer";
+import { roomCode } from "../packetElements/roomCode";
+import { PolusBuffer } from "../../util/polusBuffer";
 import { PacketHandler } from "../packet";
 
 export interface RoomListing {
@@ -46,7 +46,7 @@ export const GameSearchResults: PacketHandler<GameSearchResultsPacket> = {
                 data.readU8(),
               ].join("."),
               Port: data.readU16(),
-              RoomCode: RoomCode.intToString(data.read32()),
+              RoomCode: roomCode.intToString(data.read32()),
               RoomName: data.readString(),
               PlayerCount: data.readU8(),
               Age: data.readVarInt(),
@@ -89,7 +89,7 @@ export const GameSearchResults: PacketHandler<GameSearchResultsPacket> = {
           roomBuffer.writeU8(int);
         });
         roomBuffer.writeU16(singleRoom.Port);
-        roomBuffer.write32(RoomCode.stringToInt(singleRoom.RoomCode));
+        roomBuffer.write32(roomCode.stringToInt(singleRoom.RoomCode));
         roomBuffer.writeString(singleRoom.RoomName);
         roomBuffer.writeU8(singleRoom.PlayerCount);
         roomBuffer.writeVarInt(singleRoom.Age);

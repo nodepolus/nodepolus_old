@@ -5,7 +5,7 @@ export interface StateByteInterface {
   DidReport: boolean;
 }
 
-class StateByte {
+export class StateByte {
   public static parse(byte: number): StateByteInterface {
     return {
       VotedForPlayerPlayerID: (byte & 0b00001111) - 1,
@@ -25,5 +25,3 @@ class StateByte {
     return returnInt;
   }
 }
-
-export default StateByte;

@@ -1,4 +1,4 @@
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 import {
   CacheAnnouncement,
   CacheAnnouncementPacket,

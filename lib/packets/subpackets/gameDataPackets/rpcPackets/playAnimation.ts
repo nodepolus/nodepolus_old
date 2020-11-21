@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../../util/polusBuffer";
+import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
 
 export interface PlayAnimationPacket {

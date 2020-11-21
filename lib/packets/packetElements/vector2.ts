@@ -1,11 +1,11 @@
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 
 export interface Position {
   X: number;
   Y: number;
 }
 
-export default class Vector2 {
+export class Vector2 {
   X: number;
   Y: number;
 

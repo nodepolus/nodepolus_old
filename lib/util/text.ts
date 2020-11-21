@@ -4,7 +4,7 @@ enum State {
   Link,
 }
 
-export default class Text {
+export class Text {
   private _text: string = "";
   public state = State.None;
   constructor(initialText: string = "") {

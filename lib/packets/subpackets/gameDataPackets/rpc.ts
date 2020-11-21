@@ -1,4 +1,4 @@
-import PolusBuffer from "../../../util/polusBuffer";
+import { PolusBuffer } from "../../../util/polusBuffer";
 
 import { PlayAnimation, PlayAnimationPacket } from "./rpcPackets/playAnimation";
 import { CompleteTask, CompleteTaskPacket } from "./rpcPackets/completeTask";
