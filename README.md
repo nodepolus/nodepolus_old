@@ -1,6 +1,6 @@
 # NodePolus
 
-### 🌟 Please *Star* the project and join *[our discord][Discord]* for support! It really helps out! :)
+### 🌟 Please *Star* the project and join *[our Discord server][Discord]* for support! It really helps out! :)
 
 NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol. Once finished, it will include these implementations:
 
@@ -8,7 +8,7 @@ NodePolus is a JavaScript library containing multiple implementations of the Amo
 - A **programmable client** that can **play games**
 - A **packet inspector** and proxy
 
-Only the **region server** is in a usable state, with **plugin support** in its early stages of development. The **client** and **packet inspector** are currently non-functional. For questions and updates regarding the API, **client**, and **packet inspector**, join [our discord][Discord].
+Only the **region server** is in a usable state, with **plugin support** in its early stages of development. The **client** and **packet inspector** are currently non-functional. For questions and updates regarding the API, **client**, and **packet inspector**, join [our Discord server][Discord].
 
 # Usage
 
