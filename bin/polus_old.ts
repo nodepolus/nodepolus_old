@@ -19,20 +19,31 @@ const server = new Server({
   port: 22023,
 });
 
+// const annServer = new AnnouncementServer({
+// 	defaultMessage: new Text("Someone should create")
+// 		.append(" ")
+// 		.appendLink("https://wiki.weewoo.net/wiki/Announcements")
+// 			.append("a Text wiki page")
+// 		.clearState()
+// 		.append("!"),
+// 	port: 22024,
+// 	freeWeekend: FreeWeekendState.NotFree
+// })
+
 process.stdin.on("data", () => {
   process.exit(1);
 });
 
 server.on("roomCreated", async (evt: RoomCreationEvent) => {
   console.log("[Event] Server > 'roomCreated'");
-  let room = evt.room;
-  room.on("playerJoined", async (evt: JoinRoomEvent) => {
+  let room = evt.room
+  room.on('playerJoined', async (evt: JoinRoomEvent) => {
     setInterval(() => {
-      if (evt.player.connection) {
+      if(evt.player.connection) {
         evt.player.setName(String(evt.player.connection.name));
       }
-    }, 2500);
-  });
+    }, 2500)
+  })
 });
 
 server.on("joinRoomRequest", async (evt: JoinRoomRequestEvent) => {
