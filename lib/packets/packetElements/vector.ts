@@ -1,4 +1,4 @@
-import PolusBuffer from "../../util/polusBuffer";
+import { PolusBuffer } from "../../util/polusBuffer";
 
 export interface Position2 {
   X: number;

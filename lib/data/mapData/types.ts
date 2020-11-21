@@ -1,6 +1,6 @@
 import { Vector2, Vector3 } from "../../packets/packetElements/vector";
 import Polygon from "polygon";
-import SystemType from "../../packets/packetElements/systemType";
+import { SystemType } from "../../packets/packetElements/systemType";
 // import { PolusVents } from "../enums/playerEnums";
 
 export enum DoorOrientation {
@@ -121,7 +121,7 @@ export interface StaticMapData {
   rooms: StaticRoomData[];
   vents: StaticVentData[];
   tasks: StaticTaskData[];
-  colliders: RawStaticColliderData[];
+  colliders: Collider[];
 }
 
 export class Collider {

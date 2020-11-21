@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import * as randomstring from "randomstring";
 
 import { Connection } from "./connection";
-import { Game } from "./game";
+import Game from "./game";
 import { Publicity } from "../data/enums/publicity";
 import { RoomSettings } from "../packets/packetElements/roomSettings";
 import { Packet as Subpacket } from "../packets/unreliablePacket";
