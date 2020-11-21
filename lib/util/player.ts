@@ -354,7 +354,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetInfected,
             Packet: {
-              InfectedPlayerIDs: [this.ID],
+              InfectedPlayerIDs: [BigInt(this.ID)],
             },
           },
         ],
