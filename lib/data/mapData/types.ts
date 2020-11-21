@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import Polygon from "polygon";
 import { SystemType } from "../../packets/packetElements/systemType";
 import { Vector2, Vector3 } from "../../packets/packetElements/vector";
+=======
+import { Vector2, Vector3 } from "../../packets/packetElements/vector";
+import Polygon from "polygon";
+import SystemType from "../../packets/packetElements/systemType";
+>>>>>>> fixed a few basic issues to not cause merge issues in the future
 // import { PolusVents } from "../enums/playerEnums";
 
 export enum DoorOrientation {
