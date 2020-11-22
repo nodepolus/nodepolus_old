@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "bin/polus.ts",
-  "type": "module",
   "scripts": {
     "postinstall": "husky install",
     "start": "ts-node-dev bin/polus",
     "proxy": "ts-node-dev bin/proxy",
+    "build": "tsc",
     "lint": "prettier --check .",
     "lint-and-fix": "npx prettier --write .",
     "test": "ava",
