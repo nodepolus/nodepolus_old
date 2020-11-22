@@ -22,6 +22,7 @@ import {
   JoinRoomEvent,
   JoinRoomRequestEvent,
 } from "../events";
+import { LimboState } from "../data/enums/limboState";
 
 let nullRoom = new Room();
 
@@ -42,6 +43,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   hazelVersion?: number;
   name?: string;
   room: Room;
+  limbo: LimboState = LimboState.PreSpawn;
   isHost?: boolean;
   private inGroup: boolean = false;
   private helloRecieved: boolean = false;
@@ -60,7 +62,9 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
     this.room = nullRoom;
 
     this.on("message", async (msg: Buffer) => {
-      console.log(msg.toString("hex"));
+      if (msg[0] != 0x0a && msg[0] != 0x0c) {
+        console.log(msg.toString("hex"));
+      }
       if (this.TEMPDONTUSE) return;
       this.TEMPDONTUSE = true;
       const parsed = new Packet(this.isToClient).parse(
@@ -239,11 +243,14 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
         .map((con) => BigInt(con.ID))
         .filter((id) => id != BigInt(this.ID)),
     });
-
+    // TODO: AlterGame
     this.send({
       type: "SetGameCode",
       RoomCode: room.code,
     });
+    this.endPacketGroup();
+
+    this.limbo = LimboState.PreSpawn;
 
     if (room.host?.ID == this.ID) {
       this.startPacketGroup();
@@ -267,7 +274,6 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
       this.endPacketGroup();
     }
 
-    this.endPacketGroup();
     // this.startPacketGroup();
     // this.send("JoinedGame", {
     //     RoomCode: room.code,
