@@ -125,10 +125,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
 
   enterVent() {}
 
-  // TODO: this is WIP, marked as ignore as it's not
-  //       called from anywhere at the moment
-  // @ts-ignore
-  private sendGameDataSync() {
+  sendGameDataSync() {
     if (!this.connection)
       throw new Error("Player has no associated connection");
     let NetID: any = this.connection.room.GameObjects.find(

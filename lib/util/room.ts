@@ -20,6 +20,8 @@ import { JoinRoomEvent } from "../events";
 import { UpdateGameDataPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/updateGameData";
 import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import { Task } from "./task";
+import { GameState } from "../data/enums/gameState";
+import { LimboState } from "../data/enums/limboState";
 
 export declare interface Room {
   on(event: "close" | "playerJoined", listener: Function): this;
@@ -35,6 +37,8 @@ export class Room extends EventEmitter {
   }
   private PlayerIDtoConnectionIDMap = new Map<number, bigint>();
   public connections: Connection[] = [];
+  public limboIds: number[] = [];
+  public hasHost: boolean = false;
   private internalCode: string;
   public get code(): string {
     return this.internalCode;
@@ -50,6 +54,7 @@ export class Room extends EventEmitter {
   }
   public GameObjects: IGameObject[] = [];
   game?: Game;
+  gameState: GameState = GameState.NotStarted;
   publicity?: Publicity = Publicity.Private;
   setCode(code: string) {
     this.internalCode = code;
@@ -100,20 +105,31 @@ export class Room extends EventEmitter {
     });
   }
   get host(): Connection | undefined {
-    return this.connections.find((con) => con?.isHost);
+    return this.connections.find((con) => con.isHost);
   }
   handlePacket(packet: Subpacket, connection: Connection) {
     switch (packet.type) {
       case "EndGame":
+        this.gameState = GameState.Ended;
+        this.connections.forEach((con) => {
+          con.limbo = LimboState.PreSpawn;
+          delete con.player;
+          con.send(packet);
+          this.limboIds.push(con.ID);
+        });
+        this.connections = [];
+        break;
       case "StartGame":
-        this.connections.forEach((otherClient) => {
-          otherClient.send(packet);
+        this.gameState = GameState.Started;
+
+        this.connections.forEach((con) => {
+          con.send(packet);
         });
         break;
       case "KickPlayer":
       case "RemovePlayer":
-        this.connections.forEach((otherClient) => {
-          otherClient.send(packet);
+        this.connections.forEach((con) => {
+          con.send(packet);
         });
         //TODO: NOT SENT TO PLAYER BEING REMOVED / KICK
         //TODOPRIORITY: CRITICAL
@@ -196,6 +212,7 @@ export class Room extends EventEmitter {
                       <GameDataPlayerData>(<unknown>pd[0])
                     );
                     connection.player.connection = connection;
+                    connection.limbo = LimboState.NotLimbo;
                     let joinRoomEvent = new JoinRoomEvent(
                       connection.player,
                       this
@@ -226,19 +243,20 @@ export class Room extends EventEmitter {
                       }),
                       true
                     );
+                    // connection.player.sendGameDataSync();
+                    if (pd[0].Flags.Impostor) {
+                      connection.player.setImpostor();
+                    } else {
+                      connection.player.setCrewmate();
+                    }
+                    if (pd[0].Flags.Dead) {
+                      connection.player.setDead();
+                    } else {
+                      connection.player.revive();
+                    }
                     this.endPacketGroupBroadcastToAll();
+                    return false;
                   }
-                  if (pd[0].Flags.Impostor) {
-                    connection.player.setImpostor();
-                  } else {
-                    connection.player.setCrewmate();
-                  }
-                  if (pd[0].Flags.Dead) {
-                    connection.player.setDead();
-                  } else {
-                    connection.player.revive();
-                  }
-                  return false;
                 } else {
                   throw new Error("Data recieved for an undefined connection");
                 }
@@ -275,6 +293,9 @@ export class Room extends EventEmitter {
           }
           return true;
         });
+        if (packet.Packets.length == 0) {
+          break;
+        }
         if (packet.RecipientClientID) {
           this.connections
             .filter((conn) => BigInt(conn.ID) == packet.RecipientClientID)
@@ -296,7 +317,10 @@ export class Room extends EventEmitter {
     }
   }
   handleNewConnection(connection: Connection) {
-    if (!this.host) connection.isHost = true;
+    if (!this.host) {
+      connection.isHost = true;
+      this.hasHost = true;
+    }
     this.connections.forEach((conn) => {
       conn.send({
         type: "PlayerJoinedGame",
@@ -307,9 +331,78 @@ export class Room extends EventEmitter {
     });
     this.connections.push(connection);
     connection.on("close", async () => {
-      this.connections.splice(this.connections.indexOf(connection), 1);
+      let cIdx = this.connections.indexOf(connection);
+      if (cIdx >= 0) {
+        this.connections.splice(this.connections.indexOf(connection), 1);
+      }
+
+      if (connection.isHost) {
+        this.hasHost = false;
+      }
+
       if (connection.isHost && this.connections.length > 0) {
         this.connections[0].isHost = true;
+
+        if (
+          this.gameState == GameState.Ended &&
+          this.connections[0].limbo == LimboState.WaitingForHost
+        ) {
+          this.gameState = GameState.NotStarted;
+          this.connections[0].startPacketGroup();
+          this.connections[0].send({
+            type: "JoinedGame",
+            RoomCode: this.code,
+            PlayerClientID: this.connections[0].ID,
+            HostClientID: this.connections[0].ID,
+            OtherPlayers: this.connections
+              .map((con) => BigInt(con.ID))
+              .filter((id) => id != BigInt(this.connections[0].ID)),
+          });
+          this.connections[0].send({
+            type: "AlterGame",
+            RoomCode: this.code,
+            AlterGameTag: 1,
+            IsPublic: !!this.publicity,
+          });
+          this.connections[0].endPacketGroup();
+          this.connections[0].limbo = LimboState.NotLimbo;
+          this.connections
+            .filter((con) => con.ID != this.connections[0].ID)
+            .forEach((recipient) => {
+              recipient.send({
+                type: "PlayerJoinedGame",
+                RoomCode: this.code,
+                PlayerClientID: this.connections[0].ID,
+                HostClientID: this.connections[0].ID,
+              });
+            });
+
+          this.connections
+            .filter(
+              (waitingPlayer) =>
+                waitingPlayer.limbo == LimboState.WaitingForHost
+            )
+            .forEach((waitingPlayer) => {
+              waitingPlayer.startPacketGroup();
+              waitingPlayer.send({
+                type: "JoinedGame",
+                RoomCode: this.code,
+                PlayerClientID: waitingPlayer.ID,
+                HostClientID: this.host!.ID,
+                OtherPlayers: this.connections
+                  .map((otherPlayer) => BigInt(otherPlayer.ID))
+                  .filter((otherId) => otherId != BigInt(waitingPlayer.ID)),
+              });
+              waitingPlayer.send({
+                type: "AlterGame",
+                RoomCode: this.code,
+                AlterGameTag: 1,
+                IsPublic: !!this.publicity,
+              });
+              waitingPlayer.limbo = LimboState.NotLimbo;
+              waitingPlayer.endPacketGroup();
+            });
+        }
       }
       this.connections.forEach((TSconnection) => {
         TSconnection.startPacketGroup();
@@ -322,7 +415,10 @@ export class Room extends EventEmitter {
         });
         TSconnection.endPacketGroup();
       });
-      if (this.connections.length === 0) {
+      if (
+        this.connections.length === 0 &&
+        (this.gameState != GameState.Ended || this.limboIds.length == 0)
+      ) {
         this.close();
       }
     });
