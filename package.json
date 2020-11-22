@@ -2,6 +2,8 @@
   "name": "nodepolus2",
   "version": "1.0.0",
   "description": "",
+  "engines" : {"node" : ">=15.0.0"},
+  "engine-strict" : true,
   "main": "bin/polus.ts",
   "type": "module",
   "scripts": {
