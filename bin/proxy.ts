@@ -1,3 +1,4 @@
+//@ts-ignore
 import udp from "udp-proxy";
 
 import { PacketType } from "../lib/packets/packet";
@@ -21,6 +22,7 @@ UDPProxy.on("message", function (message: any, senderRaw: any) {
     message[0] !== PacketType.AcknowledgementPacket
   )
     console.log(
+      new Date(),
       senderRaw.address + ":" + senderRaw.port + " => S",
       message
         .toString("hex")
@@ -36,6 +38,7 @@ UDPProxy.on("proxyMsg", function (message: any, sender: any, peer: any) {
     message[0] !== PacketType.AcknowledgementPacket
   )
     console.log(
+      new Date(),
       "S => " + peer.address + ":" + peer.port,
       message
         .toString("hex")
@@ -44,8 +47,3 @@ UDPProxy.on("proxyMsg", function (message: any, sender: any, peer: any) {
         .join(" ")
     );
 });
-
-/*
-0100022b0010002a020a00010000070000803f0000803f0000c03f000070410101020100000000010f00000078000000010f
-0100022c0010002a020a00010000070000803f0000803f0000c03f000070410101020100000000010f00000078000000010f
-*/
