@@ -2,7 +2,9 @@
   "name": "nodepolus2",
   "version": "1.0.0",
   "description": "",
-  "engines" : {"node" : ">=15.0.1"},
+  "engines": {
+    "node": ">=15.0.1"
+  },
   "main": "bin/polus.ts",
   "type": "module",
   "scripts": {
