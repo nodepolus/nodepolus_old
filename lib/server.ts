@@ -20,6 +20,8 @@ import {
   RoomListingRequestEvent,
   DisconnectionEvent,
 } from "./events";
+import { GameState } from "./data/enums/gameState";
+import { LimboState } from "./data/enums/limboState";
 
 export interface ServerConfig {
   port?: number;
@@ -77,6 +79,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
       }
     });
     this.sock.bind(this.config.port);
+    console.log(`Server listening on port ${this.config.port}`);
   }
   public close(reason: string | number = 19) {
     return new Promise((resolve) => {
@@ -112,6 +115,8 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
         break;
       case "JoinGame":
         {
+          // TODO: WaitForHost/Rejoin events, or add an `isRejoining` flag to
+          //       the `joinRoomRequest` event
           let joinRoomRequestEvent = new JoinRoomRequestEvent(
             packet.RoomCode,
             connection
@@ -129,7 +134,113 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
           const newRoom = this.rooms.get(packet.RoomCode);
 
           if (newRoom) {
-            connection.moveRoom(newRoom);
+            let state = newRoom.gameState;
+
+            if (state == GameState.Started) {
+              connection.disconnect(
+                new DisconnectReason(DisconnectReasons.GameStarted)
+              );
+            } else if (state == GameState.Ended) {
+              if (connection.room.code != newRoom.code) {
+                // The player was not in the game, so they're not rejoining
+                connection.disconnect(
+                  new DisconnectReason(DisconnectReasons.GameStarted)
+                );
+              } else {
+                newRoom.limboIds.splice(
+                  newRoom.limboIds.indexOf(connection.ID),
+                  1
+                );
+
+                if (!newRoom.hasHost) {
+                  connection.isHost = true;
+                  newRoom.hasHost = true;
+                }
+
+                if (connection.isHost) {
+                  newRoom.connections.push(connection);
+                  newRoom.gameState = GameState.NotStarted;
+                  connection.limbo = LimboState.NotLimbo;
+                  connection.startPacketGroup();
+                  connection.send({
+                    type: "JoinedGame",
+                    RoomCode: newRoom.code,
+                    PlayerClientID: connection.ID,
+                    HostClientID: connection.ID,
+                    OtherPlayers: newRoom.connections
+                      .map((otherPlayer) => BigInt(otherPlayer.ID))
+                      .filter((otherId) => otherId != BigInt(connection.ID)),
+                  });
+                  connection.send({
+                    type: "AlterGame",
+                    RoomCode: newRoom.code,
+                    AlterGameTag: 1,
+                    IsPublic: !!newRoom.publicity,
+                  });
+                  connection.endPacketGroup();
+                  newRoom.connections
+                    .filter((player) => player.limbo == LimboState.NotLimbo)
+                    .filter((player) => player.ID != connection.ID)
+                    .forEach((otherPlayer) => {
+                      otherPlayer.send({
+                        type: "PlayerJoinedGame",
+                        RoomCode: newRoom.code,
+                        PlayerClientID: connection.ID,
+                        HostClientID: connection.ID,
+                      });
+                    });
+
+                  newRoom.connections
+                    .filter(
+                      (waitingPlayer) =>
+                        waitingPlayer.limbo == LimboState.WaitingForHost
+                    )
+                    .forEach((waitingPlayer) => {
+                      waitingPlayer.startPacketGroup();
+                      waitingPlayer.send({
+                        type: "JoinedGame",
+                        RoomCode: newRoom.code,
+                        PlayerClientID: waitingPlayer.ID,
+                        HostClientID: connection.ID,
+                        OtherPlayers: newRoom.connections
+                          .map((otherPlayer) => BigInt(otherPlayer.ID))
+                          .filter(
+                            (otherId) => otherId != BigInt(waitingPlayer.ID)
+                          ),
+                      });
+                      waitingPlayer.send({
+                        type: "AlterGame",
+                        RoomCode: newRoom.code,
+                        AlterGameTag: 1,
+                        IsPublic: !!newRoom.publicity,
+                      });
+                      waitingPlayer.limbo = LimboState.NotLimbo;
+                      waitingPlayer.endPacketGroup();
+                    });
+                } else {
+                  newRoom.connections.push(connection);
+                  connection.limbo = LimboState.WaitingForHost;
+                  connection.send({
+                    type: "WaitingForHost",
+                    RoomCode: newRoom.code,
+                    WaitingClientID: connection.ID,
+                  });
+                  newRoom.connections
+                    .filter((con) => con.limbo == LimboState.NotLimbo)
+                    .filter((con) => con.ID != connection.ID)
+                    .forEach((recipient) => {
+                      recipient.send({
+                        type: "PlayerJoinedGame",
+                        RoomCode: newRoom.code,
+                        PlayerClientID: connection.ID,
+                        HostClientID: newRoom.host!.ID,
+                      });
+                    });
+                }
+              }
+            } else {
+              connection.moveRoom(newRoom);
+            }
           } else {
             connection.disconnect(
               new DisconnectReason(DisconnectReasons.GameNotFound)

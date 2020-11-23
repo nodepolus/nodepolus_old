@@ -30,10 +30,6 @@ const server = new Server({
 // 	freeWeekend: FreeWeekendState.NotFree
 // })
 
-process.stdin.on("data", () => {
-  process.exit(1);
-});
-
 server.on("roomCreated", async (evt: RoomCreationEvent) => {
   console.log("[Event] Server > 'roomCreated'");
   let room = evt.room;
