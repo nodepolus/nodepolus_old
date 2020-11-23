@@ -3758,7 +3758,7 @@
     "spdx-correct" "^3.0.0"
     "spdx-expression-parse" "^3.0.0"
 
-"vec2@^1.6.0":
+"vec2@^1.6.0", "vec2@^1.6.1":
   "integrity" "sha512-6/1i+Z2JSglrBQYCrjogt8f2X3pFXRpFOncMBrUL+T+640+bOBRRTXvZx3HUnaGelioNmfBLUnIIKdqwjO1hHw=="
   "resolved" "https://registry.npmjs.org/vec2/-/vec2-1.6.1.tgz"
   "version" "1.6.1"

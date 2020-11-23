@@ -1,7 +1,8 @@
-import { MapRoom } from "./MapRooms";
+import { MapRoom, Hallway } from "./MapRooms";
 import Game from "./game";
+import StaticPolusData from "../data/mapData/polus";
 
-class BaseMapInstance {
+abstract class BaseMapInstance {
   abstract name: string;
   abstract ID: number;
   abstract rooms: {};
@@ -12,26 +13,25 @@ export class PolusMapInstance extends BaseMapInstance {
   public name: string = "Polus";
   public ID: number = 2;
   public rooms = {
-    Dropship: MapRoom = new MapRoom(this);
-    Electrical: ElectricalRoom = new ElectricalRoom(this);
-    Security: SecurityRoom = new SecurityRoom(this);
-    Storage: MapRoom = new MapRoom(this);
-    Laboratory: PolusLaboratoryRoom = new PolusLaboratoryRoom(this);
-    O2: MapRoom = new MapRoom(this);
-    Communications: CommunicationsRoom = new CommunicationsRoom(this);
-    Office: MapRoom = new MapRoom(this);
-    Specimen: MapRoom = new MapRoom(this);
-    Weapons: MapRoom = new Weapons(this);
-    Admin: MapRoom = new MapRoom(this);
-    Outside: MapRoom = new MapRoom(this);
-    LeftDecontamination: Decontamination = new Decontamination(this);
-    RightDecontamination: Decontamination = new Decontamination(this);
-    O2Hallway: Hallway = new Hallway(this);
-    LeftSpecimenHallway: Hallway = new Hallway(this);
-    RightSpecimenHallway: Hallway = new Hallway(this);
-  }
+    Dropship: new MapRoom(this, StaticPolusData.rooms[15]),
+    Electrical: new ElectricalRoom(this, StaticPolusData.rooms[0]),
+    Security: new SecurityRoom(this, StaticPolusData.rooms[1]),
+    Storage: new MapRoom(this, StaticPolusData.rooms[14]),
+    Laboratory: new PolusLaboratoryRoom(this, StaticPolusData.rooms[13]),
+    O2: new MapRoom(this, StaticPolusData.rooms[3]),
+    Communications: new CommunicationsRoom(this, StaticPolusData.rooms[5]),
+    Office: new MapRoom(this, StaticPolusData.rooms[6]),
+    Specimen: new MapRoom(this, StaticPolusData.rooms[9]),
+    Weapons: new MapRoom(this, StaticPolusData.rooms[4]),
+    Admin: new MapRoom(this, StaticPolusData.rooms[7]),
+    LeftDecontamination: new Decontamination(this, StaticPolusData.rooms[8]),
+    RightDecontamination: new Decontamination(this, StaticPolusData.rooms[12]),
+    O2Hallway: new Hallway(this, StaticPolusData.rooms[2]),
+    LeftSpecimenHallway: new Hallway(this, StaticPolusData.rooms[8]),
+    RightSpecimenHallway: new Hallway(this, StaticPolusData.rooms[10]),
+  };
   constructor(public game: Game) {
-    super(game);  
+    super(game);
   }
 }
 

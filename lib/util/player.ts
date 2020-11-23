@@ -1,4 +1,4 @@
-import { Vector2 } from "../packets/packetElements/vector2";
+import { Vector2 } from "../packets/packetElements/vector";
 import {
   PlayerColor,
   PlayerSkin,
@@ -35,12 +35,13 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
       (GO) => GO.ClientID == BigInt(this.connection?.ID)
     );
   }
+  private int_position: Vector2 = new Vector2(0,0);
+  private int_velocity: Vector2 = new Vector2(0,0);
+  get rawPosition(): Vector2 {
+    return this.int_position;
+  }
   get position(): Vector2 {
     // TODO: do pos handling
-    return new Vector2(0, 0);
-  }
-  get acceleration(): Vector2 {
-    // TODO: do accel handling
     return new Vector2(0, 0);
   }
   private int_color: PlayerColor;

@@ -1,6 +1,6 @@
 import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
-import { Vector2 } from "../../../packetElements/vector2";
+import { Vector2 } from "../../../packetElements/vector";
 
 export interface SnapToPacket {
   Position: Vector2;
