@@ -10,7 +10,11 @@ import SystemType from "../../packets/packetElements/systemType";
 >>>>>>> fixed a few basic issues to not cause merge issues in the future
 =======
 import { SystemType } from "../../packets/packetElements/systemType";
+<<<<<<< HEAD
 >>>>>>> rebase & minor fixes
+=======
+import { Door } from "../../util/DoorEvent";
+>>>>>>> Continuing work on mapdata
 // import { PolusVents } from "../enums/playerEnums";
 
 export enum DoorOrientation {
@@ -28,6 +32,7 @@ export interface StaticRoomData {
   name: string;
   id: SystemType;
   doors: number[];
+  vents: number[];
   collision: RawStaticColliderData[];
   boundaries: RawStaticColliderData;
 }
@@ -127,7 +132,7 @@ export interface RawStaticBoxColliderData {
 }
 
 export interface StaticMapData {
-  doors: StaticDoorData[];
+  doors: Door[];
   rooms: StaticRoomData[];
   vents: StaticVentData[];
   tasks: StaticTaskData[];

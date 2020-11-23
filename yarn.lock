@@ -3540,6 +3540,19 @@
     "spdx-correct" "^3.0.0"
     "spdx-expression-parse" "^3.0.0"
 
+<<<<<<< HEAD
+=======
+"vec2@^1.6.0", "vec2@^1.6.1":
+  "integrity" "sha512-6/1i+Z2JSglrBQYCrjogt8f2X3pFXRpFOncMBrUL+T+640+bOBRRTXvZx3HUnaGelioNmfBLUnIIKdqwjO1hHw=="
+  "resolved" "https://registry.npmjs.org/vec2/-/vec2-1.6.1.tgz"
+  "version" "1.6.1"
+
+"vec2@~1.3.4":
+  "integrity" "sha1-9xaEZkkkPcfZE2hC1+QqaU5XeaY="
+  "resolved" "https://registry.npmjs.org/vec2/-/vec2-1.3.4.tgz"
+  "version" "1.3.4"
+
+>>>>>>> Continuing work on mapdata
 "wcwidth@^1.0.1":
   "integrity" "sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g="
   "resolved" "https://registry.npmjs.org/wcwidth/-/wcwidth-1.0.1.tgz"

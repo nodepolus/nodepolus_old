@@ -72,10 +72,7 @@ export interface DecontaminationAmount {
   action: DecontaminationAction;
 }
 
-export interface RepairSystemPacket {
-  System: SystemType;
-  RepairerNetID: bigint;
-  RepairAmount:
+export type RepairAmount =
     | RepairLightsAmount
     | QueueMedbayScan
     | RepairO2Amount
@@ -85,7 +82,12 @@ export interface RepairSystemPacket {
     | SabotageSystemAmount
     | NormalCommunicationsAmount
     | HqCommunicationsAmount
-    | DecontaminationAmount;
+    | DecontaminationAmount
+
+export interface RepairSystemPacket {
+  System: SystemType;
+  RepairerNetID: bigint;
+  RepairAmount: RepairAmount;
 }
 
 export const RepairSabotage: PacketHandler<RepairSystemPacket> = {

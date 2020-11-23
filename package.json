@@ -20,7 +20,8 @@
   "license": "ISC",
   "dependencies": {
     "public-ip": "^4.0.2",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "vec2": "^1.6.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.6",

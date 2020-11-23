@@ -50,7 +50,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   room: Room;
   limbo: LimboState = LimboState.PreSpawn;
   isHost?: boolean;
-  private inGroup: boolean = false;
+  public inGroup: boolean = false;
   private helloRecieved: boolean = false;
   private groupArr: UnreliablePacketPacket[] = [];
   private packetGroupReliability: PacketType = PacketType.ReliablePacket;

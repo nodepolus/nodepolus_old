@@ -1,4 +1,5 @@
 import { PolusBuffer } from "../../util/polusBuffer";
+import Vec2 from "vec2";
 
 export interface Position2 {
   X: number;
@@ -46,18 +47,20 @@ export class Vector3 {
   }
 }
 
-export class Vector2 {
-  constructor(public X: number = 0, public Y: number = 0) {}
+export class Vector2 extends Vec2 {
+  constructor(public x: number = 0, public y: number = 0) {
+    super(x, y);
+  }
 
   parse(buffer: PolusBuffer): Vector2 {
-    this.X = lerp(-40, 40, buffer.readU16() / 65535);
-    this.Y = lerp(-40, 40, buffer.readU16() / 65535);
+    this.x = lerp(-40, 40, buffer.readU16() / 65535);
+    this.y = lerp(-40, 40, buffer.readU16() / 65535);
     return this;
   }
   serialize(): PolusBuffer {
     var buf = new PolusBuffer(4);
-    buf.writeU16(unlerp(-40, 40, this.X) * 65535.0);
-    buf.writeU16(unlerp(-40, 40, this.Y) * 65535.0);
+    buf.writeU16(unlerp(-40, 40, this.x) * 65535.0);
+    buf.writeU16(unlerp(-40, 40, this.y) * 65535.0);
     return buf;
   }
 }
