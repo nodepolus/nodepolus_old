@@ -2,7 +2,7 @@ import { StaticMapData, DoorOrientation } from "./types";
 import { Vector2 } from "../../packets/packetElements/vector";
 import { loadColliders } from "./functions";
 import { SystemType } from "../../packets/packetElements/systemType";
-import { Door } from "../../util/DoorEvent";
+import { Door } from "../../util/MapRooms";
 // import Polygon from "polygon";
 
 let StaticData: StaticMapData = {
