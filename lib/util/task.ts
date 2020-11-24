@@ -1,7 +1,7 @@
 import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 import { Room } from "./room";
 import StaticPolusData from "../data/mapData/polus"
-import { StaticTaskData, Collider, TaskLength } from "../data/mapData/types";
+import { Collider, TaskLength } from "../data/mapData/types";
 
 type TaskEvents = Events & {
   completed: () => Promise<void>;

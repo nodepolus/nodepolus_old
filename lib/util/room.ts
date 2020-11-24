@@ -8,7 +8,7 @@ import { IGameObject } from "./gameObject";
 import { GameDataPacketType } from "../packets/subpackets/gameData";
 
 import { addr2str } from "./misc";
-import { RPCPacketType, RPC } from "../packets/subpackets/gameDataPackets/rpc";
+import { RPCPacketType } from "../packets/subpackets/gameDataPackets/rpc";
 import { DisconnectReason } from "../packets/packetElements/disconnectReason";
 import { PolusBuffer } from "./polusBuffer";
 import { DataPacket } from "../packets/subpackets/gameDataPackets/data";
@@ -299,7 +299,7 @@ export class Room extends AsyncEventEmitter<RoomEvents> {
                     connection.player.setSkin(Number(pd[0].SkinID));
                     connection.player.setTasks(
                       pd[0].Tasks.map((taskData) => {
-                        let t = new Task(Number(taskData.TaskID));
+                        let t = new Task(Number(taskData.TaskID), this);
                         if (taskData.TaskCompleted) {
                           t.Complete();
                         } else {
