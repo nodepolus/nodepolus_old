@@ -14,6 +14,8 @@ import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import { RPCPacketType } from "../packets/subpackets/gameDataPackets/rpc";
 import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
 
+import { Packet as Subpacket } from "../packets/unreliablePacket";
+
 enum DeathType {
   Murdered = 0x00,
   Exiled = 0x01,
@@ -35,20 +37,25 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
       (GO) => GO.ClientID == BigInt(this.connection?.ID)
     );
   }
-  private int_position: Vector2 = new Vector2(0,0);
-  private int_velocity: Vector2 = new Vector2(0,0);
-  private positionSetTime: number|undefined;
+  private int_position: Vector2 = new Vector2(0, 0);
+  private int_velocity: Vector2 = new Vector2(0, 0);
+  private positionSetTime: number | undefined;
   get rawPosition(): Vector2 {
     return this.int_position;
   }
   get position(): Vector2 {
-    if(this.positionSetTime == undefined) {
-      return this.int_position
+    if (this.positionSetTime == undefined) {
+      return this.int_position;
     }
-    let c = new Vector2(this.int_position.x, this.int_position.y)
+    let c = new Vector2(this.int_position.x, this.int_position.y);
     c.x += this.int_velocity.x * ((Date.now() - this.positionSetTime) / 1000);
     c.y += this.int_velocity.y * ((Date.now() - this.positionSetTime) / 1000);
     return c;
+  }
+  private int_relative_to_POV: Record<string, Player> = {};
+  private int_fromPOV: Connection | undefined;
+  get isFromPOV() {
+    return !!this.int_fromPOV;
   }
   private int_color: PlayerColor;
   get color(): PlayerColor {
@@ -130,6 +137,74 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     });
   }
 
+  private broadcastToAll(packet: Subpacket) {
+    if (!this.connection) return;
+
+    if (this.isFromPOV) {
+      return this.int_fromPOV?.send(packet);
+    }
+
+    this.connection.room.connections.forEach((con) => {
+      con.send(packet);
+    });
+  }
+
+  /**
+   * Returns a *special* clone of the current Player instance to include different states as to be computed from the specified connection's Point of view.
+   * @param connection
+   */
+  fromPOV(connection: Connection) {
+    if (this.isFromPOV) return;
+
+    if (this.int_relative_to_POV.hasOwnProperty(connection.ID.toString())) {
+      return this.int_relative_to_POV[connection.ID.toString()];
+    }
+
+    const relativePlayer = new Player({
+      PlayerID: this.int_ID as number,
+      Color: BigInt(this.int_color),
+      HatID: BigInt(this.int_hat),
+      Flags: {
+        Dead: !this.int_isAlive,
+        Impostor: this.int_isImpostor,
+        Disconnected: false,
+      },
+      PlayerName: this.int_name,
+      PetID: BigInt(this.int_pet),
+      SkinID: BigInt(this.int_skin),
+      Tasks: this.int_tasks.map((t) => {
+        return { TaskID: BigInt(t.ID), TaskCompleted: t.complete };
+      }),
+      type: "GameDataPlayerData",
+    });
+    relativePlayer.int_fromPOV = connection;
+    relativePlayer.connection = this.connection;
+
+    this.int_relative_to_POV[connection.ID.toString()] = relativePlayer;
+
+    return relativePlayer;
+  }
+
+  /**
+   * Removes any POV for this Player from the specified connection if it exists.
+   * **Important:** It currently does not update the player so POV's are actually kept.
+   * @param connection
+   */
+  resetPOV(connection: Connection) {
+    if (this.isFromPOV) return;
+    if (this.int_relative_to_POV.hasOwnProperty(connection.ID.toString())) {
+      delete this.int_relative_to_POV[connection.ID.toString()];
+    }
+  }
+
+  /**
+   * Like `resetPOV()` but removes all POV for any connection.
+   */
+  resetAllPOV() {
+    if (this.isFromPOV) return;
+    this.int_relative_to_POV = {};
+  }
+
   enterVent() {}
 
   sendGameDataSync() {
@@ -158,8 +233,8 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
         return { TaskID: BigInt(t.ID), TaskCompleted: t.complete };
       }),
     };
-    console.log(thisPlayerData)
-    this.connection?.room.broadcastToAll({
+    console.log(thisPlayerData);
+    this.broadcastToAll({
       type: "GameData",
       RoomCode: this.connection.room.code,
       Packets: [
@@ -185,41 +260,44 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (this.int_name != playerName) {
       this.int_name = playerName;
       //TODO: Emit event 'NameChanged':NameChangedEvent
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetName,
-            Packet: {
-              Name: this.int_name,
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetName,
+              Packet: {
+                Name: this.int_name,
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
     }
   }
 
   setColor(playerColor: PlayerColor) {
+    console.log("SETTING COLOR FOR PLAYER: ", this.name, playerColor);
     if (this.int_color != playerColor) {
       this.int_color = playerColor;
       //TODO: Emit event 'ColorChanged':ColorChangedEvent
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetColor,
-            Packet: {
-              Color: this.int_color,
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetColor,
+              Packet: {
+                Color: this.int_color,
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
     }
   }
 
@@ -227,20 +305,21 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (playerHat != this.int_hat) {
       this.int_hat = playerHat;
       //TODO: Emit event 'HatChanged':HatChangedEvent
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetHat,
-            Packet: {
-              Hat: this.int_hat,
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetHat,
+              Packet: {
+                Hat: this.int_hat,
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
     }
   }
 
@@ -248,20 +327,21 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (this.int_pet != playerPet) {
       this.int_pet = playerPet;
       //TODO: Emit event 'PetChanged':PetChangedEvent
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetPet,
-            Packet: {
-              PetID: this.int_pet,
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetPet,
+              Packet: {
+                PetID: this.int_pet,
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
     }
   }
 
@@ -269,20 +349,21 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (playerSkin != this.int_skin) {
       this.int_skin = playerSkin;
       //TOOD: Emit event 'SkinChanged':SkinChangedEvent
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetSkin,
-            Packet: {
-              Skin: this.int_skin,
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetSkin,
+              Packet: {
+                Skin: this.int_skin,
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
     }
   }
 
@@ -293,36 +374,38 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
       if (!doNotCreateGroup) {
         this.connection?.room.startPacketGroupBroadcastToAll();
       }
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetTasks,
-            Packet: {
-              Tasks: this.int_tasks.map((task) => task.ID),
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetTasks,
+              Packet: {
+                Tasks: this.int_tasks.map((task) => task.ID),
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
       this.int_tasks.forEach((task, idx) => {
         if (task.complete) {
-          this.connection?.room.broadcastToAll({
-            type: "GameData",
-            RoomCode: this.connection.room.code,
-            Packets: [
-              {
-                type: 2,
-                NetID: this.connection.netIDs[0],
-                RPCFlag: RPCPacketType.CompleteTask,
-                Packet: {
-                  TaskIndex: idx,
+          if (this.connection)
+            this.broadcastToAll({
+              type: "GameData",
+              RoomCode: this.connection.room.code,
+              Packets: [
+                {
+                  type: 2,
+                  NetID: this.connection.netIDs[0],
+                  RPCFlag: RPCPacketType.CompleteTask,
+                  Packet: {
+                    TaskIndex: idx,
+                  },
                 },
-              },
-            ],
-          });
+              ],
+            });
         }
       });
       if (!doNotCreateGroup) {
@@ -347,20 +430,21 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (!this.int_isImpostor) {
       this.int_isImpostor = true;
       //TODO: Emit event 'impostor':null
-      this.connection?.room.broadcastToAll({
-        type: "GameData",
-        RoomCode: this.connection.room.code,
-        Packets: [
-          {
-            type: 2,
-            NetID: this.connection.netIDs[0],
-            RPCFlag: RPCPacketType.SetInfected,
-            Packet: {
-              InfectedPlayerIDs: [BigInt(this.ID)],
+      if (this.connection)
+        this.broadcastToAll({
+          type: "GameData",
+          RoomCode: this.connection.room.code,
+          Packets: [
+            {
+              type: 2,
+              NetID: this.connection.netIDs[0],
+              RPCFlag: RPCPacketType.SetInfected,
+              Packet: {
+                InfectedPlayerIDs: [BigInt(this.ID)],
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
     }
   }
 
