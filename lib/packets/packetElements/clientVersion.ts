@@ -1,10 +1,14 @@
 export class ClientVersion {
-  constructor(
-    public readonly year: number,
-    public readonly month: number,
-    public readonly day: number,
-    public readonly revision: number
-  ) {}
+  public readonly year: number;
+  public readonly month: number;
+  public readonly day: number;
+  public readonly revision: number;
+  constructor(year: number, month: number, day: number, revision: number) {
+    this.year = year;
+    this.month = month;
+    this.day = day;
+    this.revision = revision;
+  }
   static parse(version: number): ClientVersion {
     let year = Math.floor(version / 25000);
     version %= 25000;
@@ -20,7 +24,7 @@ export class ClientVersion {
       this.year * 25000 + this.month * 1800 + this.day * 50 + this.revision
     );
   }
-  matches(otherVersion: ClientVersion): boolean {
+  equals(otherVersion: ClientVersion): boolean {
     return (
       this.year == otherVersion.year &&
       this.month == otherVersion.month &&

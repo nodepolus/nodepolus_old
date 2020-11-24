@@ -57,7 +57,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   unacknowledgedPackets: Map<number, number> = new Map();
   private TEMPDONTUSE: boolean = false;
   public isVersionSupported(): boolean {
-    return SupportedVersions.some((v) => this.clientVersion?.matches(v));
+    return SupportedVersions.some((v) => this.clientVersion?.equals(v));
   }
   constructor(
     public address: RemoteInfo,
