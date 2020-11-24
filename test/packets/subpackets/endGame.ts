@@ -22,7 +22,7 @@ test("endGame should serialize packet", (t) => {
       room
     );
 
-    t.deepEqual(data.buf, Buffer.from([0x00, 0x00, 0x00, 0x00, v, 0x00]));
+    t.deepEqual(data.buf, Buffer.from([0x00, 0x00, 0x00, 0x80, v, 0x00]));
   }
 });
 

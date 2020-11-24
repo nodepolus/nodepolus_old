@@ -1,99 +1,71 @@
-import { PolusBuffer } from "../../util/polusBuffer";
-
-class RoomCode {
-  V2Int: number[] = [
-    25,
-    21,
-    19,
-    10,
-    8,
-    11,
-    12,
-    13,
-    22,
-    15,
-    16,
-    6,
-    24,
-    23,
-    18,
-    7,
-    0,
-    3,
-    9,
-    4,
-    14,
-    20,
-    1,
-    2,
-    5,
-    17,
+export class RoomCode {
+  // prettier-ignore
+  static readonly CharSet: number[] = [
+    25, 21, 19, 10, 8, 11, 12, 13, 22, 15, 16, 6, 24, 23, 18, 7, 0, 3, 9, 4, 14, 20, 1, 2, 5, 17
   ];
-  V2String: string = "QWXRTYLPESDFGHUJKZOCVBINMA";
+  static readonly CharMap: string = "QWXRTYLPESDFGHUJKZOCVBINMA";
 
-  stringToIntV1(str: string): number {
-    return new PolusBuffer(
-      str.split("").map((char) => char.charCodeAt(0))
-    ).read32();
+  static encode(code: string): number {
+    code = code.toUpperCase();
+
+    if (code.length == 4) {
+      return RoomCode.encodeV1(code);
+    }
+
+    if (code.length == 6) {
+      return RoomCode.encodeV2(code);
+    }
+
+    throw new TypeError(
+      "Invalid room code length, expected 4 or 6 characters: " + code
+    );
   }
 
-  stringToIntV2(input: string): number {
-    const a = this.V2Int[input.charCodeAt(0) - 65];
-    const b = this.V2Int[input.charCodeAt(1) - 65];
-    const c = this.V2Int[input.charCodeAt(2) - 65];
-    const d = this.V2Int[input.charCodeAt(3) - 65];
-    const e = this.V2Int[input.charCodeAt(4) - 65];
-    const f = this.V2Int[input.charCodeAt(5) - 65];
+  static encodeV1(code: string): number {
+    let buf = Buffer.alloc(4);
+
+    buf.write(code);
+
+    return buf.readInt32LE();
+  }
+
+  static encodeV2(code: string): number {
+    const a = RoomCode.CharSet[code.charCodeAt(0) - 65];
+    const b = RoomCode.CharSet[code.charCodeAt(1) - 65];
+    const c = RoomCode.CharSet[code.charCodeAt(2) - 65];
+    const d = RoomCode.CharSet[code.charCodeAt(3) - 65];
+    const e = RoomCode.CharSet[code.charCodeAt(4) - 65];
+    const f = RoomCode.CharSet[code.charCodeAt(5) - 65];
 
     const one = (a + 26 * b) & 0x3ff;
     const two = c + 26 * (d + 26 * (e + 26 * f));
 
-    var n = Math.floor(one | ((two << 10) & 0x3ffffc00) | 0x80000000);
-    if (n == -2147483648) {
-      return 0;
-    } else {
-      return n;
-    }
+    return one | ((two << 10) & 0x3ffffc00) | 0x80000000;
   }
 
-  intToStringV1(int: number): string {
-    const buf = new PolusBuffer(4);
-    buf.write32(int);
-    return buf.readBytes(4).toString();
+  static decode(id: number): string {
+    return id < 0 ? RoomCode.decodeV2(id) : RoomCode.decodeV1(id);
   }
 
-  intToStringV2(input: number): string {
-    const a = input & 0x3ff;
-    const b = (input >> 10) & 0xfffff;
+  static decodeV1(id: number): string {
+    const buf = Buffer.alloc(4);
+
+    buf.writeInt32LE(id);
+
+    return buf.toString();
+  }
+
+  static decodeV2(id: number): string {
+    let a = id & 0x3ff;
+    let b = (id >> 10) & 0xfffff;
+
     return [
-      this.V2String[Math.floor(a % 26)],
-      this.V2String[Math.floor(a / 26)],
-      this.V2String[Math.floor(b % 26)],
-      this.V2String[Math.floor((b / 26) % 26)],
-      this.V2String[Math.floor((b / 26 ** 2) % 26)],
-      this.V2String[Math.floor((b / 26 ** 3) % 26)],
+      RoomCode.CharMap[Math.floor(a % 26)],
+      RoomCode.CharMap[Math.floor(a / 26)],
+      RoomCode.CharMap[Math.floor(b % 26)],
+      RoomCode.CharMap[Math.floor((b /= 26) % 26)],
+      RoomCode.CharMap[Math.floor((b /= 26) % 26)],
+      RoomCode.CharMap[Math.floor((b / 26) % 26)],
     ].join("");
   }
-
-  stringToInt(str: string): number {
-    if (str.length == 4) {
-      return this.stringToIntV1(str);
-    }
-    if (str.length == 6) {
-      return this.stringToIntV2(str);
-    }
-    throw new TypeError("Room Code (" + str + ") length not 4 or 6.");
-  }
-
-  intToString(int: number, ver: number = 2): string {
-    if (ver == 1) {
-      return this.intToStringV1(int);
-    }
-    if (ver == 2) {
-      return this.intToStringV2(int);
-    }
-    throw new TypeError("Integer Version (" + ver + ") length not 1 or 2.");
-  }
 }
-
-export const roomCode = new RoomCode();
