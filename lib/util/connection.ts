@@ -27,6 +27,7 @@ import {
 } from "../events";
 import { LimboState } from "../data/enums/limboState";
 import { ClientVersion } from "../packets/packetElements/clientVersion";
+import { SupportedVersions } from "./supportedVersions";
 
 let nullRoom = new Room();
 
@@ -55,18 +56,8 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   private packetGroupReliability: PacketType = PacketType.ReliablePacket;
   unacknowledgedPackets: Map<number, number> = new Map();
   private TEMPDONTUSE: boolean = false;
-  private static internalSupportedVersions: ClientVersion[] = [
-    new ClientVersion(2020, 9, 7, 0),
-    new ClientVersion(2020, 10, 8, 0),
-    new ClientVersion(2020, 11, 17, 0),
-  ];
-  public static get supportedVersions(): ClientVersion[] {
-    return Connection.internalSupportedVersions;
-  }
   public isVersionSupported(): boolean {
-    return Connection.internalSupportedVersions.some((v) =>
-      this.clientVersion?.matches(v)
-    );
+    return SupportedVersions.some((v) => this.clientVersion?.matches(v));
   }
   constructor(
     public address: RemoteInfo,

@@ -1,9 +1,9 @@
 export class ClientVersion {
   constructor(
-    public year: number,
-    public month: number,
-    public day: number,
-    public revision: number
+    public readonly year: number,
+    public readonly month: number,
+    public readonly day: number,
+    public readonly revision: number
   ) {}
   static parse(version: number): ClientVersion {
     let year = Math.floor(version / 25000);
