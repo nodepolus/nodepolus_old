@@ -3,7 +3,7 @@ import {
   DisconnectReasons,
 } from "../packetElements/disconnectReason";
 import { PolusBuffer } from "../../util/polusBuffer";
-import { roomCode } from "../packetElements/roomCode";
+import { RoomCode } from "../packetElements/roomCode";
 import { Room } from "../../util/room";
 import { PacketHandler } from "../packet";
 
@@ -27,7 +27,7 @@ export type RemovePlayerPacket = RemovePlayerProperPacket | LateRejectionPacket;
 export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
   parse(packet: PolusBuffer, room: Room): RemovePlayerPacket {
     if (packet.dataRemaining().length >= 8) {
-      let code = roomCode.intToString(packet.read32());
+      let code = RoomCode.decode(packet.read32());
       let PlayerClientID = packet.readU32();
       let HostClientID = packet.readU32();
       let DisconnectReasonts;
@@ -42,7 +42,7 @@ export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
         DisconnectReason: DisconnectReasonts,
       };
     } else {
-      let code = roomCode.intToString(packet.read32());
+      let code = RoomCode.decode(packet.read32());
       let PlayerClientID = packet.readVarInt();
       packet.readU8();
       return {
@@ -57,7 +57,7 @@ export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
   serialize(packet: RemovePlayerPacket) {
     if (packet.type == "RemovePlayer") {
       var buf = new PolusBuffer(12);
-      buf.write32(roomCode.stringToInt(packet.RoomCode));
+      buf.write32(RoomCode.encode(packet.RoomCode));
       buf.writeU32(packet.PlayerClientID);
       buf.writeU32(packet.HostClientID);
       if (packet.DisconnectReason) {
@@ -67,7 +67,7 @@ export const RemovePlayer: PacketHandler<RemovePlayerPacket> = {
     }
     if (packet.type == "LateRejection") {
       var buf = new PolusBuffer();
-      buf.write32(roomCode.stringToInt(packet.RoomCode));
+      buf.write32(RoomCode.encode(packet.RoomCode));
       buf.writeVarInt(packet.PlayerClientID);
       buf.writeU8(DisconnectReasons.GameFull);
       return buf;
