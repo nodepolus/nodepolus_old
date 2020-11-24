@@ -1,13 +1,13 @@
 import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 import { StaticRoomData } from "../data/mapData/types";
-import { Level } from "./level";
+import { Game } from "./game";
 
 export type LevelRoomEvents = Events & {
   
 }
 
 export class LevelRoom extends AsyncEventEmitter<LevelRoomEvents> {
-  constructor(staticRoomData: StaticRoomData, public level: Level) {
+  constructor(staticRoomData: StaticRoomData, public game: Game) {
     super()
   }
 }

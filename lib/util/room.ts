@@ -2,7 +2,6 @@ import { EventEmitter } from "events";
 import * as randomstring from "randomstring";
 
 import { Connection } from "./connection";
-import Game from "./game";
 import { Publicity } from "../data/enums/publicity";
 import { RoomSettings } from "../packets/packetElements/roomSettings";
 import { Packet as Subpacket } from "../packets/unreliablePacket";
@@ -22,6 +21,8 @@ import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import { Task } from "./task";
 import { GameState } from "../data/enums/gameState";
 import { LimboState } from "../data/enums/limboState";
+//@ts-ignore
+import { Game } from "./game";
 
 export declare interface Room {
   on(event: "close" | "playerJoined", listener: Function): this;

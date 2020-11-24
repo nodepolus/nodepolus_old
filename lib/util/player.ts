@@ -37,12 +37,18 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
   }
   private int_position: Vector2 = new Vector2(0,0);
   private int_velocity: Vector2 = new Vector2(0,0);
+  private positionSetTime: number|undefined;
   get rawPosition(): Vector2 {
     return this.int_position;
   }
   get position(): Vector2 {
-    // TODO: do pos handling
-    return new Vector2(0, 0);
+    if(this.positionSetTime == undefined) {
+      return this.int_position
+    }
+    let c = new Vector2(this.int_position.x, this.int_position.y)
+    c.x += this.int_velocity.x * ((Date.now() - this.positionSetTime) / 1000);
+    c.y += this.int_velocity.y * ((Date.now() - this.positionSetTime) / 1000);
+    return c;
   }
   private int_color: PlayerColor;
   get color(): PlayerColor {
