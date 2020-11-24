@@ -26,7 +26,7 @@ import {
   CustomTransformData,
   PolusDoorSystem,
 } from "./componentTypes";
-import { Vector2 } from "./vector2";
+import { Vector2 } from "./vector";
 
 //stolen from SO
 function arraysEqual(a: any[], b: any[]) {

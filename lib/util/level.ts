@@ -1,24 +1,15 @@
 import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
-import StaticPolusData from '../data/mapData/polus'
 import { Room } from "./room";
 import { AmongUsMap } from "../data/enums/amongUsMap";
 import { StaticMapData, Collider, StaticDoorData, DoorOrientation } from "../data/mapData/types";
-<<<<<<< HEAD
-import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
-import { IGameObject } from "./gameObject";
-import { SystemType } from "../packets/packetElements/systemType";
 import { ElectricalSabotageSystem } from "./sabotageSystems/ElectricalSabotageSystem";
 import { LevelRoom } from "./levelRoom";
-import { Vent } from "../data/enums/playerEnums";
-=======
-import { LevelRoom } from "./levelRoom";
-import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
-import { IGameObject } from "./gameObject";
-import { SystemType } from "../packets/packetElements/systemType";
 import { Vent } from "./vent";
-import { ElectricalSabotageSystem } from "./sabotageSystems/ElectricalSabotageSystem";
+import StaticPolusData from "../data/mapData/polus"
+import { SystemType } from "../packets/packetElements/systemType";
+import { ObjectType } from "../packets/subpackets/gameDataPackets/spawn";
+import { IGameObject } from "./gameObject";
 
->>>>>>> updates
 type LevelEvents = Events & {
   
 }

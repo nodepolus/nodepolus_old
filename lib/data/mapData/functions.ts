@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { RawStaticColliderData } from "./types";
+import { RawStaticColliderData, Collider } from "./types";
 
 export function loadColliders(name:string) {
   let ds:string;

@@ -152,6 +152,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
         return { TaskID: BigInt(t.ID), TaskCompleted: t.complete };
       }),
     };
+    console.log(thisPlayerData)
     this.connection?.room.broadcastToAll({
       type: "GameData",
       RoomCode: this.connection.room.code,
