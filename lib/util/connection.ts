@@ -7,7 +7,10 @@ import {
   ParsedPacketData,
 } from "../packets/packet";
 import { Player } from "./player";
-import { DisconnectReason } from "../packets/packetElements/disconnectReason";
+import {
+  DisconnectReason,
+  DisconnectReasons,
+} from "../packets/packetElements/disconnectReason";
 import { PolusBuffer } from "./polusBuffer";
 import { HelloPacket } from "../packets/helloPacket";
 import { Room } from "./room";
@@ -23,6 +26,7 @@ import {
   JoinRoomRequestEvent,
 } from "../events";
 import { LimboState } from "../data/enums/limboState";
+import { ClientVersion } from "../packets/packetElements/clientVersion";
 
 let nullRoom = new Room();
 
@@ -39,7 +43,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   public netIDs: bigint[] = [];
   player?: Player;
   nonce: number = 1;
-  clientVersion?: number;
+  clientVersion?: ClientVersion;
   hazelVersion?: number;
   name?: string;
   room: Room;
@@ -51,6 +55,19 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   private packetGroupReliability: PacketType = PacketType.ReliablePacket;
   unacknowledgedPackets: Map<number, number> = new Map();
   private TEMPDONTUSE: boolean = false;
+  private static internalSupportedVersions: ClientVersion[] = [
+    new ClientVersion(2020, 9, 7, 0),
+    new ClientVersion(2020, 10, 8, 0),
+    new ClientVersion(2020, 11, 17, 0),
+  ];
+  public static get supportedVersions(): ClientVersion[] {
+    return Connection.internalSupportedVersions;
+  }
+  public isVersionSupported(): boolean {
+    return Connection.internalSupportedVersions.some((v) =>
+      this.clientVersion?.matches(v)
+    );
+  }
   constructor(
     public address: RemoteInfo,
     private socket: Socket,
@@ -83,6 +100,12 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
       this.name = (<HelloPacket>packet).Data.Name;
       this.clientVersion = (<HelloPacket>packet).Data.ClientVersion;
       this.hazelVersion = (<HelloPacket>packet).Data.HazelVersion;
+      if (!this.isVersionSupported()) {
+        this.disconnect(
+          new DisconnectReason(DisconnectReasons.IncorrectVersion)
+        );
+        return;
+      }
       this.on("message", async (msg: Buffer) => {
         // console.log(this.ID, msg.toString('hex'))
         const parsed = new Packet(this.isToClient).parse(
