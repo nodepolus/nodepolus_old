@@ -7,7 +7,10 @@ import {
   ParsedPacketData,
 } from "../packets/packet";
 import { Player } from "./player";
-import { DisconnectReason } from "../packets/packetElements/disconnectReason";
+import {
+  DisconnectReason,
+  DisconnectReasons,
+} from "../packets/packetElements/disconnectReason";
 import { PolusBuffer } from "./polusBuffer";
 import { HelloPacket } from "../packets/helloPacket";
 import { Room } from "./room";
@@ -23,6 +26,8 @@ import {
   JoinRoomRequestEvent,
 } from "../events";
 import { LimboState } from "../data/enums/limboState";
+import { ClientVersion } from "../packets/packetElements/clientVersion";
+import { SupportedVersions } from "./supportedVersions";
 
 let nullRoom = new Room();
 
@@ -39,7 +44,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   public netIDs: bigint[] = [];
   player?: Player;
   nonce: number = 1;
-  clientVersion?: number;
+  clientVersion?: ClientVersion;
   hazelVersion?: number;
   name?: string;
   room: Room;
@@ -51,6 +56,9 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
   private packetGroupReliability: PacketType = PacketType.ReliablePacket;
   unacknowledgedPackets: Map<number, number> = new Map();
   private TEMPDONTUSE: boolean = false;
+  public isVersionSupported(): boolean {
+    return SupportedVersions.some((v) => this.clientVersion?.equals(v));
+  }
   constructor(
     public address: RemoteInfo,
     private socket: Socket,
@@ -83,6 +91,12 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
       this.name = (<HelloPacket>packet).Data.Name;
       this.clientVersion = (<HelloPacket>packet).Data.ClientVersion;
       this.hazelVersion = (<HelloPacket>packet).Data.HazelVersion;
+      if (!this.isVersionSupported()) {
+        this.disconnect(
+          new DisconnectReason(DisconnectReasons.IncorrectVersion)
+        );
+        return;
+      }
       this.on("message", async (msg: Buffer) => {
         // console.log(this.ID, msg.toString('hex'))
         const parsed = new Packet(this.isToClient).parse(
