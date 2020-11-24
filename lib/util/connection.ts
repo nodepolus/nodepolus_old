@@ -28,6 +28,8 @@ import {
 import { LimboState } from "../data/enums/limboState";
 import { ClientVersion } from "../packets/packetElements/clientVersion";
 import { SupportedVersions } from "./supportedVersions";
+import { ChatEvent } from "../events/chatEvent";
+import { ChatNoteEvent } from "../events/chatNoteEvent";
 
 let nullRoom = new Room();
 
@@ -38,6 +40,8 @@ type ConnectionEvents = Events & {
   close: () => Promise<void>;
   joinRoomRequest: (event: JoinRoomRequestEvent) => Promise<void>;
   joinRoom: (event: JoinRoomEvent) => Promise<void>;
+  chat: (event: ChatEvent) => Promise<void>;
+  chatNote: (event: ChatNoteEvent) => Promise<void>;
 };
 
 export class Connection extends AsyncEventEmitter<ConnectionEvents> {
@@ -71,7 +75,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
 
     this.on("message", async (msg: Buffer) => {
       if (msg[0] != 0x0a && msg[0] != 0x0c) {
-        console.log(msg.toString("hex"));
+        // console.log(msg.toString("hex"));
       }
       if (this.TEMPDONTUSE) return;
       this.TEMPDONTUSE = true;
