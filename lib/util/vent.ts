@@ -1,6 +1,6 @@
 import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 import { StaticVentData } from "../data/mapData/types";
-import { Game } from "./game";
+import { Game } from "./Game";
 
 export type VentEvents = Events & {};
 

@@ -1,6 +1,6 @@
 import { AsyncEventEmitter, Events } from "../asyncEventEmitter";
 import { SystemType } from "../../packets/packetElements/systemType";
-import { Game } from "../game";
+import { Game } from "../Game";
 import { AmongUsMap } from "../../data/enums/amongUsMap";
 import { Player } from "../player";
 

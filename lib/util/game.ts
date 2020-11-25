@@ -23,7 +23,7 @@ type DoorEvents = Events & {
 
 }
 
-class Door extends AsyncEventEmitter<DoorEvents> {
+export class Door extends AsyncEventEmitter<DoorEvents> {
   public readonly ID: number;
   public readonly orientation: DoorOrientation;
   public readonly collider: Collider;
@@ -39,8 +39,8 @@ type DoorSystemEvents = Events & {
 
 };
 
-class DoorSystem extends AsyncEventEmitter<DoorSystemEvents> {
-  constructor(...doors:Door[]) {
+export class DoorSystem extends AsyncEventEmitter<DoorSystemEvents> {
+  constructor(doors:Door[]) {
     super()
   }
 }
@@ -90,7 +90,7 @@ export class Game extends AsyncEventEmitter<LevelEvents> {
     this.vents = this.staticData.vents.map(
       (StaticVentData) => new Vent(StaticVentData, this)
     );
-    this.doors = new DoorSystem(...this.staticData.doors);
+    this.doors = new DoorSystem(this.staticData.doors);
     this.colliders = this.staticData.colliders;
   }
   get sabotage(): SabotageSystem | undefined {

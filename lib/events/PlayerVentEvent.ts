@@ -1,6 +1,6 @@
 import { BaseEvent } from "./baseEvents";
 import { Player } from "../util/player";
-import { MapRoom } from "../util/MapRooms";
+import { LevelRoom } from "../util/levelRoom";
 
 export enum VentMovementType {
   ENTERED = 0x00,
@@ -9,7 +9,7 @@ export enum VentMovementType {
 }
 
 export class PlayerVentEvent extends BaseEvent {
-  constructor(public player: Player, public room: MapRoom, public movementType: VentMovementType) {
+  constructor(public player: Player, public room: LevelRoom, public movementType: VentMovementType) {
     super();
   }
 }

@@ -1,7 +1,7 @@
 import { Vector2, Vector3 } from "../../packets/packetElements/vector";
 import Polygon from "polygon";
 import { SystemType } from "../../packets/packetElements/systemType";
-import { Door } from "../../util/MapRooms";
+import { Door } from "../../util/Game";
 // import { PolusVents } from "../enums/playerEnums";
 
 export enum DoorOrientation {

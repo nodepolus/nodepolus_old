@@ -1,10 +1,9 @@
-import { Connection } from "../util/connection";
 import { BaseEvent } from "./baseEvents";
 import { Player } from "../util/player";
-import { MapRoom } from "../util/MapRooms";
+import { LevelRoom } from "../util/levelRoom";
 
-export class PlayerEnteredRoomEvent extends BaseEvent {
-  constructor(public player: Player, public room: MapRoom) {
+export class PlayerMovedRoomEvent extends BaseEvent {
+  constructor(public player: Player, public room: LevelRoom) {
     super();
   }
 }

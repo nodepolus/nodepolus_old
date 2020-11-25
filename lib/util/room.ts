@@ -31,6 +31,7 @@ import { SendChatNotePacket } from "../packets/subpackets/gameDataPackets/rpcPac
 import { ChatNoteEvent } from "../events/chatNoteEvent";
 import { SetTasksPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/setTasks";
 import { AssignedTasksEvent } from "../events/AssignedTasksEvent";
+import { GameStartEvent } from "../events/GameStartEvent";
 
 type RoomEvents = Events & {
   playerJoined: (evt: JoinRoomEvent) => Promise<void>;
@@ -38,6 +39,8 @@ type RoomEvents = Events & {
   chat: (evt: ChatEvent) => Promise<void>;
   chatNote: (evt: ChatNoteEvent) => Promise<void>;
   close: () => Promise<void>;
+  gameStart: (evt: GameStartEvent) => Promise<void>;
+  gameEnd: () => Promise<void>;
 };
 
 export class Room extends AsyncEventEmitter<RoomEvents> {
@@ -130,11 +133,14 @@ export class Room extends AsyncEventEmitter<RoomEvents> {
           con.send(packet);
           this.limboIds.push(con.ID);
         });
+        delete this.game;
+        await this.emit("gameEnd")
         this.connections = [];
         break;
       case "StartGame":
         this.gameState = GameState.Started;
-
+        this.game = new Game(this);
+        await this.emit("gameStart", new GameStartEvent(this.game))
         this.connections.forEach((con) => {
           con.send(packet);
         });

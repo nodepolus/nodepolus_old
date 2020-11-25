@@ -1,5 +1,5 @@
 import { AsyncEventEmitter, Events } from "../asyncEventEmitter";
-import { Game } from "../game";
+import { Game } from "../Game";
 import { SystemType } from "../../packets/packetElements/systemType";
 
 type ElectricalSabotageEvents = Events & {

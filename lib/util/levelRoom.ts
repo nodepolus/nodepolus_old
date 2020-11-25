@@ -1,6 +1,6 @@
 import { AsyncEventEmitter, Events } from "./asyncEventEmitter";
 import { StaticRoomData } from "../data/mapData/types";
-import { Game } from "./game";
+import { Game } from "./Game";
 
 export type LevelRoomEvents = Events & {
   
