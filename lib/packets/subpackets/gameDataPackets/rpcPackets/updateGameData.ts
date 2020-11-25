@@ -2,7 +2,7 @@ import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
 
 export interface TaskState {
-  TaskID: bigint;
+  TaskID: number;
   TaskCompleted: boolean;
 }
 
@@ -16,9 +16,9 @@ export interface PlayerData {
   PlayerID: number;
   PlayerName: string;
   Color: number;
-  HatID: bigint;
-  PetID: bigint;
-  SkinID: bigint;
+  HatID: number;
+  PetID: number;
+  SkinID: number;
   Flags: PlayerDataFlags;
   TaskAmount?: number;
   Tasks: TaskState[];
@@ -90,9 +90,7 @@ export const UpdateGameData: PacketHandler<UpdateGameDataPacket> = {
       if (PlayerData.Flags.Dead) FlagsBitfield += 0b00000100;
       tmpbuf.writeU8(FlagsBitfield);
       tmpbuf.writeU8(
-        PlayerData.TaskAmount
-          ? Number(PlayerData.TaskAmount)
-          : PlayerData.Tasks.length
+        PlayerData.TaskAmount ? PlayerData.TaskAmount : PlayerData.Tasks.length
       );
       for (let i = 0; i < PlayerData.Tasks.length; i++) {
         const Task = PlayerData.Tasks[i];

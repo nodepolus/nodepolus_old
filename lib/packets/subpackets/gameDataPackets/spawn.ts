@@ -39,7 +39,7 @@ export const Spawn: PacketHandler<IGameObject> = {
     PB.writeVarInt(packet.SpawnID);
     PB.writeVarInt(packet.ClientID);
     PB.writeU8(packet.Flags);
-    PB.writeVarInt(BigInt(packet.Components.length));
+    PB.writeVarInt(packet.Components.length);
     for (let i = 0; i < packet.Components.length; i++) {
       const component = packet.Components[i];
       // console.log(component)

@@ -41,7 +41,7 @@ type ConnectionEvents = Events & {
 };
 
 export class Connection extends AsyncEventEmitter<ConnectionEvents> {
-  public netIDs: bigint[] = [];
+  public netIDs: number[] = [];
   player?: Player;
   nonce: number = 1;
   clientVersion?: ClientVersion;
@@ -254,8 +254,8 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
       PlayerClientID: this.ID,
       HostClientID: room.host?.ID || -1,
       OtherPlayers: room.connections
-        .map((con) => BigInt(con.ID))
-        .filter((id) => id != BigInt(this.ID)),
+        .map((con) => con.ID)
+        .filter((id) => id != this.ID),
     });
     // TODO: AlterGame
     this.send({
@@ -280,7 +280,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
         Packets: [
           {
             type: GameDataPacketType.SceneChange,
-            ClientID: 2147483646n,
+            ClientID: 2147483646,
             Scene: "OnlineGame",
           },
         ],
@@ -293,7 +293,7 @@ export class Connection extends AsyncEventEmitter<ConnectionEvents> {
     //     RoomCode: room.code,
     //     PlayerClientID: this.ID,
     //     HostClientID: room.host.ID,
-    //     OtherPlayers: room.connections.map(con => BigInt(con.ID)).filter(id => id != BigInt(this.ID))
+    //     OtherPlayers: room.connections.map(con => con.ID).filter(id => id != this.ID)
     // })
     // this.send("AlterGame", {
     //     RoomCode: room.code,

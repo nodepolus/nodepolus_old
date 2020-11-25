@@ -4,7 +4,7 @@ import { GameDataPacketType } from "../gameData";
 
 export interface ReadyPacket {
   type: GameDataPacketType.Ready;
-  ClientID: bigint;
+  ClientID: number;
 }
 
 export const Ready: PacketHandler<ReadyPacket> = {

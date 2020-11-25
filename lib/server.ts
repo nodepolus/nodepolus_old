@@ -81,7 +81,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
     this.sock.bind(this.config.port);
     console.log(`Server listening on port ${this.config.port}`);
   }
-  public close(reason: string | number = 19) {
+  public close(reason: string | number = 19): Promise<void> {
     return new Promise((resolve) => {
       [...this.rooms.values()].forEach((room: Room) => {
         room.close(reason);
@@ -168,8 +168,8 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
                     PlayerClientID: connection.ID,
                     HostClientID: connection.ID,
                     OtherPlayers: newRoom.connections
-                      .map((otherPlayer) => BigInt(otherPlayer.ID))
-                      .filter((otherId) => otherId != BigInt(connection.ID)),
+                      .map((otherPlayer) => otherPlayer.ID)
+                      .filter((otherId) => otherId != connection.ID),
                   });
                   connection.send({
                     type: "AlterGame",
@@ -203,10 +203,8 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
                         PlayerClientID: waitingPlayer.ID,
                         HostClientID: connection.ID,
                         OtherPlayers: newRoom.connections
-                          .map((otherPlayer) => BigInt(otherPlayer.ID))
-                          .filter(
-                            (otherId) => otherId != BigInt(waitingPlayer.ID)
-                          ),
+                          .map((otherPlayer) => otherPlayer.ID)
+                          .filter((otherId) => otherId != waitingPlayer.ID),
                       });
                       waitingPlayer.send({
                         type: "AlterGame",
@@ -284,7 +282,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
             RoomCode: room.code,
             RoomName: room.host?.name || "unknown",
             PlayerCount: room.connections.length,
-            Age: 0n,
+            Age: 0,
             MapID: room.settings.Map,
             ImpostorCount: room.settings.ImpostorCount,
             MaxPlayers: room.settings.MaxPlayers,

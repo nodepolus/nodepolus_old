@@ -18,7 +18,7 @@ export interface RemovePlayerProperPacket {
 export interface LateRejectionPacket {
   type: "LateRejection";
   RoomCode: string;
-  PlayerClientID: bigint;
+  PlayerClientID: number;
   DisconnectReason: DisconnectReasons.GameFull;
 }
 

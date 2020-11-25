@@ -8,7 +8,7 @@ export interface RoomListing {
   RoomCode: string;
   RoomName: string;
   PlayerCount: number;
-  Age: bigint;
+  Age: number;
   MapID: number;
   ImpostorCount: number;
   MaxPlayers: number;

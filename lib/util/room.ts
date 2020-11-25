@@ -35,7 +35,7 @@ export class Room extends EventEmitter {
       charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     });
   }
-  private PlayerIDtoConnectionIDMap = new Map<number, bigint>();
+  private PlayerIDtoConnectionIDMap = new Map<number, number>();
   public connections: Connection[] = [];
   public limboIds: number[] = [];
   public hasHost: boolean = false;
@@ -76,11 +76,9 @@ export class Room extends EventEmitter {
       });
     });
   }
-  syncSettings(NetIDIn?: bigint) {
-    let NetID = 0n;
-    let go = this.GameObjects.find(
-      (go) => Number(go.SpawnID) == ObjectType.Player
-    );
+  syncSettings(NetIDIn?: number) {
+    let NetID = 0;
+    let go = this.GameObjects.find((go) => go.SpawnID == ObjectType.Player);
     if (go) {
       NetID = go.Components[0].netID;
     }
@@ -137,7 +135,7 @@ export class Room extends EventEmitter {
       case "GameData":
         if (
           packet.RecipientClientID &&
-          packet.RecipientClientID === 2147483646n
+          packet.RecipientClientID === 2147483646
         ) {
           if (!this.host)
             throw new Error("Could not find host for gameData packet");
@@ -153,10 +151,10 @@ export class Room extends EventEmitter {
           packet.Packets.forEach((packet) => {
             if (packet.type == GameDataPacketType.Spawn) {
               if (
-                Number(packet.SpawnID) == ObjectType.Player &&
+                packet.SpawnID == ObjectType.Player &&
                 packet.Components[0].Data?.type == "PlayerControl"
               ) {
-                if (packet.ClientID != 2147483646n) {
+                if (packet.ClientID != 2147483646) {
                   this.PlayerIDtoConnectionIDMap.set(
                     packet.Components[0].Data.id,
                     packet.ClientID
@@ -166,7 +164,7 @@ export class Room extends EventEmitter {
             }
             if (
               packet.type == GameDataPacketType.Spawn &&
-              Number(packet.SpawnID) == ObjectType.GameData &&
+              packet.SpawnID == ObjectType.GameData &&
               packet.Components[0].Data?.type == "GameData"
             ) {
               this.GameObjects.push(packet);
@@ -177,16 +175,16 @@ export class Room extends EventEmitter {
         packet.Packets = packet.Packets.filter((GDPacket) => {
           if (GDPacket.type == GameDataPacketType.Spawn) {
             if (
-              Number(GDPacket.SpawnID) == ObjectType.Player &&
+              GDPacket.SpawnID == ObjectType.Player &&
               GDPacket.Components[0].Data?.type == "PlayerControl"
             ) {
-              if (GDPacket.ClientID != 2147483646n) {
+              if (GDPacket.ClientID != 2147483646) {
                 this.PlayerIDtoConnectionIDMap.set(
                   GDPacket.Components[0].Data.id,
                   GDPacket.ClientID
                 );
                 let connection = this.connections.find(
-                  (con) => con.ID == Number(GDPacket.ClientID)
+                  (con) => con.ID == GDPacket.ClientID
                 );
                 if (connection) {
                   connection.netIDs = GDPacket.Components.map((c) => c.netID);
@@ -204,7 +202,7 @@ export class Room extends EventEmitter {
                   pd[0].PlayerID
                 );
                 let connection = this.connections.find(
-                  (con) => con.ID == Number(connectionID)
+                  (con) => con.ID == connectionID
                 );
                 if (connection) {
                   if (!connection.player) {
@@ -228,12 +226,12 @@ export class Room extends EventEmitter {
                     this.startPacketGroupBroadcastToAll();
                     connection.player.setName(pd[0].PlayerName);
                     connection.player.setColor(pd[0].Color);
-                    connection.player.setHat(Number(pd[0].HatID));
-                    connection.player.setPet(Number(pd[0].PetID));
-                    connection.player.setSkin(Number(pd[0].SkinID));
+                    connection.player.setHat(pd[0].HatID);
+                    connection.player.setPet(pd[0].PetID);
+                    connection.player.setSkin(pd[0].SkinID);
                     connection.player.setTasks(
                       pd[0].Tasks.map((taskData) => {
-                        let t = new Task(Number(taskData.TaskID));
+                        let t = new Task(taskData.TaskID);
                         if (taskData.TaskCompleted) {
                           t.Complete();
                         } else {
@@ -298,7 +296,7 @@ export class Room extends EventEmitter {
         }
         if (packet.RecipientClientID) {
           this.connections
-            .filter((conn) => BigInt(conn.ID) == packet.RecipientClientID)
+            .filter((conn) => conn.ID == packet.RecipientClientID)
             .forEach((recipient) => {
               recipient.send(packet);
             });
@@ -355,8 +353,8 @@ export class Room extends EventEmitter {
             PlayerClientID: this.connections[0].ID,
             HostClientID: this.connections[0].ID,
             OtherPlayers: this.connections
-              .map((con) => BigInt(con.ID))
-              .filter((id) => id != BigInt(this.connections[0].ID)),
+              .map((con) => con.ID)
+              .filter((id) => id != this.connections[0].ID),
           });
           this.connections[0].send({
             type: "AlterGame",
@@ -390,8 +388,8 @@ export class Room extends EventEmitter {
                 PlayerClientID: waitingPlayer.ID,
                 HostClientID: this.host!.ID,
                 OtherPlayers: this.connections
-                  .map((otherPlayer) => BigInt(otherPlayer.ID))
-                  .filter((otherId) => otherId != BigInt(waitingPlayer.ID)),
+                  .map((otherPlayer) => otherPlayer.ID)
+                  .filter((otherId) => otherId != waitingPlayer.ID),
               });
               waitingPlayer.send({
                 type: "AlterGame",

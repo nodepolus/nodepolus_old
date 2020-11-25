@@ -5,7 +5,7 @@ interface MasterServer {
   Name: string;
   IP: string;
   Port: number;
-  PlayerCount: bigint;
+  PlayerCount: number;
 }
 
 export interface MasterServersPacket {
@@ -41,7 +41,7 @@ export const MasterServers: PacketHandler<MasterServersPacket> = {
   serialize(packet: MasterServersPacket): PolusBuffer {
     var buf = new PolusBuffer();
     buf.writeU8(1);
-    buf.writeVarInt(BigInt(packet.MasterServers.length));
+    buf.writeVarInt(packet.MasterServers.length);
     var MSBufs = PolusBuffer.concat(
       ...packet.MasterServers.map((MasterServer) => {
         var LengthBuf = new PolusBuffer(3);

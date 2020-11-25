@@ -6,7 +6,7 @@ import {
 } from "../../../packetElements/stateByte";
 
 export interface VotingCompletePacket {
-  StatesLength?: bigint;
+  StatesLength?: number;
   States: StateByteInterface[];
   ExiledPlayerPlayerID: number;
   IsTie: boolean;
@@ -20,7 +20,7 @@ export const VotingComplete: PacketHandler<VotingCompletePacket> = {
       ExiledPlayerPlayerID: 0,
       IsTie: false,
     };
-    data.States = new Array(Number(data.StatesLength));
+    data.States = new Array(data.StatesLength);
     for (let i = 0; i < data.States.length; i++) {
       data.States[i] = StateByte.parse(packet.readU8());
     }
@@ -31,7 +31,7 @@ export const VotingComplete: PacketHandler<VotingCompletePacket> = {
 
   serialize(packet: VotingCompletePacket): PolusBuffer {
     let buf = new PolusBuffer();
-    buf.writeVarInt(BigInt(packet.States.length));
+    buf.writeVarInt(packet.States.length);
     for (var i = 0; i < packet.States.length; i++) {
       buf.writeU8(StateByte.serialize(packet.States[i]));
     }

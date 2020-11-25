@@ -104,7 +104,7 @@ SYSTEM_HANDLER.set(SystemType.Electrical, {
 
 SYSTEM_HANDLER.set(SystemType.Medbay, {
   read: (buf, rm) => {
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const users = [];
     for (let i = 0; i < length; i++) users.push(buf.readU8());
     return {
@@ -113,7 +113,7 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
     };
   },
   write: (obj: UserListSystem, buf, rm) => {
-    buf.writeVarInt(BigInt(obj.Users.length));
+    buf.writeVarInt(obj.Users.length);
     for (let i = 0; i < obj.Users.length; i++) {
       buf.writeU8(obj.Users[i]);
     }
@@ -128,14 +128,14 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
 SYSTEM_HANDLER.set(SystemType.Communications, {
   read: (buf, rm) => {
     if (rm.settings.Map == AmongUsMap.MIRA_HQ) {
-      let pairsLength = Number(buf.readVarInt());
+      let pairsLength = buf.readVarInt();
       let userConsolePairs: number[][] = [];
 
       for (let i = 0; i < pairsLength; i++) {
         userConsolePairs.push([buf.readU8(), buf.readU8()]);
       }
 
-      let completedLength = Number(buf.readVarInt());
+      let completedLength = buf.readVarInt();
       let completed: number[] = [];
 
       for (let i = 0; i < completedLength; i++) {
@@ -156,12 +156,12 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
   write: (obj: CommsSystem, buf, rm) => {
     if (rm.settings.Map == AmongUsMap.MIRA_HQ) {
       let sys: MiraCommsSystem = <MiraCommsSystem>obj;
-      buf.writeVarInt(BigInt(sys.ActiveConsoles.length));
+      buf.writeVarInt(sys.ActiveConsoles.length);
       for (let i = 0; i < sys.ActiveConsoles.length; i++) {
         buf.writeU8(sys.ActiveConsoles[i][0]);
         buf.writeU8(sys.ActiveConsoles[i][1]);
       }
-      buf.writeVarInt(BigInt(sys.CompletedConsoles.length));
+      buf.writeVarInt(sys.CompletedConsoles.length);
       for (let i = 0; i < sys.CompletedConsoles.length; i++) {
         buf.writeU8(sys.CompletedConsoles[i]);
       }
@@ -199,7 +199,7 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 
 SYSTEM_HANDLER.set(SystemType.Security, {
   read: (buf, rm) => {
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const users = [];
     for (let i = 0; i < length; i++) users.push(buf.readU8());
     return {
@@ -208,7 +208,7 @@ SYSTEM_HANDLER.set(SystemType.Security, {
     };
   },
   write: (obj: UserListSystem, buf, rm) => {
-    buf.writeVarInt(BigInt(obj.Users.length));
+    buf.writeVarInt(obj.Users.length);
     for (let i = 0; i < obj.Users.length; i++) {
       buf.writeU8(obj.Users[i]);
     }
@@ -222,7 +222,7 @@ SYSTEM_HANDLER.set(SystemType.Security, {
 const reactorHandler: SystemHandler = {
   read: (buf, rm): ReactorSystem => {
     const Countdown = buf.readFloat32();
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const pairs = new Map();
     for (let i = 0; i < length; i++) {
       pairs.set(buf.readU8(), buf.readU8());
@@ -236,7 +236,7 @@ const reactorHandler: SystemHandler = {
   write: (obj: ReactorSystem, buf, rm) => {
     buf.writeFloat32(obj.Countdown);
     let entries = [...obj.UserConsolePairs.entries()];
-    buf.writeVarInt(BigInt(entries.length));
+    buf.writeVarInt(entries.length);
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i];
       buf.writeU8(entry[0]);
@@ -259,7 +259,7 @@ SYSTEM_HANDLER.set(SystemType.Reactor, reactorHandler);
 SYSTEM_HANDLER.set(SystemType.O2, {
   read: (buf, rm) => {
     const Countdown = buf.readFloat32();
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const consoles = [];
     for (let i = 0; i < length; i++) {
       consoles.push(buf.readVarInt());
@@ -272,7 +272,7 @@ SYSTEM_HANDLER.set(SystemType.O2, {
   },
   write: (obj: O2System, buf, rm) => {
     buf.writeFloat32(obj.Countdown);
-    buf.writeVarInt(BigInt(obj.Consoles.length));
+    buf.writeVarInt(obj.Consoles.length);
     for (let i = 0; i < obj.Consoles.length; i++) {
       buf.writeVarInt(obj.Consoles[i]);
     }
@@ -313,7 +313,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
       let mask: number | null = null;
 
       if (!spawn) {
-        mask = Number(buf.readVarInt());
+        mask = buf.readVarInt();
       }
 
       for (let i = 0; i < length; i++) {
@@ -362,7 +362,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
             mask |= 1 << i;
           }
         }
-        maskBuf.writeVarInt(BigInt(mask));
+        maskBuf.writeVarInt(mask);
         buf.writeBytes(maskBuf);
         buf.writeBytes(doorBuf);
       } else {
@@ -462,15 +462,15 @@ export class Component {
   public old?: Component = undefined;
   public Data: ComponentData | null = null;
   public length: number = -1;
-  public netID: bigint = -1n;
+  public netID: number = -1;
   public flag: number = -1;
   //if old, not spawn!
 
-  constructor(private spawnId: bigint, public index: number) {}
+  constructor(private spawnId: number, public index: number) {}
 
   private readData(pb: PolusBuffer, room: Room) {
     const spawn = !(this.old && this.old.Data);
-    switch (Number(this.spawnId)) {
+    switch (this.spawnId) {
       case ObjectType.HeadQuarters:
       case ObjectType.AprilShipStatus:
       case ObjectType.PlanetMap:
@@ -499,7 +499,7 @@ export class Component {
             // console.log(`read ship system ${k}`, JSON.stringify((<ShipStatus>this.Data).systems[k]))
           }
         } else {
-          const mask = Number(pb.readVarInt());
+          const mask = pb.readVarInt();
           (<ShipStatus>this.Data).mask = mask;
           for (let k of mapOrder) {
             if ((mask & (1 << k)) != 0) {
@@ -596,7 +596,7 @@ export class Component {
         let mask;
 
         if (!spawn) {
-          mask = Number(pb.readVarInt());
+          mask = pb.readVarInt();
         }
 
         for (let i = 0; i < this.length; i++) {
@@ -620,7 +620,7 @@ export class Component {
   private writeData(room: Room): PolusBuffer {
     const spawn = !(this.old && this.old.Data);
     const pb = new PolusBuffer();
-    switch (Number(this.spawnId)) {
+    switch (this.spawnId) {
       case ObjectType.HeadQuarters:
       case ObjectType.AprilShipStatus:
       case ObjectType.PlanetMap:
@@ -645,7 +645,7 @@ export class Component {
           let buffers: PolusBuffer[] = [new PolusBuffer()];
 
           for (let k of mapOrder) {
-            if ((Number(mask) & (1 << k)) != 0) {
+            if (mask && (mask & (1 << k)) != 0) {
               let data = (<ShipStatus>this.Data).systems[k];
               let buf = new PolusBuffer();
               const handler = SYSTEM_HANDLER.get(k);
@@ -668,7 +668,7 @@ export class Component {
             }
           }
 
-          buffers[0].writeVarInt(BigInt(mask));
+          buffers[0].writeVarInt(mask || 0);
           pb.writeBytes(PolusBuffer.concat(...buffers));
         }
         break;
@@ -688,9 +688,7 @@ export class Component {
         break;
       case ObjectType.GameData:
         if (this.index == 0) {
-          pb.writeVarInt(
-            BigInt((<GameData>(<unknown>this.Data)).players.length)
-          );
+          pb.writeVarInt((<GameData>(<unknown>this.Data)).players.length);
           (<GameData>(<unknown>this.Data)).players.forEach((player) => {
             pb.writeU8(player.PlayerID);
             pb.writeString(player.PlayerName);
@@ -727,11 +725,11 @@ export class Component {
         let dirtyBits = this.calculateDirtyBits();
 
         if (!spawn) {
-          pb.writeVarInt(BigInt(dirtyBits));
+          pb.writeVarInt(dirtyBits);
         }
 
         for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
-          if (spawn || (Number(dirtyBits) & (1 << i)) != 0) {
+          if (spawn || (dirtyBits & (1 << i)) != 0) {
             pb.writeU8(
               StateByte.serialize(
                 <StateByteInterface>(<MeetingHud>this.Data).players[i]
@@ -751,7 +749,7 @@ export class Component {
     if (!(this.old && this.old.Data)) {
       return 0xffffffff;
     } else {
-      switch (Number(this.spawnId)) {
+      switch (this.spawnId) {
         case ObjectType.HeadQuarters:
         case ObjectType.AprilShipStatus:
         case ObjectType.PlanetMap:

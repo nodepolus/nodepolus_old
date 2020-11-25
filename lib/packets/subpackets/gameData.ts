@@ -22,7 +22,7 @@ export type GameDataSubtype =
 export interface GameDataPacket {
   type: "GameData";
   RoomCode: string;
-  RecipientClientID?: bigint;
+  RecipientClientID?: number;
   Packets: GameDataSubtype[];
 }
 
@@ -80,7 +80,7 @@ export const GameData: PacketHandler<GameDataPacket> = {
   serialize(packet: GameDataPacket, room: Room): PolusBuffer {
     var pb = new PolusBuffer();
     pb.write32(RoomCode.encode(packet.RoomCode));
-    if (packet.RecipientClientID || packet.RecipientClientID === 0n) {
+    if (packet.RecipientClientID || packet.RecipientClientID === 0) {
       pb.writeVarInt(packet.RecipientClientID);
     }
     pb.writeBytes(

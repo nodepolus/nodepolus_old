@@ -221,7 +221,7 @@ export const Unreliable: PacketHandler<UnreliablePacket> = {
           break;
         case "GameData":
           type =
-            subpacket.RecipientClientID || subpacket.RecipientClientID === 0n
+            subpacket.RecipientClientID || subpacket.RecipientClientID === 0
               ? 0x06
               : 0x05;
           break;

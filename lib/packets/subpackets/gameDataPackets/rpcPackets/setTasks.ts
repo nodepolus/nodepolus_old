@@ -3,7 +3,7 @@ import { PacketHandler } from "../../../packet";
 
 export interface SetTasksPacket {
   PlayerID: number;
-  TaskCount?: bigint;
+  TaskCount?: number;
   Tasks: number[];
 }
 
@@ -27,7 +27,7 @@ export const SetTasks: PacketHandler<SetTasksPacket> = {
   serialize(packet: SetTasksPacket): PolusBuffer {
     let buf = new PolusBuffer();
     buf.writeU8(packet.PlayerID);
-    buf.writeVarInt(BigInt(packet.Tasks.length));
+    buf.writeVarInt(packet.Tasks.length);
     for (let i = 0; i < packet.Tasks.length; i++) {
       buf.writeU8(packet.Tasks[i]);
     }

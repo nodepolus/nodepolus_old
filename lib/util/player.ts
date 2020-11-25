@@ -32,7 +32,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
   get gameObjects(): IGameObject[] {
     if (!this.connection) return [];
     return this.connection.room.GameObjects.filter(
-      (GO) => GO.ClientID == BigInt(this.connection?.ID)
+      (GO) => GO.ClientID == this.connection?.ID
     );
   }
   get position(): Vector2 {
@@ -105,15 +105,15 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
   constructor(playerData: GameDataPlayerData) {
     super();
     this.int_ID = playerData.PlayerID;
-    this.int_color = Number(playerData.Color);
-    this.int_hat = Number(playerData.HatID);
+    this.int_color = playerData.Color;
+    this.int_hat = playerData.HatID;
     this.int_isAlive = !playerData.Flags.Dead;
     this.int_isImpostor = playerData.Flags.Impostor;
     this.int_name = playerData.PlayerName;
-    this.int_pet = Number(playerData.PetID);
-    this.int_skin = Number(playerData.SkinID);
+    this.int_pet = playerData.PetID;
+    this.int_skin = playerData.SkinID;
     this.int_tasks = playerData.Tasks.map((taskData) => {
-      let t = new Task(Number(taskData.TaskID));
+      let t = new Task(taskData.TaskID);
       if (taskData.TaskCompleted) {
         t.Complete();
       } else {
@@ -129,7 +129,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (!this.connection)
       throw new Error("Player has no associated connection");
     let NetID: any = this.connection.room.GameObjects.find(
-      (go) => Number(go.SpawnID) == ObjectType.GameData
+      (go) => go.SpawnID == ObjectType.GameData
     );
     if (!NetID) throw new Error("Room does not have a GameData GameObject");
     NetID = NetID.Components[0].netID;
@@ -139,16 +139,16 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
       PlayerID: this.ID,
       PlayerName: this.name,
       Color: this.color,
-      HatID: BigInt(this.hat),
-      PetID: BigInt(this.pet),
-      SkinID: BigInt(this.skin),
+      HatID: this.hat,
+      PetID: this.pet,
+      SkinID: this.skin,
       Flags: {
         Disconnected: false,
         Impostor: this.isImpostor,
         Dead: !this.isAlive,
       },
       Tasks: this.tasks.map((t) => {
-        return { TaskID: BigInt(t.ID), TaskCompleted: t.complete };
+        return { TaskID: t.ID, TaskCompleted: t.complete };
       }),
     };
     this.connection?.room.broadcastToAll({
@@ -348,7 +348,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetInfected,
             Packet: {
-              InfectedPlayerIDs: [BigInt(this.ID)],
+              InfectedPlayerIDs: [this.ID],
             },
           },
         ],
