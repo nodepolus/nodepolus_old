@@ -11,8 +11,8 @@ import { Room } from "../../lib/util/room";
 
 export interface ClientData {
   nonce: number;
-  announceId: bigint;
-  language: bigint;
+  announceId: number;
+  language: number;
   info: RemoteInfo;
 }
 
@@ -153,8 +153,8 @@ export class AnnouncementServer extends EventEmitter {
     if (!this.clientMap.has(addr))
       this.clientMap.set(addr, {
         nonce: 0,
-        announceId: BigInt(0),
-        language: BigInt(0),
+        announceId: 0,
+        language: 0,
         info,
       });
     return this.clientMap.get(addr) || null;
@@ -162,10 +162,10 @@ export class AnnouncementServer extends EventEmitter {
   private incrementNonce(client: ClientData): number {
     return client.nonce++;
   }
-  private generateId(avoid: bigint = BigInt(0)) {
+  private generateId(avoid: number = 0) {
     let id = avoid;
     while (id == avoid) {
-      id = BigInt(Math.floor(Math.random() * 1000));
+      id = Math.floor(Math.random() * 1000);
     }
     return id;
   }

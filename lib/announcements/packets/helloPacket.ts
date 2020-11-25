@@ -3,9 +3,9 @@ import { PolusBuffer } from "../../util/polusBuffer";
 
 export interface HelloPacketData {
   HazelVersion: number;
-  ClientVersion: bigint;
-  LastAnnouncement: bigint;
-  Language: bigint;
+  ClientVersion: number;
+  LastAnnouncement: number;
+  Language: number;
 }
 
 export interface HelloPacket {

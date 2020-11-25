@@ -90,7 +90,7 @@ export type RPCPacketSubtype =
 
 export interface RPCPacket {
   type: GameDataPacketType.RPC;
-  NetID: bigint;
+  NetID: number;
   RPCFlag: RPCPacketType;
   Packet: RPCPacketSubtype;
 }

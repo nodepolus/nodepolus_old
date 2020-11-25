@@ -7,8 +7,8 @@ export interface JoinedGamePacket {
   RoomCode: string;
   PlayerClientID: number;
   HostClientID: number;
-  PlayerCount?: bigint;
-  OtherPlayers: bigint[];
+  PlayerCount?: number;
+  OtherPlayers: number[];
 }
 
 export const JoinedGame: PacketHandler<JoinedGamePacket> = {
@@ -38,7 +38,7 @@ export const JoinedGame: PacketHandler<JoinedGamePacket> = {
     buf.write32(RoomCode.encode(packet.RoomCode));
     buf.writeU32(packet.PlayerClientID);
     buf.writeU32(packet.HostClientID);
-    buf.writeVarInt(BigInt(packet.OtherPlayers.length));
+    buf.writeVarInt(packet.OtherPlayers.length);
     for (let i = 0; i < packet.OtherPlayers.length; i++) {
       buf.writeVarInt(packet.OtherPlayers[i]);
     }

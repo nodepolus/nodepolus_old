@@ -4,7 +4,7 @@ import { GameDataPacketType } from "../gameData";
 
 export interface DespawnPacket {
   type: GameDataPacketType.Despawn;
-  NetID: bigint;
+  NetID: number;
 }
 
 export const Despawn: PacketHandler<DespawnPacket> = {

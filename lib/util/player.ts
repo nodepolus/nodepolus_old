@@ -32,7 +32,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
   get gameObjects(): IGameObject[] {
     if (!this.connection) return [];
     return this.connection.room.GameObjects.filter(
-      (GO) => GO.ClientID == BigInt(this.connection?.ID)
+      (GO) => GO.ClientID == this.connection?.ID
     );
   }
   get position(): Vector2 {
@@ -139,16 +139,16 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
       PlayerID: this.ID,
       PlayerName: this.name,
       Color: this.color,
-      HatID: BigInt(this.hat),
-      PetID: BigInt(this.pet),
-      SkinID: BigInt(this.skin),
+      HatID: this.hat,
+      PetID: this.pet,
+      SkinID: this.skin,
       Flags: {
         Disconnected: false,
         Impostor: this.isImpostor,
         Dead: !this.isAlive,
       },
       Tasks: this.tasks.map((t) => {
-        return { TaskID: BigInt(t.ID), TaskCompleted: t.complete };
+        return { TaskID: t.ID, TaskCompleted: t.complete };
       }),
     };
     this.connection?.room.broadcastToAll({
@@ -348,7 +348,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
             NetID: this.connection.netIDs[0],
             RPCFlag: RPCPacketType.SetInfected,
             Packet: {
-              InfectedPlayerIDs: [BigInt(this.ID)],
+              InfectedPlayerIDs: [this.ID],
             },
           },
         ],

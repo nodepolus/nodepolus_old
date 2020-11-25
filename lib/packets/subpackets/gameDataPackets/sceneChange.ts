@@ -4,7 +4,7 @@ import { GameDataPacketType } from "../gameData";
 
 export interface SceneChangePacket {
   type: GameDataPacketType.SceneChange;
-  ClientID: bigint;
+  ClientID: number;
   Scene: string;
 }
 

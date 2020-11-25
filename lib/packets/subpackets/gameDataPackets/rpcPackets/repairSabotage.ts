@@ -74,7 +74,7 @@ export interface DecontaminationAmount {
 
 export interface RepairSystemPacket {
   System: SystemType;
-  RepairerNetID: bigint;
+  RepairerNetID: number;
   RepairAmount:
     | RepairLightsAmount
     | QueueMedbayScan

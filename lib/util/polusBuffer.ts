@@ -80,24 +80,28 @@ export class PolusBuffer {
     return float32;
   }
 
-  readVarInt(): bigint {
+  readVarInt(): number {
     let readMore: boolean = true;
-    let shift: bigint = 0n;
-    let output: bigint = 0n;
+    let shift: number = 0;
+    let output: number = 0;
     while (readMore) {
-      let b = BigInt(this.buf.readUInt8(this.cursor++));
-      if (b >= 0x80n) {
+      let b = this.buf.readUInt8(this.cursor++);
+      if (b >= 0x80) {
         readMore = true;
-        b ^= 0x80n;
+        b ^= 0x80;
       } else {
         readMore = false;
       }
 
       output |= b << shift;
-      shift += 7n;
+      shift += 7;
     }
 
     return output;
+  }
+
+  readVarUInt(): number {
+    return this.readVarInt() >>> 0;
   }
 
   readString(): string {
@@ -209,22 +213,25 @@ export class PolusBuffer {
     return temp;
   }
 
-  writeVarInt(value: bigint) {
-    let val = value;
+  writeVarInt(value: number) {
+    this.writeVarUInt(value >>> 0);
+  }
+
+  writeVarUInt(value: number) {
     do {
-      let b = val & 0xffn;
-      if (val >= 0x80n) {
-        b |= 0x80n;
+      let b = value & 0xff;
+      if (value >= 0x80) {
+        b |= 0x80;
       }
       this.resizeBuffer(1);
-      this.buf.writeUInt8(Number(b), this.cursor++);
-      val >>= 7n;
-    } while (val > 0n);
+      this.buf.writeUInt8(b, this.cursor++);
+      value >>>= 7;
+    } while (value != 0);
   }
 
   writeString(value: string) {
     let bytes = Buffer.from(value);
-    this.writeVarInt(BigInt(bytes.length));
+    this.writeVarInt(bytes.length);
     this.writeBytes(bytes);
   }
 

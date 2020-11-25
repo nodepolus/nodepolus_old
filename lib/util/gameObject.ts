@@ -8,8 +8,8 @@ export enum SpawnFlags {
 
 export interface IGameObject {
   type: GameDataPacketType.Spawn;
-  SpawnID: bigint;
-  ClientID: bigint;
+  SpawnID: number;
+  ClientID: number;
   Flags: SpawnFlags;
   Components: Component[];
 }

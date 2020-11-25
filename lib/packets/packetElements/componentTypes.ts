@@ -12,17 +12,17 @@ export interface GameDataPlayerData {
   type: "GameDataPlayerData";
   PlayerID: number;
   PlayerName: string;
-  Color: bigint;
-  HatID: bigint;
-  PetID: bigint;
-  SkinID: bigint;
+  Color: number;
+  HatID: number;
+  PetID: number;
+  SkinID: number;
   Flags: {
     Disconnected: boolean;
     Impostor: boolean;
     Dead: boolean;
   };
   Tasks: {
-    TaskID: bigint;
+    TaskID: number;
     TaskCompleted: boolean;
   }[];
 }
@@ -66,7 +66,7 @@ export interface ReactorSystem {
 export interface O2System {
   type: "O2System";
   Countdown: number;
-  Consoles: bigint[];
+  Consoles: number[];
 }
 
 export interface DoorSystem {
@@ -126,7 +126,7 @@ export interface CustomTransformData {
 
 export interface PlayerVoteBanSystem {
   type: "PlayerVoteBanSystem";
-  Players: Map<number, bigint[]>;
+  Players: Map<number, number[]>;
 }
 
 export type ComponentData =

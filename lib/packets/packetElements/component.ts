@@ -113,7 +113,7 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
     };
   },
   write: (obj: UserListSystem, buf, rm) => {
-    buf.writeVarInt(BigInt(obj.Users.length));
+    buf.writeVarInt(obj.Users.length);
     for (let i = 0; i < obj.Users.length; i++) {
       buf.writeU8(obj.Users[i]);
     }
@@ -156,12 +156,12 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
   write: (obj: CommsSystem, buf, rm) => {
     if (rm.settings.Map == AmongUsMap.MIRA_HQ) {
       let sys: MiraCommsSystem = <MiraCommsSystem>obj;
-      buf.writeVarInt(BigInt(sys.ActiveConsoles.length));
+      buf.writeVarInt(sys.ActiveConsoles.length);
       for (let i = 0; i < sys.ActiveConsoles.length; i++) {
         buf.writeU8(sys.ActiveConsoles[i][0]);
         buf.writeU8(sys.ActiveConsoles[i][1]);
       }
-      buf.writeVarInt(BigInt(sys.CompletedConsoles.length));
+      buf.writeVarInt(sys.CompletedConsoles.length);
       for (let i = 0; i < sys.CompletedConsoles.length; i++) {
         buf.writeU8(sys.CompletedConsoles[i]);
       }
@@ -208,7 +208,7 @@ SYSTEM_HANDLER.set(SystemType.Security, {
     };
   },
   write: (obj: UserListSystem, buf, rm) => {
-    buf.writeVarInt(BigInt(obj.Users.length));
+    buf.writeVarInt(obj.Users.length);
     for (let i = 0; i < obj.Users.length; i++) {
       buf.writeU8(obj.Users[i]);
     }
@@ -236,7 +236,7 @@ const reactorHandler: SystemHandler = {
   write: (obj: ReactorSystem, buf, rm) => {
     buf.writeFloat32(obj.Countdown);
     let entries = [...obj.UserConsolePairs.entries()];
-    buf.writeVarInt(BigInt(entries.length));
+    buf.writeVarInt(entries.length);
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i];
       buf.writeU8(entry[0]);
@@ -272,7 +272,7 @@ SYSTEM_HANDLER.set(SystemType.O2, {
   },
   write: (obj: O2System, buf, rm) => {
     buf.writeFloat32(obj.Countdown);
-    buf.writeVarInt(BigInt(obj.Consoles.length));
+    buf.writeVarInt(obj.Consoles.length);
     for (let i = 0; i < obj.Consoles.length; i++) {
       buf.writeVarInt(obj.Consoles[i]);
     }
@@ -362,7 +362,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
             mask |= 1 << i;
           }
         }
-        maskBuf.writeVarInt(BigInt(mask));
+        maskBuf.writeVarInt(mask);
         buf.writeBytes(maskBuf);
         buf.writeBytes(doorBuf);
       } else {
@@ -462,11 +462,11 @@ export class Component {
   public old?: Component = undefined;
   public Data: ComponentData | null = null;
   public length: number = -1;
-  public netID: bigint = -1n;
+  public netID: number = -1;
   public flag: number = -1;
   //if old, not spawn!
 
-  constructor(private spawnId: bigint, public index: number) {}
+  constructor(private spawnId: number, public index: number) {}
 
   private readData(pb: PolusBuffer, room: Room) {
     const spawn = !(this.old && this.old.Data);
@@ -668,7 +668,7 @@ export class Component {
             }
           }
 
-          buffers[0].writeVarInt(BigInt(mask));
+          buffers[0].writeVarInt(mask || 0);
           pb.writeBytes(PolusBuffer.concat(...buffers));
         }
         break;
@@ -688,9 +688,7 @@ export class Component {
         break;
       case ObjectType.GameData:
         if (this.index == 0) {
-          pb.writeVarInt(
-            BigInt((<GameData>(<unknown>this.Data)).players.length)
-          );
+          pb.writeVarInt((<GameData>(<unknown>this.Data)).players.length);
           (<GameData>(<unknown>this.Data)).players.forEach((player) => {
             pb.writeU8(player.PlayerID);
             pb.writeString(player.PlayerName);
@@ -727,7 +725,7 @@ export class Component {
         let dirtyBits = this.calculateDirtyBits();
 
         if (!spawn) {
-          pb.writeVarInt(BigInt(dirtyBits));
+          pb.writeVarInt(dirtyBits);
         }
 
         for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {

@@ -3,7 +3,7 @@ import { PolusBuffer } from "../../../util/polusBuffer";
 
 export interface AnnouncementDataPacket {
   type: "AnnouncementData";
-  Id: bigint;
+  Id: number;
   Text: string;
 }
 

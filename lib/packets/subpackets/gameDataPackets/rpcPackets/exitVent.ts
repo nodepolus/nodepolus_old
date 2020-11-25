@@ -2,7 +2,7 @@ import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
 
 export interface ExitVentPacket {
-  VentID: bigint;
+  VentID: number;
 }
 
 export const ExitVent: PacketHandler<ExitVentPacket> = {

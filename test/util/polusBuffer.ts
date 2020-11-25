@@ -166,21 +166,41 @@ test("writes a float32", (t) => {
   t.is(12, buf.length);
 });
 
+test("reads a packed int32", (t) => {
+  const buf = new PolusBuffer("dcfcffff0f45a08a20", true);
+
+  t.is(-420, buf.readVarInt());
+  t.is(69, buf.readVarInt());
+  t.is(525600, buf.readVarInt());
+  t.true(buf.dataRemaining.length == 0);
+});
+
+test("writes a packed int32", (t) => {
+  const buf = new PolusBuffer();
+
+  buf.writeVarInt(-420);
+  buf.writeVarInt(69);
+  buf.writeVarInt(525600);
+
+  t.is("dcfcffff0f45a08a20", buf.buf.toString("hex"));
+  t.is(9, buf.length);
+});
+
 test("reads a packed uint32", (t) => {
   const buf = new PolusBuffer("dcfcffff0f45a08a20", true);
 
-  t.is(BigInt(4294966876), buf.readVarInt());
-  t.is(BigInt(69), buf.readVarInt());
-  t.is(BigInt(525600), buf.readVarInt());
+  t.is(4294966876, buf.readVarUInt());
+  t.is(69, buf.readVarUInt());
+  t.is(525600, buf.readVarUInt());
   t.true(buf.dataRemaining.length == 0);
 });
 
 test("writes a packed uint32", (t) => {
   const buf = new PolusBuffer();
 
-  buf.writeVarInt(BigInt(4294966876));
-  buf.writeVarInt(BigInt(69));
-  buf.writeVarInt(BigInt(525600));
+  buf.writeVarUInt(4294966876);
+  buf.writeVarUInt(69);
+  buf.writeVarUInt(525600);
 
   t.is("dcfcffff0f45a08a20", buf.buf.toString("hex"));
   t.is(9, buf.length);

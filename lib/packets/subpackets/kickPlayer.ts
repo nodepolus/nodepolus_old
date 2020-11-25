@@ -5,7 +5,7 @@ import { RoomCode } from "../packetElements/roomCode";
 export interface KickPlayerPacket {
   type: "KickPlayer";
   RoomCode: string;
-  ClientID: bigint;
+  ClientID: number;
   isBanned: boolean;
 }
 

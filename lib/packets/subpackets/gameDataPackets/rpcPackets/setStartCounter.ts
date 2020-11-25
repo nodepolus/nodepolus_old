@@ -2,7 +2,7 @@ import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
 
 export interface SetStartCounterPacket {
-  SequenceNumber: bigint;
+  SequenceNumber: number;
   Time: number;
 }
 

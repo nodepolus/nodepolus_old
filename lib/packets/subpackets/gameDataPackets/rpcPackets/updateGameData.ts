@@ -2,7 +2,7 @@ import { PolusBuffer } from "../../../../util/polusBuffer";
 import { PacketHandler } from "../../../packet";
 
 export interface TaskState {
-  TaskID: bigint;
+  TaskID: number;
   TaskCompleted: boolean;
 }
 
@@ -16,9 +16,9 @@ export interface PlayerData {
   PlayerID: number;
   PlayerName: string;
   Color: number;
-  HatID: bigint;
-  PetID: bigint;
-  SkinID: bigint;
+  HatID: number;
+  PetID: number;
+  SkinID: number;
   Flags: PlayerDataFlags;
   TaskAmount?: number;
   Tasks: TaskState[];
