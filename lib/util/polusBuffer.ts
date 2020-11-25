@@ -105,7 +105,7 @@ export class PolusBuffer {
   }
 
   readString(): string {
-    const length = this.readVarInt();
+    const length = this.readVarUInt();
     return this.readBytes(Number(length)).buf.toString("utf8");
   }
 
