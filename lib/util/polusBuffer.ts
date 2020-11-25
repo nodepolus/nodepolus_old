@@ -231,7 +231,7 @@ export class PolusBuffer {
 
   writeString(value: string) {
     let bytes = Buffer.from(value);
-    this.writeVarInt(bytes.length);
+    this.writeVarUInt(bytes.length);
     this.writeBytes(bytes);
   }
 
