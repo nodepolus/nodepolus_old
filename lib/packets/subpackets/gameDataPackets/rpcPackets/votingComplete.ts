@@ -20,7 +20,7 @@ export const VotingComplete: PacketHandler<VotingCompletePacket> = {
       ExiledPlayerPlayerID: 0,
       IsTie: false,
     };
-    data.States = new Array(Number(data.StatesLength));
+    data.States = new Array(data.StatesLength);
     for (let i = 0; i < data.States.length; i++) {
       data.States[i] = StateByte.parse(packet.readU8());
     }

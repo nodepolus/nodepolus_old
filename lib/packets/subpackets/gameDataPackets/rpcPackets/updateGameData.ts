@@ -90,9 +90,7 @@ export const UpdateGameData: PacketHandler<UpdateGameDataPacket> = {
       if (PlayerData.Flags.Dead) FlagsBitfield += 0b00000100;
       tmpbuf.writeU8(FlagsBitfield);
       tmpbuf.writeU8(
-        PlayerData.TaskAmount
-          ? Number(PlayerData.TaskAmount)
-          : PlayerData.Tasks.length
+        PlayerData.TaskAmount ? PlayerData.TaskAmount : PlayerData.Tasks.length
       );
       for (let i = 0; i < PlayerData.Tasks.length; i++) {
         const Task = PlayerData.Tasks[i];

@@ -104,7 +104,7 @@ SYSTEM_HANDLER.set(SystemType.Electrical, {
 
 SYSTEM_HANDLER.set(SystemType.Medbay, {
   read: (buf, rm) => {
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const users = [];
     for (let i = 0; i < length; i++) users.push(buf.readU8());
     return {
@@ -128,14 +128,14 @@ SYSTEM_HANDLER.set(SystemType.Medbay, {
 SYSTEM_HANDLER.set(SystemType.Communications, {
   read: (buf, rm) => {
     if (rm.settings.Map == AmongUsMap.MIRA_HQ) {
-      let pairsLength = Number(buf.readVarInt());
+      let pairsLength = buf.readVarInt();
       let userConsolePairs: number[][] = [];
 
       for (let i = 0; i < pairsLength; i++) {
         userConsolePairs.push([buf.readU8(), buf.readU8()]);
       }
 
-      let completedLength = Number(buf.readVarInt());
+      let completedLength = buf.readVarInt();
       let completed: number[] = [];
 
       for (let i = 0; i < completedLength; i++) {
@@ -199,7 +199,7 @@ SYSTEM_HANDLER.set(SystemType.Communications, {
 
 SYSTEM_HANDLER.set(SystemType.Security, {
   read: (buf, rm) => {
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const users = [];
     for (let i = 0; i < length; i++) users.push(buf.readU8());
     return {
@@ -222,7 +222,7 @@ SYSTEM_HANDLER.set(SystemType.Security, {
 const reactorHandler: SystemHandler = {
   read: (buf, rm): ReactorSystem => {
     const Countdown = buf.readFloat32();
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const pairs = new Map();
     for (let i = 0; i < length; i++) {
       pairs.set(buf.readU8(), buf.readU8());
@@ -259,7 +259,7 @@ SYSTEM_HANDLER.set(SystemType.Reactor, reactorHandler);
 SYSTEM_HANDLER.set(SystemType.O2, {
   read: (buf, rm) => {
     const Countdown = buf.readFloat32();
-    const length = Number(buf.readVarInt());
+    const length = buf.readVarInt();
     const consoles = [];
     for (let i = 0; i < length; i++) {
       consoles.push(buf.readVarInt());
@@ -313,7 +313,7 @@ SYSTEM_HANDLER.set(SystemType.Doors, {
       let mask: number | null = null;
 
       if (!spawn) {
-        mask = Number(buf.readVarInt());
+        mask = buf.readVarInt();
       }
 
       for (let i = 0; i < length; i++) {
@@ -470,7 +470,7 @@ export class Component {
 
   private readData(pb: PolusBuffer, room: Room) {
     const spawn = !(this.old && this.old.Data);
-    switch (Number(this.spawnId)) {
+    switch (this.spawnId) {
       case ObjectType.HeadQuarters:
       case ObjectType.AprilShipStatus:
       case ObjectType.PlanetMap:
@@ -499,7 +499,7 @@ export class Component {
             // console.log(`read ship system ${k}`, JSON.stringify((<ShipStatus>this.Data).systems[k]))
           }
         } else {
-          const mask = Number(pb.readVarInt());
+          const mask = pb.readVarInt();
           (<ShipStatus>this.Data).mask = mask;
           for (let k of mapOrder) {
             if ((mask & (1 << k)) != 0) {
@@ -596,7 +596,7 @@ export class Component {
         let mask;
 
         if (!spawn) {
-          mask = Number(pb.readVarInt());
+          mask = pb.readVarInt();
         }
 
         for (let i = 0; i < this.length; i++) {
@@ -620,7 +620,7 @@ export class Component {
   private writeData(room: Room): PolusBuffer {
     const spawn = !(this.old && this.old.Data);
     const pb = new PolusBuffer();
-    switch (Number(this.spawnId)) {
+    switch (this.spawnId) {
       case ObjectType.HeadQuarters:
       case ObjectType.AprilShipStatus:
       case ObjectType.PlanetMap:
@@ -645,7 +645,7 @@ export class Component {
           let buffers: PolusBuffer[] = [new PolusBuffer()];
 
           for (let k of mapOrder) {
-            if ((Number(mask) & (1 << k)) != 0) {
+            if (mask && (mask & (1 << k)) != 0) {
               let data = (<ShipStatus>this.Data).systems[k];
               let buf = new PolusBuffer();
               const handler = SYSTEM_HANDLER.get(k);
@@ -729,7 +729,7 @@ export class Component {
         }
 
         for (let i = 0; i < (<MeetingHud>this.Data).players.length; i++) {
-          if (spawn || (Number(dirtyBits) & (1 << i)) != 0) {
+          if (spawn || (dirtyBits & (1 << i)) != 0) {
             pb.writeU8(
               StateByte.serialize(
                 <StateByteInterface>(<MeetingHud>this.Data).players[i]
@@ -749,7 +749,7 @@ export class Component {
     if (!(this.old && this.old.Data)) {
       return 0xffffffff;
     } else {
-      switch (Number(this.spawnId)) {
+      switch (this.spawnId) {
         case ObjectType.HeadQuarters:
         case ObjectType.AprilShipStatus:
         case ObjectType.PlanetMap:

@@ -105,15 +105,15 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
   constructor(playerData: GameDataPlayerData) {
     super();
     this.int_ID = playerData.PlayerID;
-    this.int_color = Number(playerData.Color);
-    this.int_hat = Number(playerData.HatID);
+    this.int_color = playerData.Color;
+    this.int_hat = playerData.HatID;
     this.int_isAlive = !playerData.Flags.Dead;
     this.int_isImpostor = playerData.Flags.Impostor;
     this.int_name = playerData.PlayerName;
-    this.int_pet = Number(playerData.PetID);
-    this.int_skin = Number(playerData.SkinID);
+    this.int_pet = playerData.PetID;
+    this.int_skin = playerData.SkinID;
     this.int_tasks = playerData.Tasks.map((taskData) => {
-      let t = new Task(Number(taskData.TaskID));
+      let t = new Task(taskData.TaskID);
       if (taskData.TaskCompleted) {
         t.Complete();
       } else {
@@ -129,7 +129,7 @@ export class Player extends AsyncEventEmitter<PlayerEvents> {
     if (!this.connection)
       throw new Error("Player has no associated connection");
     let NetID: any = this.connection.room.GameObjects.find(
-      (go) => Number(go.SpawnID) == ObjectType.GameData
+      (go) => go.SpawnID == ObjectType.GameData
     );
     if (!NetID) throw new Error("Room does not have a GameData GameObject");
     NetID = NetID.Components[0].netID;
