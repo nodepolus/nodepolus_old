@@ -267,7 +267,6 @@ export class Room extends EventEmitter {
               if (connection && connection.player) {
                 let sendChatEvent = new SendChatEvent(
                   connection.player,
-                  this,
                   (GDPacket.Packet as SendChatPacket).ChatText
                 );
                 this.emit("chatMessage", sendChatEvent);
