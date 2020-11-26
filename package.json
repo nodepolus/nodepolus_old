@@ -11,6 +11,8 @@
     "postinstall": "husky install",
     "start": "ts-node-dev bin/polus",
     "proxy": "ts-node-dev bin/proxy",
+    "set-region": "ts-node-dev bin/regionEditor set-region",
+    "add-server": "ts-node-dev bin/regionEditor add-server",
     "lint": "prettier --check .",
     "lint-and-fix": "npx prettier --write .",
     "test": "ava",
