@@ -2,13 +2,12 @@ import { Region } from "./region";
 import { PolusBuffer } from "./polusBuffer";
 
 export class RegionList {
-  type: number;
+  selected: number = 0;
   name: string;
   address: string;
   servers: Region[] = [];
 
-  constructor(type: number, name: string, address: string) {
-    this.type = type;
+  constructor(name: string, address: string) {
     this.name = name;
     this.address = address;
   }
@@ -17,9 +16,13 @@ export class RegionList {
     this.servers.push(new Region(name, address, port));
   }
 
+  public selectServer(index: number) {
+    this.selected = index;
+  }
+
   public getBuffer(): PolusBuffer {
     let buffer = new PolusBuffer();
-    buffer.write32(this.type); // unknown purpose: always 1 for innersloth servers, and 0 for custom servers (???)
+    buffer.write32(this.selected); // selected server
     buffer.writeString(this.name); // region name
     buffer.writeString(this.address); // region ping ip
     buffer.write32(this.servers.length); // server count
@@ -27,7 +30,7 @@ export class RegionList {
       buffer.writeString(server.name); //server name: usually <region-name>-MASTER-<number>
       buffer.writeBytes(server.address.split(".").map((e) => parseInt(e))); // server ip as a four byte array
       buffer.write16(server.port); // server port
-      buffer.write32(0); // unknown purpose: typically 0x0000 (???)
+      buffer.write32(server.failures); // number of connection failures
     }
     return buffer;
   }
