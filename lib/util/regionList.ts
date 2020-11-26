@@ -34,4 +34,19 @@ export class RegionList {
     }
     return buffer;
   }
+
+  public fromBuffer(buffer: PolusBuffer) {
+    this.selected = buffer.read32(false);
+    this.name = buffer.readString();
+    this.address = buffer.readString();
+    this.servers = new Array(buffer.read32(false));
+    for (let i = 0; i < this.servers.length; i++) {
+      let name = buffer.readString();
+      let address = buffer.readBytes(4).buf.join(".");
+      let port = buffer.read16(false);
+      let failures = buffer.read32(false);
+      this.servers[i] = new Region(name, address, port);
+      this.servers[i].failures = failures;
+    }
+  }
 }
