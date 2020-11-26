@@ -31,21 +31,16 @@ function writeBuffer(regionList: PolusBuffer) {
 }
 
 (async () => {
+  let name = process.argv[3];
+  let address = (await lookup(process.argv[4])).address;
   if (process.argv[2] == "set-region") {
-    let list = new RegionList(
-      process.argv[3],
-      (await lookup(process.argv[4])).address
-    );
+    let list = new RegionList(name, address);
     writeBuffer(list.getBuffer());
   } else if (process.argv[2] == "add-server") {
     let list = RegionList.fromBuffer(
       new PolusBuffer(fs.readFileSync(regionFile))
     );
-    list.addServer(
-      process.argv[3],
-      (await lookup(process.argv[4])).address,
-      parseInt(process.argv[5])
-    );
+    list.addServer(name, address, parseInt(process.argv[5]));
     writeBuffer(list.getBuffer());
   }
 })();
