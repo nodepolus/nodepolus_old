@@ -27,8 +27,9 @@ if (process.argv[2] == "set-region") {
   let list = new RegionList(process.argv[3], process.argv[4]);
   writeBuffer(list.getBuffer());
 } else if (process.argv[2] == "add-server") {
-  let list = new RegionList();
-  list.fromBuffer(new PolusBuffer(fs.readFileSync(regionFile)));
+  let list = RegionList.fromBuffer(
+    new PolusBuffer(fs.readFileSync(regionFile))
+  );
   list.addServer(process.argv[3], process.argv[4], parseInt(process.argv[5]));
   writeBuffer(list.getBuffer());
 }
