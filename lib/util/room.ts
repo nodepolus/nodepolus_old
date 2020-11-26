@@ -25,10 +25,7 @@ import { LimboState } from "../data/enums/limboState";
 import { SendChatEvent } from "../events/sendChatEvent";
 import { SendChatPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/sendChat";
 
-type RoomEventType =
-  "close" |
-  "playerJoined" |
-  "chatMessage"
+type RoomEventType = "close" | "playerJoined" | "chatMessage";
 
 export declare interface Room {
   on(event: RoomEventType, listener: Function): this;
@@ -268,8 +265,12 @@ export class Room extends EventEmitter {
               }
             } else if (GDPacket.RPCFlag == RPCPacketType.SendChat) {
               if (connection && connection.player) {
-                let sendChatEvent = new SendChatEvent(connection.player, this, (GDPacket.Packet as SendChatPacket).ChatText)
-                this.emit("chatMessage", sendChatEvent)
+                let sendChatEvent = new SendChatEvent(
+                  connection.player,
+                  this,
+                  (GDPacket.Packet as SendChatPacket).ChatText
+                );
+                this.emit("chatMessage", sendChatEvent);
                 // Probably take care of this in case event is canceled (Eg.: prevent message from being sent at all.)
               }
             }
