@@ -22,9 +22,16 @@ import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import { Task } from "./task";
 import { GameState } from "../data/enums/gameState";
 import { LimboState } from "../data/enums/limboState";
+import { SendChatEvent } from "../events/sendChatEvent";
+import { SendChatPacket } from "../packets/subpackets/gameDataPackets/rpcPackets/sendChat";
+
+type RoomEventType =
+  "close" |
+  "playerJoined" |
+  "chatMessage"
 
 export declare interface Room {
-  on(event: "close" | "playerJoined", listener: Function): this;
+  on(event: RoomEventType, listener: Function): this;
 }
 
 export class Room extends EventEmitter {
@@ -258,6 +265,12 @@ export class Room extends EventEmitter {
                 } else {
                   throw new Error("Data recieved for an undefined connection");
                 }
+              }
+            } else if (GDPacket.RPCFlag == RPCPacketType.SendChat) {
+              if (connection && connection.player) {
+                let sendChatEvent = new SendChatEvent(connection.player, this, (GDPacket.Packet as SendChatPacket).ChatText)
+                this.emit("chatMessage", sendChatEvent)
+                // Probably take care of this in case event is canceled (Eg.: prevent message from being sent at all.)
               }
             }
           }
