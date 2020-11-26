@@ -2,10 +2,10 @@ import os from "os";
 import fs from "fs";
 import { PolusBuffer } from "../lib/util/polusBuffer";
 import { RegionList } from "../lib/util/regionList";
+import path from "path";
 import dns from "dns";
 import util from "util";
 const lookup = util.promisify(dns.lookup);
-import path from "path";
 
 let regionFile: string;
 
