@@ -5,6 +5,7 @@ import { RegionList } from "../lib/util/regionList";
 import dns from "dns";
 import util from "util";
 const lookup = util.promisify(dns.lookup);
+import path from "path";
 
 let regionFile: string;
 
@@ -14,9 +15,12 @@ if (process.argv[2] == "set-region" && !!process.argv[5]) {
   regionFile = process.argv[6];
 } else {
   let home = os.homedir();
-  let path = home + "/AppData/LocalLow/Innersloth/Among Us/regioninfo.dat";
-  if (fs.existsSync(path)) {
-    regionFile = path;
+  let file = path.join(
+    home,
+    "/AppData/LocalLow/Innersloth/Among Us/regioninfo.dat"
+  );
+  if (fs.existsSync(file)) {
+    regionFile = file;
   } else {
     throw new Error("regioninfo.dat not found!");
   }
