@@ -2,7 +2,7 @@
 
 ### 🌟 Please *Star* the project and join *[our Discord server][Discord]* for support! It really helps out! :)
 
-NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol. Once finished, it will include these implementations:
+NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol. Once finished, it will provide implementations for each of the following:
 
 - A custom **region server** with **plugin support**
 - A **programmable client** that can **play games**
