@@ -1,0 +1,19 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: 15.x
+      - name: Lint and fix
+        run: npm run lint-and-fix
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v5
+          with:
+            add: '.'
