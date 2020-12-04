@@ -17,6 +17,6 @@ jobs:
         run: npm run lint-and-fix
       - name: Commit changes
         uses: EndBug/add-and-commit@v5
-          with:
-            message: "Lint"
-            add: "."
+        with:
+          message: "Lint"
+          add: "."
