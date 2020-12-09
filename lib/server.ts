@@ -22,6 +22,8 @@ import {
 } from "./events";
 import { GameState } from "./data/enums/gameState";
 import { LimboState } from "./data/enums/limboState";
+import { EventManager } from "./util/EventManager";
+import { Plugin } from "./util/Plugin";
 
 export interface ServerConfig {
   port?: number;
@@ -45,6 +47,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
   rooms: Map<string, Room> = new Map();
   connections: Map<string, Connection>;
   private clientIDIncrementer = 256;
+  private eventManager: EventManager = new EventManager(this)
   constructor(
     config: ServerConfig = {
       port: 22023,
@@ -354,5 +357,9 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
   }
   private requestClientID() {
     return this.clientIDIncrementer++;
+  }
+
+  public loadPlugin(plugin: Plugin) {
+    plugin.load(this, this.eventManager)
   }
 }

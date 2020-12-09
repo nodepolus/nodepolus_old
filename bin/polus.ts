@@ -10,6 +10,7 @@ import {
   DisconnectionEvent,
   JoinRoomEvent,
 } from "../lib/events";
+import ExamplePlugin from "./ExamplePlugin";
 
 // import AnnouncementServer from "../lib/announcements/Server";
 // import { FreeWeekendState } from '../lib/announcements/packets/subpackets/FreeWeekend';
@@ -18,6 +19,8 @@ import {
 const server = new Server({
   port: 22023,
 });
+
+server.loadPlugin(new ExamplePlugin())
 
 // const annServer = new AnnouncementServer({
 // 	defaultMessage: new Text("Someone should create")
