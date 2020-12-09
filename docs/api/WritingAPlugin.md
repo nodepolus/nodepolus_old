@@ -39,6 +39,7 @@ Time to add event listeners
 Inside your plugin class add the following code
 ```typescript
 import { JoinRoomEvent } from "../lib/events"; // Once again, imports are relative to the bin directory
+// Event listeners can have any name you want
 onRoomCreated(e: JoinRoomEvent /* Use type anotation to get autocompletion for the event */) {
     console.log('Room created with code ' + e.room.code)
 }
