@@ -361,5 +361,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
 
   public loadPlugin(plugin: Plugin) {
     plugin.load(this, this.eventManager)
+
+    plugin.onEnable()
   }
 }

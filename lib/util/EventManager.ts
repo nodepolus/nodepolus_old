@@ -2,8 +2,8 @@ import { ConnectionEvent, DisconnectionEvent, JoinRoomEvent, JoinRoomRequestEven
 import { Server } from "../server"
 import { Room } from "./room"
 
-export type serverEvents = 'listening'|'connection'|'disconnection'|'message'|'roomCreated'|'joinRoomRequest'|'roomListingRequest'
-export type roomEvents = 'close'|'playerJoined'
+export type serverEvents = 'connection'|'disconnection'|'roomCreated'|'joinRoomRequest'|'roomListingRequest'
+export type roomEvents = 'playerJoined'
 export type events = serverEvents|roomEvents
 
 export class EventManager {
@@ -50,7 +50,7 @@ export class EventManager {
         if(room) params.push(room)
 
         this.events.get(event)?.forEach(handler => {
-            handler.call(null, params)
+            handler(...params)
         })
     } 
 }

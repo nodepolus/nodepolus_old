@@ -2,7 +2,7 @@ import { Server } from "../server";
 import { EventManager } from "./EventManager";
 
 export class BasePlugin {
-    private _server?: Server
+    public _server?: Server
     public _eventManager?: EventManager
 
     public load(server: Server, eventManager: EventManager) {

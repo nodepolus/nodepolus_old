@@ -9,7 +9,9 @@ export default class ExamplePlugin extends BasePlugin implements Plugin {
     public version = "1.0.0"
 
     onEnable() {
-        
+        //Register events we want to listen to
+        this._eventManager?.registerEvent('playerJoined', this.onPlayerJoined)
+        this._eventManager?.registerEvent('roomCreated', this.onRoomCreated)
     }
 
     onDisable() {
