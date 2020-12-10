@@ -1,7 +1,7 @@
-import { JoinRoomEvent, RoomCreationEvent } from "../lib/events";
-import { BasePlugin } from "../lib/util/BasePlugin";
-import { Plugin } from "../lib/util/Plugin";
-import { Room } from "../lib/util/room";
+import { JoinRoomEvent, RoomCreationEvent } from "../../lib/events";
+import { BasePlugin } from "../../lib/util/BasePlugin";
+import { Plugin } from "../../lib/util/Plugin";
+import { Room } from "../../lib/util/room";
 
 export default class ExamplePlugin extends BasePlugin implements Plugin {
     public name = "Example"

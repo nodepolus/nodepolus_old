@@ -10,7 +10,8 @@ import {
   DisconnectionEvent,
   JoinRoomEvent,
 } from "../lib/events";
-import ExamplePlugin from "./ExamplePlugin";
+import { readdirSync } from "fs";
+import { join } from "path";
 
 // import AnnouncementServer from "../lib/announcements/Server";
 // import { FreeWeekendState } from '../lib/announcements/packets/subpackets/FreeWeekend';
@@ -20,7 +21,29 @@ const server = new Server({
   port: 22023,
 });
 
-server.loadPlugin(new ExamplePlugin())
+{
+  (async () => {
+    const files = readdirSync(join(__dirname, 'plugins'), {
+      withFileTypes: true
+    })
+  
+    for(let i = 0; i < files.length; i++) {
+      const file = files[i]
+  
+      if(!file.isFile()) continue
+      if(!file.name.endsWith('.ts')) continue
+  
+      try {
+        const plugin = (await import(join(__dirname, 'plugins', file.name))).default
+        const Plugin = new plugin()
+        server.loadPlugin(Plugin)
+        console.log(`Loaded plugin ${plugin.name}`)
+      } catch {
+        console.log(`An error occured while loading ${file.name}`)
+      }
+    }
+  })()
+}
 
 // const annServer = new AnnouncementServer({
 // 	defaultMessage: new Text("Someone should create")
