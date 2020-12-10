@@ -22,14 +22,18 @@ import { GameDataPlayerData } from "../packets/packetElements/componentTypes";
 import { Task } from "./task";
 import { GameState } from "../data/enums/gameState";
 import { LimboState } from "../data/enums/limboState";
+import { EventManager, roomEvents } from "./EventManager";
 
 export declare interface Room {
   on(event: "close" | "playerJoined", listener: Function): this;
 }
 
 export class Room extends EventEmitter {
-  constructor() {
+  _eventManager: EventManager
+
+  constructor(eventManager: EventManager = new EventManager()) {
     super();
+    this._eventManager = eventManager
     this.internalCode = randomstring.generate({
       length: 6,
       charset: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -217,7 +221,7 @@ export class Room extends EventEmitter {
                     );
                     process.nextTick((connection: Connection) => {
                       connection.emit("joinRoom", joinRoomEvent);
-                      this.emit("playerJoined", joinRoomEvent);
+                      this.callEvent("playerJoined", joinRoomEvent);
                       if (joinRoomEvent.isCanceled) {
                         connection.disconnect();
                       }
@@ -429,7 +433,7 @@ export class Room extends EventEmitter {
       pb.writeU8(0x08);
       pb.writeString(reason);
     }
-    this.emit("close");
+    this.callEvent("close");
     this.connections.forEach((TSconnection) => {
       TSconnection.send({
         type: "RemoveRoom",
@@ -451,5 +455,10 @@ export class Room extends EventEmitter {
     this.connections.forEach((con) => {
       con.endPacketGroup();
     });
+  }
+
+  private callEvent(event: roomEvents, param?: any) {
+    this._eventManager.emitEvent(event, param, this)
+    this.emit(event, param)
   }
 }

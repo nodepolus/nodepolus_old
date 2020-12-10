@@ -22,7 +22,7 @@ import {
 } from "./events";
 import { GameState } from "./data/enums/gameState";
 import { LimboState } from "./data/enums/limboState";
-import { EventManager } from "./util/EventManager";
+import { EventManager, serverEvents } from "./util/EventManager";
 import { Plugin } from "./util/Plugin";
 
 export interface ServerConfig {
@@ -47,7 +47,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
   rooms: Map<string, Room> = new Map();
   connections: Map<string, Connection>;
   private clientIDIncrementer = 256;
-  private eventManager: EventManager = new EventManager(this)
+  private eventManager: EventManager = new EventManager()
   constructor(
     config: ServerConfig = {
       port: 22023,
@@ -97,10 +97,10 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
     switch (packet.type) {
       case "GameCreate":
         {
-          let room = new Room();
+          let room = new Room(this.eventManager);
           room.settings = packet.RoomSettings;
           let roomEvent = new RoomCreationEvent(room);
-          await this.emit("roomCreated", roomEvent);
+          await this.callEvent("roomCreated", roomEvent);
           if (roomEvent.isCanceled) {
             room.close();
             connection.disconnect(roomEvent.cancelReason);
@@ -124,7 +124,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
             packet.RoomCode,
             connection
           );
-          await this.emit("joinRoomRequest", joinRoomRequestEvent);
+          await this.callEvent("joinRoomRequest", joinRoomRequestEvent);
           await connection.emit("joinRoomRequest", joinRoomRequestEvent);
           if (joinRoomRequestEvent.isCanceled) {
             connection.disconnect();
@@ -303,7 +303,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
             Rooms: RoomList,
           }
         );
-        this.emit("roomListingRequest", roomListingRequestEvent);
+        this.callEvent("roomListingRequest", roomListingRequestEvent);
         if (roomListingRequestEvent.isCanceled) {
           roomListingRequestEvent.response.SkeldRoomCount = 0;
           roomListingRequestEvent.response.MiraHQRoomCount = 0;
@@ -330,7 +330,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
     if (!connection) {
       connection = this.buildConnection(remote);
       let conEvt = new ConnectionEvent(connection);
-      await this.emit("connection", conEvt);
+      await this.callEvent("connection", conEvt);
       if (conEvt.isCanceled) {
         connection.disconnect(conEvt.cancelReason);
       } else {
@@ -350,7 +350,7 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
     conn.on("close", async () => {
       this.connections.delete(addr2str(remote));
       let de = new DisconnectionEvent(conn);
-      this.emit("disconnection", de);
+      this.callEvent("disconnection", de);
       conn.emit("disconnection", de);
     });
     return conn;
@@ -363,5 +363,10 @@ export class Server extends AsyncEventEmitter<ServerEvents> {
     plugin.load(this, this.eventManager)
 
     plugin.onEnable()
+  }
+
+  private async callEvent(event: serverEvents, param?: any) {
+    this.eventManager.emitEvent(event, param)
+    await this.emit(event, param)
   }
 }
