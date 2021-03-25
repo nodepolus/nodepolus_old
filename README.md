@@ -1,3 +1,9 @@
+# Archived
+
+This is the old version of NodePolus and is no longer supported.
+
+---
+
 # NodePolus
 
 ### 🌟 Please *Star* the project and join *[our Discord server][Discord]* for support! It really helps out! :)
